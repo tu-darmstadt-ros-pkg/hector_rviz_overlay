@@ -1,0 +1,30 @@
+<library path="libhector_rviz_overlay_demo">
+    <class name="hector_rviz_overlay_demo/SimplePopupsOverlayDisplay"
+           type="hector_rviz_overlay_demo::SimplePopupsOverlayDisplay"
+           base_class_type="rviz::Display">
+        <description>
+            A simple example showing how to use simple popups in overlays.
+        </description>
+    </class>
+    <class name="hector_rviz_overlay_demo/DemoOverlayDisplay"
+           type="hector_rviz_overlay_demo::DemoOverlayDisplay"
+           base_class_type="rviz::Display">
+        <description>
+            A demo overlay for rviz.
+        </description>
+    </class>
+    <class name="hector_rviz_overlay_demo/DemoQmlOverlayDisplay"
+           type="hector_rviz_overlay_demo::DemoQmlOverlayDisplay"
+           base_class_type="rviz::Display">
+        <description>
+            A demo qml overlay for rviz.
+        </description>
+    </class>
+    <class name="hector_rviz_overlay_demo/DemoQmlRosOverlayDisplay"
+           type="hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay"
+           base_class_type="rviz::Display">
+        <description>
+            A qml overlay demonstrating the use of the RosPlugin for QML.
+        </description>
+    </class>
+</library>

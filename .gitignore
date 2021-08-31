@@ -1,0 +1,11 @@
+# Ignore CLion config files
+.idea/
+# Clion build files
+cmake-build-*/
+# VSCode
+.vscode/
+
+# Generated documentation
+doc/
+
+*.qmlc

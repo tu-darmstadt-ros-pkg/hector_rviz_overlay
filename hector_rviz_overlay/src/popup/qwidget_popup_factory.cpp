@@ -1,0 +1,41 @@
+/*
+ * Copyright (C) 2018  Stefan Fabian
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "hector_rviz_overlay/popup/qwidget_popup_factory.h"
+
+#include "hector_rviz_overlay/popup/popup_container_widget.h"
+#include "hector_rviz_overlay/popup/popup_dialog.h"
+
+#include <QLabel>
+
+namespace hector_rviz_overlay
+{
+
+QWidgetPopupOverlayPtr QWidgetPopupFactory::createMessagePopup( const std::string &name, const QString &title,
+                                                                const QString &message, int buttons )
+{
+  QWidgetPopupOverlayPtr overlay = std::make_shared<QWidgetPopupOverlay>( name );
+  auto popup = new PopupDialog;
+  popup->setTitle( title );
+  auto message_label = new QLabel( message );
+  message_label->setAlignment( Qt::AlignTop );
+  popup->setContent( message_label );
+  popup->setButtons( buttons );
+  overlay->popupContainerWidget()->setPopup( popup );
+  return overlay;
+}
+}

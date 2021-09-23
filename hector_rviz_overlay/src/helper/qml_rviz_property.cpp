@@ -22,7 +22,7 @@ namespace hector_rviz_overlay
 
 QmlRvizProperty::QmlRvizProperty( rviz::Property *property ) : property_( property )
 {
-  connect( property_, &rviz::Property::changed, this, &QmlRvizProperty::valueChanged );
+  connect( property_, &rviz::Property::changed, this, &QmlRvizProperty::onPropertyChanged );
 }
 
 QVariant QmlRvizProperty::value() const
@@ -33,11 +33,15 @@ QVariant QmlRvizProperty::value() const
 void QmlRvizProperty::setValue( const QVariant &value )
 {
   property_->setValue( value );
-  emit valueChanged();
 }
 
 rviz::Property *QmlRvizProperty::property()
 {
   return property_;
+}
+
+void QmlRvizProperty::onPropertyChanged()
+{
+  emit valueChanged( property_->getValue());
 }
 }

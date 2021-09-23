@@ -41,7 +41,10 @@ public:
 
 signals:
 
-  void valueChanged();
+  void valueChanged( const QVariant &value );
+
+private slots:
+  void onPropertyChanged();
 
 private:
   rviz::Property *property_;

@@ -1,5 +1,4 @@
 import QtQuick 2.3
-//import QtAudioEngine 1.1
 
 Item {
     id: page
@@ -29,35 +28,5 @@ Item {
         }
     }
 
-    /*Rectangle {
-        width: 20
-        height: 20
-        color: "red"
-        x: mouseArea.mouseX - mouseArea.x - 10
-        y: mouseArea.mouseY - mouseArea.y - 10
-    }*/
-
     MouseArea { z: 1; id: mouseArea; anchors.fill: helloText; hoverEnabled: true; propagateComposedEvents: true }
-
-    // Easter Eggs
-    property var mlgCounter : 0
-
-    Keys.onReleased: {
-      helloText.text = "Hello Keys"
-      helloText.text = helloText.text + event.toString()
-      if (event.key == Qt.Key_M && mlgCounter == 0) {
-        mlgCounter = 1;
-        helloText.text = "Hello 1"
-      } else if (mlgCounter == 1 && event.key == Qt.Key_L) {
-        mlgCounter = 2;
-        helloText.text = "Hello 2"
-      } else if (mlgCounter == 2 && event.key == Qt.Key_G) {
-        // TODO: Run mlg stuff
-        particles.running = !particles.running
-        mlgCounter = 3;
-        helloText.text = "Hello 3"
-      } else {
-        mlgCounter = 0;
-      }
-    }
 }

@@ -32,6 +32,8 @@
   <depend>roscpp</depend>
   <depend>rviz</depend>
   <depend>hector_rviz_overlay</depend>
+  <exec_depend>qml-module-qtquick2</exec_depend>
+  <exec_depend>qml_ros_plugin</exec_depend>
 
   <export>
     <rviz plugin="${prefix}/plugin_description.xml"/>

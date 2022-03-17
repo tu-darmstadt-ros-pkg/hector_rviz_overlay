@@ -138,6 +138,10 @@ public:
 
   void setConfiguration( const QVariantMap &value );
 
+  const QQmlEngine *engine() const;
+
+  QQmlEngine *engine();
+
 signals:
 
   void statusChanged( hector_rviz_overlay::QmlOverlay::Status status );

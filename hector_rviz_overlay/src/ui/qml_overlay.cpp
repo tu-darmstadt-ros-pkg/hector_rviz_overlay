@@ -466,4 +466,14 @@ QmlRvizContext *QmlOverlay::context()
 {
   return qml_rviz_context_;
 }
+
+const QQmlEngine *QmlOverlay::engine() const
+{
+  return engine_;
+}
+
+QQmlEngine *QmlOverlay::engine()
+{
+  return engine_;
+}
 }

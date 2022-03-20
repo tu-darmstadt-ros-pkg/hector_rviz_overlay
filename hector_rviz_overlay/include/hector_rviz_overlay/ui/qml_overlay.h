@@ -142,6 +142,10 @@ public:
 
   QQmlEngine *engine();
 
+  const QQuickItem *rootItem() const;
+
+  QQuickItem *rootItem();
+
 signals:
 
   void statusChanged( hector_rviz_overlay::QmlOverlay::Status status );

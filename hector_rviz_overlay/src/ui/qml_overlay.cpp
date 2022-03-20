@@ -476,4 +476,14 @@ QQmlEngine *QmlOverlay::engine()
 {
   return engine_;
 }
+
+const QQuickItem *QmlOverlay::rootItem() const
+{
+  return root_item_;
+}
+
+QQuickItem *QmlOverlay::rootItem()
+{
+  return root_item_;
+}
 }

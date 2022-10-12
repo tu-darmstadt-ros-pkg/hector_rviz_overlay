@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "hector_rviz_overlay/helper/qml_rviz_context.h"
+#include "hector_rviz_overlay/positioning/ogre_position_tracker.h"
+
 #include <rviz/properties/bool_property.h>
 #include <rviz/properties/float_property.h>
 #include <rviz/properties/ros_topic_property.h>
 #include <rviz/properties/string_property.h>
 #include <rviz/properties/tf_frame_property.h>
 #include <rviz/display_context.h>
-#include "hector_rviz_overlay/helper/qml_rviz_context.h"
-
-#include "hector_rviz_overlay/positioning/ogre_position_tracker.h"
+#include <rviz/window_manager_interface.h>
+#include <QWidget>
+#include <QWindow>
 
 namespace hector_rviz_overlay
 {
@@ -34,6 +37,8 @@ QmlRvizContext::QmlRvizContext( rviz::DisplayContext *context, const Overlay *ov
   configuration_property_ = new rviz::Property( "Configuration", QVariant(),
                                                 "Container for configurable settings of the overlay." );
   tool_manager_ = new QmlToolManager( context_->getToolManager());
+  connect( context->getWindowManager()->getParentWindow()->windowHandle(), &QWindow::windowStateChanged, this, &QmlRvizContext::onWindowStateChanged );
+  window_state_ = context->getWindowManager()->getParentWindow()->windowHandle()->windowState();
 }
 
 QmlRvizContext::~QmlRvizContext() = default;
@@ -60,6 +65,23 @@ void QmlRvizContext::setVisible( bool value )
 {
   visible_ = value;
   emit visibleChanged();
+}
+
+bool QmlRvizContext::isFullscreen() const
+{
+  return context_->getWindowManager()->getParentWindow()->isFullScreen();
+}
+
+void QmlRvizContext::setIsFullscreen( bool value )
+{
+  // Unfortunately this method is not exposed in the public interface, hence, we need to work around this using Qt
+  QMetaObject::invokeMethod( context_->getWindowManager()->getParentWindow(), "setFullScreen", Q_ARG( bool, value ));
+}
+
+void QmlRvizContext::onWindowStateChanged( Qt::WindowState state )
+{
+  if ((state & Qt::WindowFullScreen) != (window_state_ & Qt::WindowFullScreen)) emit isFullscreenChanged();
+  window_state_ = state;
 }
 
 void QmlRvizContext::setConfigurationPropertyParent( rviz::Property *parent )

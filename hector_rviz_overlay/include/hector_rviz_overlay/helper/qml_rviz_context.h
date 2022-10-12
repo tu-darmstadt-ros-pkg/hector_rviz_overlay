@@ -38,6 +38,7 @@ Q_OBJECT
   // @formatter:off
   Q_PROPERTY( QVariantMap config READ config WRITE setConfig NOTIFY configChanged )
   Q_PROPERTY( bool visible READ visible NOTIFY visibleChanged )
+  Q_PROPERTY( bool isFullscreen READ isFullscreen WRITE setIsFullscreen NOTIFY isFullscreenChanged )
   Q_PROPERTY( QObject* toolManager READ toolManager CONSTANT )
   // @formatter:on
 public:
@@ -52,6 +53,10 @@ public:
   bool visible() const;
 
   void setVisible( bool value );
+
+  bool isFullscreen() const;
+
+  void setIsFullscreen( bool value );
 
   void load( const rviz::Config &config );
 
@@ -158,11 +163,17 @@ signals:
 
   void visibleChanged();
 
+  void isFullscreenChanged();
+
+private slots:
+  void onWindowStateChanged( Qt::WindowState state );
+
 private:
   void loadPropertyFromConfig( rviz::Property *property );
 
   QVariantMap config_;
   rviz::Config property_config_;
+  Qt::WindowState window_state_;
   rviz::DisplayContext *context_;
   QmlToolManager *tool_manager_;
   const Overlay *overlay_;

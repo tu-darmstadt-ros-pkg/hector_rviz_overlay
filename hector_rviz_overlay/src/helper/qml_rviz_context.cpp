@@ -37,13 +37,24 @@ QmlRvizContext::QmlRvizContext( rviz::DisplayContext *context, const Overlay *ov
   configuration_property_ = new rviz::Property( "Configuration", QVariant(),
                                                 "Container for configurable settings of the overlay." );
   tool_manager_ = new QmlToolManager( context_->getToolManager());
-  connect( context->getWindowManager()->getParentWindow()->windowHandle(), &QWindow::windowStateChanged, this, &QmlRvizContext::onWindowStateChanged );
-  window_state_ = context->getWindowManager()->getParentWindow()->windowHandle()->windowState();
+  // If rviz is used as widget inside an application, the window manager interface may not be available
+  rviz::WindowManagerInterface *wmi = context_->getWindowManager();
+  QWindow *window = wmi == nullptr ? nullptr : wmi->getParentWindow()->windowHandle();
+  if ( window == nullptr )
+  {
+    window_state_ = Qt::WindowNoState;
+    return;
+  }
+  connect( window, &QWindow::windowStateChanged, this, &QmlRvizContext::onWindowStateChanged );
+  window_state_ = window->windowState();
 }
 
 QmlRvizContext::~QmlRvizContext() = default;
 
-const QVariantMap &QmlRvizContext::config() const { return config_; }
+const QVariantMap &QmlRvizContext::config() const
+{
+  return config_;
+}
 
 void QmlRvizContext::setConfig( const QVariantMap &config )
 {
@@ -74,6 +85,14 @@ bool QmlRvizContext::isFullscreen() const
 
 void QmlRvizContext::setIsFullscreen( bool value )
 {
+  // If rviz is used as widget inside an application, the window manager interface may not be available
+  rviz::WindowManagerInterface *wmi = context_->getWindowManager();
+  if ( wmi == nullptr )
+  {
+    ROS_ERROR_NAMED( "hector_rviz_overlay", "setIsFullscreen failed: Window could not be obtained! "
+                                            "Implement the WindowManagerInterface in the DisplayContext." );
+    return;
+  }
   // Unfortunately this method is not exposed in the public interface, hence, we need to work around this using Qt
   QMetaObject::invokeMethod( context_->getWindowManager()->getParentWindow(), "setFullScreen", Q_ARG( bool, value ));
 }

@@ -128,7 +128,7 @@ void loadConfig( const rviz::Config &config, rviz::Property *property )
   if ( !config.isValid()) return;
   if ( config.getType() == rviz::Config::Value )
   {
-    property->setValue( config.getValue());
+    property->load( config );
     return;
   }
   if ( config.getType() != rviz::Config::Map ) return;
@@ -138,17 +138,17 @@ void loadConfig( const rviz::Config &config, rviz::Property *property )
   }
 }
 
-QVariant getValue( const rviz::Config &config, std::vector<QString> &path )
+rviz::Config getPropertyConfig( const rviz::Config &config, std::vector<QString> &path )
 {
   if ( path.empty())
   {
     if ( !config.isValid() || config.getType() != rviz::Config::Value ) return {};
-    return config.getValue();
+    return config;
   }
   if ( !config.isValid() || config.getType() != rviz::Config::Map ) return {};
   const rviz::Config &child = config.mapGetChild( path.back());
   path.pop_back();
-  return getValue( child, path );
+  return getPropertyConfig( child, path );
 }
 }
 
@@ -161,9 +161,9 @@ void QmlRvizContext::loadPropertyFromConfig( rviz::Property *property )
     path.push_back( prop->getName());
     prop = prop->getParent();
   }
-  QVariant value = getValue( property_config_, path );
-  if ( !value.isValid()) return;
-  property->setValue( value );
+  rviz::Config config = getPropertyConfig( property_config_, path );
+  if ( !config.isValid()) return;
+  property->load( config );
 }
 
 void QmlRvizContext::load( const rviz::Config &config )

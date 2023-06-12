@@ -88,6 +88,8 @@ public:
 
   Q_INVOKABLE QObject *addTool( const QString &class_lookup_name );
 
+  Q_INVOKABLE QObject *getTool( const QString &name );
+
   Q_INVOKABLE void removeTool( int i );
 
   Q_INVOKABLE void removeTool( QObject *tool );

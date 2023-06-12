@@ -122,6 +122,15 @@ QObject *QmlToolManager::addTool( const QString &class_lookup_name )
   return tools_.last();
 }
 
+QObject *QmlToolManager::getTool( const QString &name )
+{
+  for ( QmlTool *tool : tools_ )
+  {
+    if ( tool->name() == name ) return tool;
+  }
+  return nullptr;
+}
+
 void QmlToolManager::removeTool( int i )
 {
   if ( tools_.size() <= i ) return;

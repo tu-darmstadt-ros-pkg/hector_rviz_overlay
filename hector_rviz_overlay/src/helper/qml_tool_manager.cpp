@@ -122,11 +122,11 @@ QObject *QmlToolManager::addTool( const QString &class_lookup_name )
   return tools_.last();
 }
 
-QObject *QmlToolManager::getTool( const QString &name )
+QObject *QmlToolManager::getTool( const QString &class_id )
 {
   for ( QmlTool *tool : tools_ )
   {
-    if ( tool->name() == name ) return tool;
+    if ( tool->classId() == class_id ) return tool;
   }
   return nullptr;
 }

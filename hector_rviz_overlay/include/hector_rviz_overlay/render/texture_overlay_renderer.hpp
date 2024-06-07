@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_TEXTURE_OVERLAY_RENDERER_H
 #define HECTOR_RVIZ_OVERLAY_TEXTURE_OVERLAY_RENDERER_H
 
-#include "hector_rviz_overlay/render/overlay_renderer.h"
+#include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
 #include <OgreMaterial.h>
 #include <OgreTexture.h>
@@ -29,7 +29,7 @@ class Overlay;
 class OverlayContainer;
 }
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 }
@@ -47,7 +47,7 @@ namespace hector_rviz_overlay
 class TextureOverlayRenderer : public OverlayRenderer
 {
 public:
-  explicit TextureOverlayRenderer( rviz::DisplayContext *context );
+  explicit TextureOverlayRenderer( rviz_common::DisplayContext *context );
 
   ~TextureOverlayRenderer() override;
 
@@ -91,7 +91,7 @@ protected:
   Ogre::MaterialPtr material_;
   Ogre::TexturePtr texture_;
 
-  rviz::RenderPanel *render_panel_;
+  rviz_common::RenderPanel *render_panel_;
 
 private:
   class RenderTargetListener;

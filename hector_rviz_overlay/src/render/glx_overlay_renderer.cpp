@@ -18,17 +18,22 @@
 #define GLEW_STATIC
 
 #include <GL/glew.h>
-#include "hector_rviz_overlay/render/glx_overlay_renderer.h"
+#include "hector_rviz_overlay/render/glx_overlay_renderer.hpp"
 
-#include "hector_rviz_overlay/render/qopengl_wrapper.h"
+#include "hector_rviz_overlay/render/qopengl_wrapper.hpp"
 
+#include <OgreMaterialManager.h>
+#include <OgreMaterial.h>
 #include <OgreRenderQueueListener.h>
+#include <OgreRenderTargetListener.h>
 #include <OgreRenderWindow.h>
+#include <OgreSceneManager.h>
+#include <OgreTechnique.h>
 
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-
-#include <ros/ros.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_rendering/render_window.hpp>
+#include "../logging.hpp"
 
 #include "./gl_helpers.h"
 #include <GL/glx.h>
@@ -73,13 +78,13 @@ GLuint createShaderProgram()
   HECTOR_RVIZ_OVERLAY_DEBUG_CHECK_GL_ERROR( vertex_shader = glCreateShader( GL_VERTEX_SHADER ));
   if ( vertex_shader == 0 )
   {
-    ROS_ERROR( "OverlayManager: Failed to create vertex shader!" );
+    LOG_ERROR( "OverlayManager: Failed to create vertex shader!" );
     return 0;
   }
   HECTOR_RVIZ_OVERLAY_DEBUG_CHECK_GL_ERROR( fragment_shader = glCreateShader( GL_FRAGMENT_SHADER ));
   if ( fragment_shader == 0 )
   {
-    ROS_ERROR( "OverlayManager: Failed to create fragment shader!" );
+    LOG_ERROR( "OverlayManager: Failed to create fragment shader!" );
     return 0;
   }
 
@@ -95,7 +100,7 @@ GLuint createShaderProgram()
     glGetShaderiv( vertex_shader, GL_INFO_LOG_LENGTH, &length );
     char message[length + 1];
     glGetShaderInfoLog( vertex_shader, length, nullptr, message );
-    ROS_ERROR( "OverlayManager: Failed to compile vertex shader!\nMessage: %s", message );
+    LOG_ERROR( "OverlayManager: Failed to compile vertex shader!\nMessage: %s", message );
     return 0;
   }
 
@@ -110,7 +115,7 @@ GLuint createShaderProgram()
     glGetShaderiv( fragment_shader, GL_INFO_LOG_LENGTH, &length );
     char message[length + 1];
     glGetShaderInfoLog( fragment_shader, length, nullptr, message );
-    ROS_ERROR( "OverlayManager: Failed to compile fragment shader!\nMessage: %s", message );
+    LOG_ERROR( "OverlayManager: Failed to compile fragment shader!\nMessage: %s", message );
     return 0;
   }
 
@@ -128,7 +133,7 @@ GLuint createShaderProgram()
     glGetProgramiv( program, GL_INFO_LOG_LENGTH, &length );
     char message[length + 1];
     glGetProgramInfoLog( program, length, nullptr, message );
-    ROS_ERROR( "OverlayManager: Failed to link shader program!\nMessage: %s", message );
+    LOG_ERROR( "OverlayManager: Failed to link shader program!\nMessage: %s", message );
     return 0;
   }
 
@@ -157,7 +162,7 @@ private:
   GLXOverlayRenderer *renderer_;
 };
 
-GLXOverlayRenderer::GLXOverlayRenderer( rviz::DisplayContext *context )
+GLXOverlayRenderer::GLXOverlayRenderer( rviz_common::DisplayContext *context )
   : OverlayRenderer( context )
 {
   scene_manager_ = context_->getSceneManager();
@@ -165,24 +170,35 @@ GLXOverlayRenderer::GLXOverlayRenderer( rviz::DisplayContext *context )
   clear_pass_ = clearMat->getTechnique( 0 )->getPass( 0 );
 
   render_target_listener_ = new RenderTargetListener( this );
-  render_panel_->getRenderWindow()->addListener( render_target_listener_ );
+  rviz_rendering::RenderWindowOgreAdapter::addListener( render_panel_->getRenderWindow(), render_target_listener_ );
 }
 
 GLXOverlayRenderer::~GLXOverlayRenderer()
 {
-  render_panel_->getRenderWindow()->removeListener( render_target_listener_ );
-
   delete qopengl_wrapper_;
 
-  delete render_target_listener_;
+  if ( render_target_listener_ ) {
+    rviz_rendering::RenderWindowOgreAdapter::removeListener( render_panel_->getRenderWindow(), render_target_listener_ );
+    delete render_target_listener_;
+    render_target_listener_ = nullptr;
+  }
   delete pixel_data_;
 }
 
 void GLXOverlayRenderer::initialize()
 {
   if ( qopengl_wrapper_ != nullptr ) return;
-  Display *display;
-  render_panel_->getRenderWindow()->getCustomAttribute( "DISPLAY", &display );
+  // TODO get display from rendersystem
+  Display *display = 0;
+#if __linux__
+  display = XOpenDisplay(0);
+  if (!display)
+  {
+    LOG_ERROR("Failed to open X display!");
+    return;
+  }
+  LOG_INFO("Opened display %s", XDisplayName(0));
+#endif
   qopengl_wrapper_ = new QOpenGLWrapper( display, geometry_.size());
   framebuffer_object_updated_ = true;
 }
@@ -211,7 +227,7 @@ void GLXOverlayRenderer::initializeOpenGL()
   shader_program_ = createShaderProgram();
   if ( shader_program_ == 0 )
   {
-    ROS_ERROR( "OverlayManager: Shader creation failed! Overlays won't be visible!" );
+    LOG_ERROR( "OverlayManager: Shader creation failed! Overlays won't be visible!" );
     return;
   }
   glBindVertexArray( 0 );
@@ -257,7 +273,7 @@ void GLXOverlayRenderer::initializeOpenGL()
   }
 
   if ( can_share_texture_ ) return;
-  ROS_INFO(
+  LOG_INFO(
     "OverlayManager: Looks like texture sharing isn't working on your system. Falling back to texture copying." );
 
   // If we can't share textures, we have to generate one
@@ -274,7 +290,7 @@ void GLXOverlayRenderer::initializeOpenGL()
 void GLXOverlayRenderer::releaseResources()
 {
   if ( qopengl_wrapper_ == nullptr ) return;
-  render_panel_->getRenderWindow()->removeListener( render_target_listener_ );
+  rviz_rendering::RenderWindowOgreAdapter::removeListener( render_panel_->getRenderWindow(), render_target_listener_ );
 
   if ( texture_ != 0 )
   {

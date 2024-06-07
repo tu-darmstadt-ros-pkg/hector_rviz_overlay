@@ -18,10 +18,10 @@
 #ifndef HECTOR_RVIZ_OVERLAY_POPUP_CONTAINER_WIDGET_H
 #define HECTOR_RVIZ_OVERLAY_POPUP_CONTAINER_WIDGET_H
 
-#include "hector_rviz_overlay/overlay_widget.h"
+#include "hector_rviz_overlay/overlay_widget.hpp"
 
-#include "hector_rviz_overlay/popup/positioning/anchor_point.h"
-#include "hector_rviz_overlay/popup/positioning/point_tracker.h"
+#include "hector_rviz_overlay/popup/positioning/anchor_point.hpp"
+#include "hector_rviz_overlay/popup/positioning/point_tracker.hpp"
 
 #include <QPoint>
 

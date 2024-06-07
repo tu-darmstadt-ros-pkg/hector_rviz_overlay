@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/displays/qwidget_overlay_display.h"
+#include "hector_rviz_overlay/displays/qwidget_overlay_display.hpp"
+#include "hector_rviz_overlay/path_helper.hpp"
 
 #include <QFile>
 #include <QWidget>
 
-#include <ros/package.h>
-
-#include <rviz/properties/editable_enum_property.h>
+#include <rviz_common/properties/editable_enum_property.hpp>
 
 namespace hector_rviz_overlay
 {
@@ -31,7 +30,7 @@ QWidgetOverlayDisplay::QWidgetOverlayDisplay() : QWidgetOverlayDisplay( false ) 
 
 QWidgetOverlayDisplay::QWidgetOverlayDisplay( bool allow_multiple ) : OverlayDisplay( allow_multiple )
 {
-  style_sheet_property_ = new rviz::EditableEnumProperty( "Style Sheet", "",
+  style_sheet_property_ = new rviz_common::properties::EditableEnumProperty( "Style Sheet", "",
                                                           "Sets the style sheet for the QWidget. "
                                                             "Can be either a style sheet or a path to a style sheet. "
                                                             "Use package://{package}/ to access package relative paths.",
@@ -59,15 +58,7 @@ void QWidgetOverlayDisplay::updateStyleSheet()
   QString style_sheet = style_sheet_property_->getString();
   if ( style_sheet.endsWith( ".qss" ))
   {
-    if ( style_sheet.startsWith( "package://" ))
-    {
-      int pos_end_package_name = style_sheet.indexOf( '/', 10 );
-      QString package = style_sheet.mid( 10, pos_end_package_name - 10 );
-      style_sheet =
-        QString::fromStdString( ros::package::getPath( package.toStdString())) +
-        style_sheet.mid( pos_end_package_name );
-    }
-    QFile file( style_sheet );
+    QFile file( resolvePath( style_sheet ));
     if ( file.exists())
     {
       if ( file.open( QFile::ReadOnly ))
@@ -76,17 +67,17 @@ void QWidgetOverlayDisplay::updateStyleSheet()
         // For some reason the style isn't applied correctly without this if the setting was loaded from the rviz config
         // and therefore the stylesheet was set two times within a very short time frame before the widget is drawn
         qwidget_overlay_->widget()->ensurePolished();
-        setStatus( rviz::StatusProperty::Ok, "Style Sheet", "Style sheet loaded." );
+        setStatus( rviz_common::properties::StatusProperty::Ok, "Style Sheet", "Style sheet loaded." );
       }
       else
       {
-        setStatus( rviz::StatusProperty::Error, "Style Sheet",
+        setStatus( rviz_common::properties::StatusProperty::Error, "Style Sheet",
                    "Failed to open style sheet. Please check the path: " + style_sheet );
       }
     }
     else
     {
-      setStatus( rviz::StatusProperty::Error, "Style Sheet",
+      setStatus( rviz_common::properties::StatusProperty::Error, "Style Sheet",
                  "Style sheet not found. Please check the path: " + style_sheet );
     }
   }
@@ -94,7 +85,7 @@ void QWidgetOverlayDisplay::updateStyleSheet()
   {
     qwidget_overlay_->widget()->setStyleSheet( style_sheet );
     qwidget_overlay_->widget()->ensurePolished();
-    setStatus( rviz::StatusProperty::Ok, "Style Sheet", "Style sheet applied." );
+    setStatus( rviz_common::properties::StatusProperty::Ok, "Style Sheet", "Style sheet applied." );
   }
 }
 }

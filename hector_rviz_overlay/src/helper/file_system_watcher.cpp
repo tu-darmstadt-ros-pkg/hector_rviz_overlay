@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/file_system_watcher.h"
+#include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 
 #include <boost/filesystem.hpp>
-#include <ros/ros.h>
 #include <sys/inotify.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "../logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -47,7 +48,7 @@ bool FileSystemWatcher::isValid() const
 
 bool FileSystemWatcher::addWatch( const std::string &path )
 {
-  if ( path.length() == 0 ) return false;
+  if ( path.empty()) return false;
   if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end())
   {
     watched_paths_.push_back( path );
@@ -76,7 +77,7 @@ bool FileSystemWatcher::addWatch( const std::string &path )
         if ( !boost::filesystem::is_directory( dir.path())) continue;
         if ( !addWatch( dir.path().string()))
         {
-          ROS_WARN_NAMED( "OverlayManager", "Could not add file system watch for '%s'!", dir.path().c_str());
+          LOG_WARN( "OverlayManager: Could not add file system watch for '%s'!", dir.path().c_str());
         }
       }
     }

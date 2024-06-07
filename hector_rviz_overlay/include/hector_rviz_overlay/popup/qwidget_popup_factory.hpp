@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020  Stefan Fabian
+ * Copyright (C) 2018  Stefan Fabian
  *
  * This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,29 +15,22 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
-#define HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
+#ifndef HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
+#define HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
 
-#include <QQuickImageProvider>
+#include "hector_rviz_overlay/popup/qwidget_popup_overlay.hpp"
 
-namespace rviz
-{
-class ToolManager;
-}
+#include "hector_rviz_overlay/popup/popup_dialog.hpp"
 
 namespace hector_rviz_overlay
 {
 
-class RvizToolIconProvider : public QQuickImageProvider
+class QWidgetPopupFactory
 {
 public:
-  explicit RvizToolIconProvider(rviz::ToolManager *tool_manager);
-
-  QPixmap requestPixmap( const QString &id, QSize *size, const QSize &requestedSize ) override;
-
-private:
-  rviz::ToolManager *tool_manager_;
+  QWidgetPopupOverlayPtr createMessagePopup( const std::string &name, const QString &title, const QString &message,
+                                             int buttons = ButtonOk );
 };
 }
 
-#endif //HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
+#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H

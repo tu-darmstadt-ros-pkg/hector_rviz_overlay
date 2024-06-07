@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_DEMO_SIMPLE_POPUPS_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_DEMO_SIMPLE_POPUPS_OVERLAY_DISPLAY_H
 
-#include <hector_rviz_overlay/displays/qwidget_overlay_display.h>
+#include <hector_rviz_overlay/displays/qwidget_overlay_display.hpp>
 
 #include <hector_rviz_overlay/popup/qwidget_popup_factory.h>
 

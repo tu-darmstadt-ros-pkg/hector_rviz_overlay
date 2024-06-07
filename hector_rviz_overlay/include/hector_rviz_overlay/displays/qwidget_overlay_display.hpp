@@ -18,10 +18,10 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_DISPLAY_H
 
-#include "overlay_display.h"
-#include "hector_rviz_overlay/ui/qwidget_overlay.h"
+#include "overlay_display.hpp"
+#include "hector_rviz_overlay/ui/qwidget_overlay.hpp"
 
-namespace rviz
+namespace rviz_common::properties
 {
 class EditableEnumProperty;
 }
@@ -67,7 +67,7 @@ protected:
   virtual void onSetupUi( QWidget *widget ) = 0;
 
   /*! A property that allows the user to apply a style sheet to an Overlay's top-level QWidget. */
-  rviz::EditableEnumProperty *style_sheet_property_;
+  rviz_common::properties::EditableEnumProperty *style_sheet_property_;
   QWidgetOverlayPtr qwidget_overlay_;
 };
 }

@@ -15,25 +15,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/overlay_renderer.h"
+#include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
-#include "hector_rviz_overlay/render/glx_overlay_renderer.h"
-#include "hector_rviz_overlay/render/image_overlay_renderer.h"
+#include "hector_rviz_overlay/render/glx_overlay_renderer.hpp"
+#include "hector_rviz_overlay/render/image_overlay_renderer.hpp"
 
 #include <chrono>
 
 #include <QPainter>
 
-#include <ros/ros.h>
-
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/view_manager.hpp>
 
 namespace hector_rviz_overlay
 {
 
-OverlayRenderer *OverlayRenderer::create( rviz::DisplayContext *context )
+OverlayRenderer *OverlayRenderer::create( rviz_common::DisplayContext *context )
 {
 #ifdef RENDER_OVERLAYS_USING_OPENGL
   OverlayRenderer *renderer = new GLXOverlayRenderer( context );
@@ -43,7 +41,7 @@ OverlayRenderer *OverlayRenderer::create( rviz::DisplayContext *context )
   return renderer;
 }
 
-OverlayRenderer::OverlayRenderer( rviz::DisplayContext *context )
+OverlayRenderer::OverlayRenderer( rviz_common::DisplayContext *context )
   : context_( context ), timer_index_( 0 ), no_visible_overlays_( true )
 {
   render_panel_ = context_->getViewManager()->getRenderPanel();

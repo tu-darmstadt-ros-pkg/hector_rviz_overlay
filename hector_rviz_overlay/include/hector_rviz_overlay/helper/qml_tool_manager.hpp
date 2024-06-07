@@ -19,9 +19,9 @@
 #define HECTOR_RVIZ_OVERLAY_QML_TOOL_MANAGER_H
 
 #include <QObject>
-#include <rviz/tool.h>
+#include <rviz_common/tool.hpp>
 
-namespace rviz
+namespace rviz_common
 {
 class ToolManager;
 }
@@ -43,7 +43,7 @@ Q_OBJECT
   Q_PROPERTY( QObject* tool READ tool CONSTANT )
   // @formatter:on
 public:
-  explicit QmlTool( rviz::Tool *tool );
+  explicit QmlTool( rviz_common::Tool *tool );
 
   bool isSelected() const;
 
@@ -61,14 +61,14 @@ public:
 
   QString iconSource() const;
 
-  rviz::Tool *tool() { return tool_; }
+  rviz_common::Tool *tool() { return tool_; }
 
 signals:
 
   void isSelectedChanged();
 
 private:
-  rviz::Tool *tool_;
+  rviz_common::Tool *tool_;
   bool is_selected_ = false;
 };
 
@@ -80,7 +80,7 @@ Q_OBJECT
   Q_PROPERTY( QObject *currentTool READ currentTool WRITE setCurrentTool NOTIFY toolChanged )
   // @formatter:on
 public:
-  explicit QmlToolManager( rviz::ToolManager *tool_manager );
+  explicit QmlToolManager( rviz_common::ToolManager *tool_manager );
 
   QVariantList tools() const;
 
@@ -112,14 +112,14 @@ signals:
 
 private slots:
 
-  void onToolAdded( rviz::Tool * );
+  void onToolAdded( rviz_common::Tool * );
 
-  void onToolRemoved( rviz::Tool * );
+  void onToolRemoved( rviz_common::Tool * );
 
-  void onToolChanged( rviz::Tool * );
+  void onToolChanged( rviz_common::Tool * );
 
 private:
-  rviz::ToolManager *tool_manager_;
+  rviz_common::ToolManager *tool_manager_;
   QList<QmlTool *> tools_;
 };
 }

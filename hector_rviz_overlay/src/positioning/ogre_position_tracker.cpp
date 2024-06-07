@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/positioning/ogre_position_tracker.h"
-#include "hector_rviz_overlay/overlay.h"
+#include "hector_rviz_overlay/positioning/ogre_position_tracker.hpp"
+#include "hector_rviz_overlay/overlay.hpp"
 
-#include <rviz/display_context.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/view_manager.hpp>
 
 #include <OgreCamera.h>
 #include <OgreVector4.h>
@@ -49,7 +49,7 @@ private:
   OgrePositionTracker *parent_;
 };
 
-OgrePositionTracker::OgrePositionTracker( const Ogre::Vector3 &point, const rviz::DisplayContext *context,
+OgrePositionTracker::OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context,
                                           const Overlay *overlay )
   : point_( point ), context_( context ), overlay_( overlay )
 {

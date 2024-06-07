@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/overlay_manager.h"
-#include "hector_rviz_overlay/render/overlay_renderer.h"
+#include "hector_rviz_overlay/overlay_manager.hpp"
+#include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>
@@ -25,11 +25,11 @@
 
 #include <Ogre.h>
 
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/view_manager.hpp>
 
-#include <ros/ros.h>
+#include "logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -52,12 +52,12 @@ OverlayManager::OverlayManager()
 
 OverlayManager::~OverlayManager() = default;
 
-rviz::DisplayContext *OverlayManager::displayContext()
+rviz_common::DisplayContext *OverlayManager::displayContext()
 {
   return context_;
 }
 
-void OverlayManager::init( rviz::DisplayContext *context )
+void OverlayManager::init( rviz_common::DisplayContext *context )
 {
   if ( renderer_ != nullptr ) return;
 
@@ -114,7 +114,7 @@ bool OverlayManager::addOverlay( OverlayPtr overlay, bool unique_name_if_exists 
     renderer_->addOverlay( overlay );
     return true;
   }
-  ROS_ERROR_NAMED( "OverlayManager", "Tried to add unknown type of overlay!" );
+  LOG_ERROR( "OverlayManager: Tried to add unknown type of overlay!" );
   return false;
 }
 

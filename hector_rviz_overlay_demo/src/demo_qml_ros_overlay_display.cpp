@@ -25,5 +25,5 @@ QString DemoQmlRosOverlayDisplay::getPathToQml()
 }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay, rviz::Display )
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay, rviz_common::Display )

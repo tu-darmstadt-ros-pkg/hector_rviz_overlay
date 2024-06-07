@@ -19,7 +19,9 @@
 #define HECTOR_RVIZ_OVERLAY_QML_RVIZ_PROPERTY_H
 
 #include <QObject>
-#include <rviz/properties/property.h>
+#include <rviz_common/properties/property.hpp>
+
+#include "hector_rviz_overlay/displays/overlay_display.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -31,13 +33,13 @@ Q_OBJECT
   Q_PROPERTY( QVariant value READ value WRITE setValue NOTIFY valueChanged )
   // @formatter:on
 public:
-  explicit QmlRvizProperty( rviz::Property *property );
+  explicit QmlRvizProperty( rviz_common::properties::Property *property );
 
   QVariant value() const;
 
   void setValue( const QVariant &value );
 
-  rviz::Property *property();
+  rviz_common::properties::Property *property();
 
 signals:
 
@@ -47,7 +49,7 @@ private slots:
   void onPropertyChanged();
 
 private:
-  rviz::Property *property_;
+  rviz_common::properties::Property *property_;
 };
 }
 

@@ -18,12 +18,12 @@
 #ifndef HECTOR_RVIZ_OVERLAY_OVERLAY_RENDERER_H
 #define HECTOR_RVIZ_OVERLAY_OVERLAY_RENDERER_H
 
-#include "hector_rviz_overlay/overlay.h"
-#include "renderer.h"
+#include "hector_rviz_overlay/overlay.hpp"
+#include "renderer.hpp"
 
 #include <chrono>
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 
@@ -50,12 +50,12 @@ public:
   /*!
    * Creates an instance of an OverlayRenderer implementation depending on compile flags.
    * This method may cache the renderer or return a different instance on each call.
-   * @param context A pointer to an rviz::DisplayContext.
+   * @param context A pointer to an rviz_common::DisplayContext.
    * @return An instance of a OverlayRenderer.
    */
-  static OverlayRenderer *create( rviz::DisplayContext *context );
+  static OverlayRenderer *create( rviz_common::DisplayContext *context );
 
-  explicit OverlayRenderer( rviz::DisplayContext *context );
+  explicit OverlayRenderer( rviz_common::DisplayContext *context );
 
   ~OverlayRenderer() override;
 
@@ -111,7 +111,7 @@ protected:
 
   /*!
    * Initializes all resources required for rendering.
-   * You can expect that rviz's OpenGL context already exists at this point.
+   * You can expect that rviz_common's OpenGL context already exists at this point.
    */
   virtual void initialize() = 0;
 
@@ -161,8 +161,8 @@ protected:
    */
   virtual void hide() = 0;
 
-  rviz::DisplayContext *context_;
-  rviz::RenderPanel *render_panel_;
+  rviz_common::DisplayContext *context_;
+  rviz_common::RenderPanel *render_panel_;
   std::vector<OverlayPtr> overlays_;
   QRect geometry_;
 

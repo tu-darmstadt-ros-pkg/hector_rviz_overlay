@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_IMAGE_OVERLAY_RENDERER_H
 #define HECTOR_RVIZ_OVERLAY_IMAGE_OVERLAY_RENDERER_H
 
-#include "hector_rviz_overlay/render/texture_overlay_renderer.h"
+#include "hector_rviz_overlay/render/texture_overlay_renderer.hpp"
 
 #include <QImage>
 
@@ -38,7 +38,7 @@ class ImageOverlayRenderer : public TextureOverlayRenderer
 {
 Q_OBJECT
 public:
-  explicit ImageOverlayRenderer( rviz::DisplayContext *context );
+  explicit ImageOverlayRenderer( rviz_common::DisplayContext *context );
 
   void initialize() override;
 

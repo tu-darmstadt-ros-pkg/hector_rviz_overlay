@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_ROS_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_ROS_OVERLAY_DISPLAY_H
 
-#include <hector_rviz_overlay/displays/qml_overlay_display.h>
+#include <hector_rviz_overlay/displays/qml_overlay_display.hpp>
 
 namespace hector_rviz_overlay_demo
 {

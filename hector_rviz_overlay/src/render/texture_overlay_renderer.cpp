@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/texture_overlay_renderer.h"
+#include "hector_rviz_overlay/render/texture_overlay_renderer.hpp"
 
-#include <rviz/display_context.h>
-#include <rviz/view_manager.h>
-#include <rviz/render_panel.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/view_manager.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_rendering/render_window.hpp>
 
 #include <Ogre.h>
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayManager.h>
+#include <Overlay/OgreOverlay.h>
+#include <Overlay/OgreOverlayContainer.h>
+#include <Overlay/OgreOverlayManager.h>
 #include <OgreRenderTargetListener.h>
 
-#include <ros/ros.h>
-
-#include <QPainter>
-
-#include <chrono>
-#include <hector_rviz_overlay/render/texture_overlay_renderer.h>
-
+#include "../logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -64,7 +60,7 @@ unsigned int getSmallestPowerOf2GreaterThan( int value )
 }
 }
 
-TextureOverlayRenderer::TextureOverlayRenderer( rviz::DisplayContext *context )
+TextureOverlayRenderer::TextureOverlayRenderer( rviz_common::DisplayContext *context )
 : OverlayRenderer( context ), render_panel_( context->getViewManager()->getRenderPanel() )
 {
 
@@ -81,15 +77,15 @@ TextureOverlayRenderer::TextureOverlayRenderer( rviz::DisplayContext *context )
   ogre_overlay_->add2D( overlay_panel_ );
 
   render_target_listener_ = new RenderTargetListener( this );
-  render_panel_->getRenderWindow()->addListener( render_target_listener_ );
-  QObject::connect( render_panel_, &rviz::RenderPanel::destroyed, this, &TextureOverlayRenderer::onRenderPanelDestroyed );
+  rviz_rendering::RenderWindowOgreAdapter::addListener( render_panel_->getRenderWindow(), render_target_listener_ );
+  QObject::connect( render_panel_, &rviz_common::RenderPanel::destroyed, this, &TextureOverlayRenderer::onRenderPanelDestroyed );
 }
 
 TextureOverlayRenderer::~TextureOverlayRenderer()
 {
   if ( render_panel_ != nullptr )
   {
-    render_panel_->getRenderWindow()->removeListener( render_target_listener_ );
+    rviz_rendering::RenderWindowOgreAdapter::removeListener( render_panel_->getRenderWindow(), render_target_listener_ );
     delete render_target_listener_;
   }
 
@@ -165,18 +161,18 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
     );
   } catch ( std::exception &ex )
   {
-    ROS_WARN( "Caught exception while creating overlay texture: %s", ex.what());
+    LOG_WARN( "Caught exception while creating overlay texture: %s", ex.what());
   }
   if ( texture_.isNull())
   {
     if ( texture_multiple_of_two_required_ )
     {
-      ROS_WARN( "Failed to create texture of size (%u, %u)!", texture_width, texture_height );
+      LOG_WARN( "Failed to create texture of size (%u, %u)!", texture_width, texture_height );
     }
     else
     {
       texture_multiple_of_two_required_ = true;
-      ROS_WARN( "Failed to create texture of size (%u, %u)! Switching to textures sized by powers of 2.", texture_width,
+      LOG_WARN( "Failed to create texture of size (%u, %u)! Switching to textures sized by powers of 2.", texture_width,
                 texture_height );
       updateTexture( texture_width, texture_height );
     }

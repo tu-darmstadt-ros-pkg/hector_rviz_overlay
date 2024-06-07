@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_OGRE_POSITION_TRACKER_H
 #define HECTOR_RVIZ_OVERLAY_OGRE_POSITION_TRACKER_H
 
-#include "hector_rviz_overlay/positioning/position_tracker.h"
+#include "hector_rviz_overlay/positioning/position_tracker.hpp"
 
 #include <OgreVector3.h>
 
@@ -27,7 +27,7 @@ namespace Ogre
 class Camera;
 }
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 }
@@ -50,7 +50,7 @@ class OgrePositionTracker : public PositionTracker
 {
 Q_OBJECT
 public:
-  OgrePositionTracker( const Ogre::Vector3 &point, const rviz::DisplayContext *context, const Overlay *overlay );
+  OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context, const Overlay *overlay );
 
   ~OgrePositionTracker() override;
 
@@ -61,7 +61,7 @@ private:
 
   Ogre::Vector3 point_;
   const Overlay *overlay_;
-  const rviz::DisplayContext *context_;
+  const rviz_common::DisplayContext *context_;
   Ogre::Camera *camera_ = nullptr;
 
   class Listener;

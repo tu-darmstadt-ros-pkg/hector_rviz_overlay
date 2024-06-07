@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Stefan Fabian
+ * Copyright (C) 2020  Stefan Fabian
  *
  * This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,32 +15,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
-#define HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
+#ifndef HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
+#define HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
 
-#include "hector_rviz_overlay/popup/positioning/point_tracker.h"
+#include <QQuickImageProvider>
 
-#include <OgreVector3.h>
-
-namespace rviz
+namespace rviz_common
 {
-class DisplayContext;
+class ToolManager;
 }
 
 namespace hector_rviz_overlay
 {
 
-class OgreTracker : public PointTracker
+class RvizToolIconProvider : public QQuickImageProvider
 {
 public:
-  OgreTracker( const Ogre::Vector3 &point, const rviz::DisplayContext *context );
+  explicit RvizToolIconProvider(rviz_common::ToolManager *tool_manager);
 
-  QPoint getPoint( int width, int height ) override;
+  QPixmap requestPixmap( const QString &id, QSize *size, const QSize &requestedSize ) override;
 
-protected:
-  Ogre::Vector3 point_;
-  const rviz::DisplayContext *context_;
+private:
+  rviz_common::ToolManager *tool_manager_;
 };
 }
 
-#endif //HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
+#endif //HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H

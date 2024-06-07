@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/image_overlay_renderer.h"
+#include "hector_rviz_overlay/render/image_overlay_renderer.hpp"
 
 #include <OgreTexture.h>
 
 namespace hector_rviz_overlay
 {
 
-ImageOverlayRenderer::ImageOverlayRenderer( rviz::DisplayContext *context ) : TextureOverlayRenderer( context )
+ImageOverlayRenderer::ImageOverlayRenderer( rviz_common::DisplayContext *context ) : TextureOverlayRenderer( context )
 {
 }
 

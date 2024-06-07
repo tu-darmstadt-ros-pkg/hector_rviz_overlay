@@ -46,7 +46,7 @@ protected:
   bool event( QEvent *event ) override;
 
 public:
-  explicit PopupDialog( QWidget *parent = nullptr, Qt::WindowFlags flags = 0 );
+  explicit PopupDialog( QWidget *parent = nullptr, Qt::WindowFlags flags = {} );
 
   /*!
    * @return The title of the popup dialog.

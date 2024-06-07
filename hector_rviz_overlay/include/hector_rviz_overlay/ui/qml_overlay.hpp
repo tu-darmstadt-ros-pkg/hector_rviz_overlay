@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QML_OVERLAY_H
 #define HECTOR_RVIZ_OVERLAY_QML_OVERLAY_H
 
-#include "ui_overlay.h"
+#include "ui_overlay.hpp"
 
 #include <QVariantMap>
 

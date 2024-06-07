@@ -18,9 +18,9 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QML_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_QML_OVERLAY_DISPLAY_H
 
-#include "overlay_display.h"
+#include "overlay_display.hpp"
 
-#include "hector_rviz_overlay/ui/qml_overlay.h"
+#include "hector_rviz_overlay/ui/qml_overlay.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -43,9 +43,9 @@ public:
   //! @param allow_multiple Whether or not to allow multiple instances of the display. Default: False (Single instance only)
   explicit QmlOverlayDisplay( bool allow_multiple );
 
-  void load( const rviz::Config &config ) override;
+  void load( const rviz_common::Config &config ) override;
 
-  void save( rviz::Config config ) const override;
+  void save( rviz_common::Config config ) const override;
 
 protected slots:
 
@@ -66,8 +66,8 @@ protected:
 
   QmlOverlayPtr qml_overlay_;
 
-  rviz::Config overlay_config_;
-  rviz::BoolProperty *live_reload_property_;
+  rviz_common::Config overlay_config_;
+  BoolProperty *live_reload_property_;
 };
 }
 

@@ -15,19 +15,32 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HECTOR_RVIZ_OVERLAY_CENTER_TRACKER_H
-#define HECTOR_RVIZ_OVERLAY_CENTER_TRACKER_H
+#ifndef HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
+#define HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
 
-#include "hector_rviz_overlay/popup/positioning/point_tracker.h"
+#include "hector_rviz_overlay/popup/positioning/point_tracker.hpp"
+
+#include <OgreVector3.h>
+
+namespace rviz_common
+{
+class DisplayContext;
+}
 
 namespace hector_rviz_overlay
 {
 
-class CenterTracker : public PointTracker
+class OgreTracker : public PointTracker
 {
 public:
+  OgreTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context );
+
   QPoint getPoint( int width, int height ) override;
+
+protected:
+  Ogre::Vector3 point_;
+  const rviz_common::DisplayContext *context_;
 };
 }
 
-#endif //HECTOR_RVIZ_OVERLAY_CENTER_TRACKER_H
+#endif //HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H

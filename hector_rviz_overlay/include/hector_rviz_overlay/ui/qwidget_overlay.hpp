@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_H
 #define HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_H
 
-#include "ui_overlay.h"
+#include "ui_overlay.hpp"
 
 class QKeyEvent;
 class QMouseEvent;
@@ -32,7 +32,7 @@ class QWidgetEventManager;
 
 /*!
  * @class QWidgetOverlay
- * @brief This class provides a QWidget that can be used as a top level widget to draw on top of the rviz::RenderPanel.
+ * @brief This class provides a QWidget that can be used as a top level widget to draw on top of the rviz_common::RenderPanel.
  */
 class QWidgetOverlay : public UiOverlay
 {
@@ -56,7 +56,7 @@ public:
 
   ///@{
   /*!
-   * @return The top level widget that is drawn on top of the rviz::RenderPanel.
+   * @return The top level widget that is drawn on top of the rviz_common::RenderPanel.
    */
   QWidget *widget();
 

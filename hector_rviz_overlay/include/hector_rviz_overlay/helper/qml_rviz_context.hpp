@@ -20,10 +20,12 @@
 
 #include <QObject>
 #include <QVariantMap>
-#include "hector_rviz_overlay/helper/qml_rviz_property.h"
-#include "hector_rviz_overlay/helper/qml_tool_manager.h"
 
-namespace rviz
+#include "hector_rviz_overlay/displays/overlay_display.hpp"
+#include "hector_rviz_overlay/helper/qml_rviz_property.hpp"
+#include "hector_rviz_overlay/helper/qml_tool_manager.hpp"
+
+namespace rviz_common
 {
 class DisplayContext;
 }
@@ -42,7 +44,7 @@ Q_OBJECT
   Q_PROPERTY( QObject* toolManager READ toolManager CONSTANT )
   // @formatter:on
 public:
-  explicit QmlRvizContext( rviz::DisplayContext *context, const Overlay *overlay, bool visible = false );
+  explicit QmlRvizContext( rviz_common::DisplayContext *context, const Overlay *overlay, bool visible = false );
 
   ~QmlRvizContext() override;
 
@@ -58,9 +60,9 @@ public:
 
   void setIsFullscreen( bool value );
 
-  void load( const rviz::Config &config );
+  void load( const rviz_common::Config &config );
 
-  void setConfigurationPropertyParent( rviz::Property *parent );
+  void setConfigurationPropertyParent( rviz_common::properties::Property *parent );
 
   QObject *toolManager() const;
 
@@ -169,15 +171,15 @@ private slots:
   void onWindowStateChanged( Qt::WindowState state );
 
 private:
-  void loadPropertyFromConfig( rviz::Property *property );
+  void loadPropertyFromConfig( rviz_common::properties::Property *property );
 
   QVariantMap config_;
-  rviz::Config property_config_;
+  rviz_common::Config property_config_;
   Qt::WindowState window_state_;
-  rviz::DisplayContext *context_;
+  rviz_common::DisplayContext *context_;
   QmlToolManager *tool_manager_;
   const Overlay *overlay_;
-  rviz::Property *configuration_property_;
+  rviz_common::properties::Property *configuration_property_;
   bool visible_;
 };
 }

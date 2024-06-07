@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_GLX_OVERLAY_RENDERER_H
 #define HECTOR_RVIZ_OVERLAY_GLX_OVERLAY_RENDERER_H
 
-#include "overlay_renderer.h"
+#include "overlay_renderer.hpp"
 
 namespace Ogre
 {
@@ -26,7 +26,7 @@ class Pass;
 class SceneManager;
 }
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 }
@@ -49,7 +49,7 @@ Q_OBJECT
 private:
   class RenderTargetListener;
 public:
-  explicit GLXOverlayRenderer(rviz::DisplayContext *render_panel);
+  explicit GLXOverlayRenderer(rviz_common::DisplayContext *render_panel);
 
   ~GLXOverlayRenderer() override;
 

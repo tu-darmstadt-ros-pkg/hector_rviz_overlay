@@ -18,9 +18,9 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_OVERLAY_H
 #define HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_OVERLAY_H
 
-#include "hector_rviz_overlay/popup/popup_overlay.h"
+#include "hector_rviz_overlay/popup/popup_overlay.hpp"
 
-#include "hector_rviz_overlay/popup/positioning/anchor_point.h"
+#include "hector_rviz_overlay/popup/positioning/anchor_point.hpp"
 
 class QKeyEvent;
 class QMouseEvent;
@@ -56,7 +56,7 @@ public:
 
   ///@{
   /*!
-   * @return The top level container widget that is drawn on top of the rviz::RenderPanel and which manages the popup as its single child widget.
+   * @return The top level container widget that is drawn on top of the rviz_common::RenderPanel and which manages the popup as its single child widget.
    */
   PopupContainerWidget *popupContainerWidget();
 

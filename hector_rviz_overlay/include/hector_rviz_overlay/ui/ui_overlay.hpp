@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_UI_OVERLAY_H
 #define HECTOR_RVIZ_OVERLAY_UI_OVERLAY_H
 
-#include "hector_rviz_overlay/overlay.h"
+#include "hector_rviz_overlay/overlay.hpp"
 
 namespace hector_rviz_overlay
 {

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/positioning/popup_move_bar.h"
+#include "hector_rviz_overlay/popup/positioning/popup_move_bar.hpp"
 
-#include "hector_rviz_overlay/popup/popup_container_widget.h"
+#include "hector_rviz_overlay/popup/popup_container_widget.hpp"
 
 #include <QMouseEvent>
 
@@ -50,7 +50,6 @@ void PopupMoveBar::mouseReleaseEvent( QMouseEvent *event )
 void PopupMoveBar::mouseMoveEvent( QMouseEvent *event )
 {
   QWidget::mouseMoveEvent( event );
-  event->pos();
 
   auto container = dynamic_cast<PopupContainerWidget *>(topLevelWidget());
   if (container == nullptr) return;

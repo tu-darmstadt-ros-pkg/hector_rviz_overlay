@@ -18,8 +18,8 @@
 #ifndef HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H
 #define HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H
 
-#include "hector_rviz_overlay/ui/ui_overlay.h"
-#include "hector_rviz_overlay/popup/popup_overlay.h"
+#include "hector_rviz_overlay/ui/ui_overlay.hpp"
+#include "hector_rviz_overlay/popup/popup_overlay.hpp"
 
 #include <mutex>
 
@@ -30,7 +30,7 @@ class QKeyEvent;
 class QMouseEvent;
 class QWheelEvent;
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 class RenderPanel;
@@ -60,21 +60,21 @@ public:
   void operator=( OverlayManager const & ) = delete;
 
   /*!
-   * Returns a singleton instance of the OverlayManager which can be used to overlay Qt on top of the rviz::RenderPanel.
+   * Returns a singleton instance of the OverlayManager which can be used to overlay Qt on top of the rviz_common::RenderPanel.
    *
    * @return A reference to the instance of the OverlayManager
    */
   static OverlayManager &getSingleton();
 
-  //! @return The rviz::DisplayContext providing access to the main render panel and Ogre's SceneManager.
-  rviz::DisplayContext *displayContext();
+  //! @return The rviz_common::DisplayContext providing access to the main render panel and Ogre's SceneManager.
+  rviz_common::DisplayContext *displayContext();
 
   /*!
    * Initializes the OverlayManager. Has to be called before issuing draw calls.
    * Does nothing if the OverlayManager is already initialized.
-   * @param context An instance of a rviz::DisplayContext which provides access to the main render panel and Ogre's SceneManager
+   * @param context An instance of a rviz_common::DisplayContext which provides access to the main render panel and Ogre's SceneManager
    */
-  void init( rviz::DisplayContext *context );
+  void init( rviz_common::DisplayContext *context );
 
   /*!
    * Adds the overlay to the collection of overlays managed by this class.
@@ -165,8 +165,8 @@ private:
 
   bool handleKeyEvent( QObject *receiver, QKeyEvent *event );
 
-  rviz::DisplayContext *context_;
-  rviz::RenderPanel *render_panel_;
+  rviz_common::DisplayContext *context_;
+  rviz_common::RenderPanel *render_panel_;
   std::vector<UiOverlayPtr> ui_overlays_;
   std::vector<PopupOverlayPtr> popup_overlays_;
   OverlayRenderer *renderer_;

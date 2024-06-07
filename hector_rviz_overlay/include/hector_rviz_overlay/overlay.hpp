@@ -138,13 +138,13 @@ public:
   /*!
    * If the scaling factor differs from 1.0, the geometry of the overlay will NOT be equal to the geometry of its content.
    * The geometry is updated by the OverlayManager and should always represent the global top-left, the width and the
-   * height of the rviz::RenderPanel.
+   * height of the rviz_common::RenderPanel.
    * @return The geometry of this overlay.
    */
   const QRect &geometry() const { return geometry_; }
 
   /*!
-   * This method is used by OverlayManager to update the overlay's geometry every time the rviz::RenderPanel's size changes.
+   * This method is used by OverlayManager to update the overlay's geometry every time the rviz_common::RenderPanel's size changes.
    * If the scaling factor differs from 1.0, the geometry of the overlay will NOT be equal to the geometry of its content.
    * @param value The new geometry
    */

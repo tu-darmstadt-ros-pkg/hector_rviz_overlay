@@ -15,22 +15,29 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
-#define HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
+#ifndef HECTOR_RVIZ_OVERLAY_POINT_TRACKER_H
+#define HECTOR_RVIZ_OVERLAY_POINT_TRACKER_H
 
-#include "hector_rviz_overlay/popup/qwidget_popup_overlay.h"
-
-#include "hector_rviz_overlay/popup/popup_dialog.h"
+#include <QPoint>
 
 namespace hector_rviz_overlay
 {
 
-class QWidgetPopupFactory
+/*!
+ * Base class for point trackers which track a (potentially moving) point over time.
+ */
+class PointTracker
 {
 public:
-  QWidgetPopupOverlayPtr createMessagePopup( const std::string &name, const QString &title, const QString &message,
-                                             int buttons = ButtonOk );
+  virtual ~PointTracker() = default;
+
+  /**
+   * @param width The width of the window where the point should be tracked
+   * @param height The height of the window where the point should be tracked
+   * @return The position of the currently tracked point within the window.
+   */
+  virtual QPoint getPoint( int width, int height ) = 0;
 };
 }
 
-#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
+#endif //HECTOR_RVIZ_OVERLAY_POINT_TRACKER_H

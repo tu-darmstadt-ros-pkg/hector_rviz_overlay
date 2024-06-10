@@ -15,28 +15,28 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/image_overlay_renderer.hpp"
+#include "hector_rviz_overlay/render/qimage_texture_overlay_renderer.hpp"
 
 #include <OgreTexture.h>
 
 namespace hector_rviz_overlay
 {
 
-ImageOverlayRenderer::ImageOverlayRenderer( rviz_common::DisplayContext *context ) : TextureOverlayRenderer( context )
+QImageTextureOverlayRenderer::QImageTextureOverlayRenderer( rviz_common::DisplayContext *context ) : TextureOverlayRenderer( context )
 {
 }
 
-void ImageOverlayRenderer::initialize()
-{
-  /* Nothing to do */
-}
-
-void ImageOverlayRenderer::releaseResources()
+void QImageTextureOverlayRenderer::initialize()
 {
   /* Nothing to do */
 }
 
-void ImageOverlayRenderer::prepareRender( int width, int height )
+void QImageTextureOverlayRenderer::releaseResources()
+{
+  /* Nothing to do */
+}
+
+void QImageTextureOverlayRenderer::prepareRender( int width, int height )
 {
   TextureOverlayRenderer::prepareRender( width, height );
   buffer_ = texture_->getBuffer();
@@ -55,31 +55,31 @@ void ImageOverlayRenderer::prepareRender( int width, int height )
   paint_device_image_ = QImage( data, width, height, bytes_per_line, QImage::Format_ARGB32_Premultiplied );
 }
 
-void ImageOverlayRenderer::finishRender()
+void QImageTextureOverlayRenderer::finishRender()
 {
   buffer_->unlock();
-  buffer_.setNull();
+  buffer_.reset();
   TextureOverlayRenderer::finishRender();
 }
 
-QPaintDevice *ImageOverlayRenderer::paintDevice() noexcept
+QPaintDevice *QImageTextureOverlayRenderer::paintDevice() noexcept
 {
   return &paint_device_image_;
 }
 
-QOpenGLFramebufferObject *ImageOverlayRenderer::framebufferObject()
+QOpenGLFramebufferObject *QImageTextureOverlayRenderer::framebufferObject()
 {
   throw std::logic_error( "ImageOverlayRenderer doesn't have a QOpenGLFramebufferObject."
                           " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
                           " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
 }
 
-QOpenGLContext *ImageOverlayRenderer::context()
+QOpenGLContext *QImageTextureOverlayRenderer::context()
 {
   throw std::logic_error( "ImageOverlayRenderer doesn't have a QOpenGLContext."
                           " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
                           " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
 }
 
-bool ImageOverlayRenderer::framebufferObjectUpdated() noexcept { return false; }
+bool QImageTextureOverlayRenderer::framebufferObjectUpdated() noexcept { return false; }
 }

@@ -19,9 +19,9 @@
 #ifndef HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H
 
-#include <hector_rviz_overlay/displays/qml_overlay_display.h>
+#include <hector_rviz_overlay/displays/qml_overlay_display.hpp>
 
-namespace rviz
+namespace rviz_common::properties
 {
 class StringProperty;
 }
@@ -42,7 +42,7 @@ protected:
   QString getPathToQml() override;
 
 private:
-  rviz::StringProperty *path_property_;
+  rviz_common::properties::StringProperty *path_property_;
 };
 }
 

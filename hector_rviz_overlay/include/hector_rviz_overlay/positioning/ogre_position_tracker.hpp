@@ -20,7 +20,7 @@
 
 #include "hector_rviz_overlay/positioning/position_tracker.hpp"
 
-#include <OgreVector3.h>
+#include <Ogre.h>
 
 namespace Ogre
 {

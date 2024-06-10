@@ -18,9 +18,8 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H
 #define HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H
 
+#include <qopenglcontext.h>
 #include <QSize>
-
-typedef struct _XDisplay Display;
 
 class QOpenGLContext;
 class QOpenGLPaintDevice;
@@ -36,7 +35,13 @@ class QOpenGLWrapper
 private:
   struct NativeContextInformation;
 public:
-  explicit QOpenGLWrapper( Display *display, const QSize &size );
+  /**
+   *
+   * @param native_context Optional native OpenGL context to share resources with.
+   * @param size The size of the surface.
+   * @param gl_version The OpenGL version to use. If 0, the default version is used.
+   */
+  explicit QOpenGLWrapper( QOpenGLContext *native_context, const QSize &size, int gl_version = 0 );
 
   ~QOpenGLWrapper();
 

@@ -463,12 +463,11 @@ bool OverlayManager::handleWheelEvent( QObject *receiver, QWheelEvent *event )
 {
   // Map the wheel event to the render panel because the top left of the render panel is equivalent to the top left of
   // the overlays.
-  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPos());
+  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPosition().toPoint());
   if ( !render_panel_->contentsRect().contains( render_panel_pos )) return false;
 
-  QWheelEvent child_event( render_panel_pos, event->globalPos(), event->pixelDelta(), event->angleDelta(),
-                           event->delta(),
-                           event->orientation(), event->buttons(), event->modifiers(), event->phase(), event->source());
+  QWheelEvent child_event( render_panel_pos, event->globalPosition(), event->pixelDelta(), event->angleDelta(),
+                           event->buttons(), event->modifiers(), event->phase(), event->source());
 
   std::unique_lock<std::recursive_mutex> scoped_lock( mutex_ );
   for ( int i = (int) popup_overlays_.size() - 1; i >= 0; --i )

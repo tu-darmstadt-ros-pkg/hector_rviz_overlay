@@ -28,17 +28,17 @@ namespace hector_rviz_overlay
 {
 
 /*!
- * @class ImageOverlayRenderer
+ * @class QImageTextureOverlayRenderer
  * @brief This class renders QWidgetOverlay's into a QImage.
  *
  * The texture's memory is wrapped by a QImage that is used as a paint device for the QWidgetOverlays.
  * This renderer does not support the rendering of QmlOverlays!
  */
-class ImageOverlayRenderer : public TextureOverlayRenderer
+class QImageTextureOverlayRenderer : public TextureOverlayRenderer
 {
 Q_OBJECT
 public:
-  explicit ImageOverlayRenderer( rviz_common::DisplayContext *context );
+  explicit QImageTextureOverlayRenderer( rviz_common::DisplayContext *context );
 
   void initialize() override;
 

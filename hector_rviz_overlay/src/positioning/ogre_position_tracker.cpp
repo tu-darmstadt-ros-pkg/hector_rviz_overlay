@@ -22,7 +22,6 @@
 #include <rviz_common/view_manager.hpp>
 
 #include <OgreCamera.h>
-#include <OgreVector4.h>
 #include <OgreViewport.h>
 
 namespace hector_rviz_overlay

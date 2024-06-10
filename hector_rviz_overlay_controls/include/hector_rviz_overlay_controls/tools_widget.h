@@ -27,7 +27,7 @@ class QHBoxLayout;
 class QMenu;
 class QPushButton;
 
-namespace rviz
+namespace rviz_common
 {
 class Tool;
 class ToolManager;
@@ -44,57 +44,39 @@ Q_OBJECT
                 namesVisible
                 WRITE
                 setNamesVisible )
-  Q_PROPERTY( bool addRemoveButtonsVisible
-                READ
-                addRemoveButtonsVisible
-                WRITE
-                setAddRemoveButtonsVisible )
 public:
   explicit ToolsWidget( QWidget *parent = nullptr );
 
-  void initializeTools( rviz::ToolManager *tool_manager );
+  void initializeTools( rviz_common::ToolManager *tool_manager );
 
   bool namesVisible() const;
 
   void setNamesVisible( bool value );
 
-  bool addRemoveButtonsVisible() const;
-
-  void setAddRemoveButtonsVisible( bool value );
-
 private slots:
 
-  void onToolAdded( rviz::Tool *tool );
+  void onToolAdded( rviz_common::Tool *tool );
 
-  void onToolRemoved( rviz::Tool *tool );
+  void onToolRemoved( rviz_common::Tool *tool );
 
-  void onToolChanged( rviz::Tool *tool );
+  void onToolChanged( rviz_common::Tool *tool );
 
   void onToolButtonChecked( bool checked );
 
-  void onAddToolClicked();
-
-  void onRemoveToolMenuTriggered( QAction *action );
-
 private:
 
-  void addTool( rviz::Tool *tool );
+  void addTool( rviz_common::Tool *tool );
 
-  void removeTool( rviz::Tool *tool );
+  void removeTool( rviz_common::Tool *tool );
 
-  QHBoxLayout *tools_layout_;
+  QHBoxLayout *tools_layout_ = nullptr;
   QHash<QString, QPushButton *> tool_buttons_;
-  QHash<QPushButton *, rviz::Tool *> tool_map_;
-  QButtonGroup *tool_button_group_;
+  QHash<QPushButton *, rviz_common::Tool *> tool_map_;
+  QButtonGroup *tool_button_group_ = nullptr;
 
-  QPushButton *add_tool_button_;
-  QPushButton *remove_tool_button_;
-  QMenu *remove_tool_menu_;
+  rviz_common::ToolManager *tool_manager_ = nullptr;
 
-  rviz::ToolManager *tool_manager_;
-
-  bool names_visible_;
-  bool add_remove_buttons_visible_;
+  bool names_visible_ = true;
 };
 }
 

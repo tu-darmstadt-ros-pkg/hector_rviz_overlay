@@ -23,6 +23,7 @@
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/view_manager.hpp>
+#include <rviz_rendering/render_system.hpp>
 
 namespace hector_rviz_overlay
 {
@@ -65,6 +66,7 @@ void OverlayDisplay::onInitialize()
 {
   using namespace rviz_common::properties;
   Display::onInitialize();
+  rviz_rendering::RenderSystem::get()->prepareOverlays(scene_manager_);
   OverlayManager::getSingleton().init( context_ );
 
   overlay_ = createOverlay();

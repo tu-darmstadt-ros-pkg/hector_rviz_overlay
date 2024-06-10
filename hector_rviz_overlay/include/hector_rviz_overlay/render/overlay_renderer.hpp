@@ -171,6 +171,7 @@ protected:
   double timer_history_[TimerHistoryLength];
   double timer_average_;
 
+  bool is_dirty_ = false;
   bool no_visible_overlays_ = false;
   bool initialized_ = false;
 };

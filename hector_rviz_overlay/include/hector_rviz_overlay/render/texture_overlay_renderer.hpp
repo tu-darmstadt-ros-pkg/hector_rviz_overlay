@@ -77,10 +77,12 @@ protected:
   void finishRender() override;
 
   /*!
-   * Creates a new texture with the given width and height if necessary.
+   * Creates a new texture with the given width and height if necessary. This method may destroy the old texture.
    * Automatically handles if texture have to be sized using powers of 2.
-   * After this method was called the texture_ property should be initialized (in case of an error it can be a nullptr)
-   * and ready for rendering, e.g., by attaching the texture to the material_.
+   * After this method was called the texture_, texture_unit_state and texture_id_ properties are initialized
+   * (in case of an error it can be a nullptr).
+   * If you need to make changes to the texture or texture unit, override this method and call the base implementation
+   * before making your changes.
    * @param texture_width Width of the texture.
    * @param texture_height Height of the texture.
    */
@@ -90,6 +92,8 @@ protected:
   Ogre::OverlayContainer *overlay_panel_;
   Ogre::MaterialPtr material_;
   Ogre::TexturePtr texture_;
+  Ogre::TextureUnitState *texture_unit_state_;
+  unsigned int texture_id_ = 0;
 
   rviz_common::RenderPanel *render_panel_;
 

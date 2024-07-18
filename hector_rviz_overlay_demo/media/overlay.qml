@@ -27,6 +27,13 @@ Item {
             }
         }
     }
+    Text {
+        anchors.bottom: page.bottom
+        anchors.horizontalCenter: page.horizontalCenter
+        anchors.bottomMargin: 8
+        text: "Your fixed frame is: " + rviz.fixedFrame
+        font.pointSize: 20; font.bold: true
+    }
 
     MouseArea { z: 1; id: mouseArea; anchors.fill: helloText; hoverEnabled: true; propagateComposedEvents: true }
 }

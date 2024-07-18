@@ -46,6 +46,7 @@ QmlRvizContext::QmlRvizContext( rviz::DisplayContext *context, const Overlay *ov
     return;
   }
   connect( window, &QWindow::windowStateChanged, this, &QmlRvizContext::onWindowStateChanged );
+  connect( context_->getFrameManager(), &rviz::FrameManager::fixedFrameChanged, this, &QmlRvizContext::fixedFrameChanged );
   window_state_ = window->windowState();
 }
 
@@ -95,6 +96,16 @@ void QmlRvizContext::setIsFullscreen( bool value )
   }
   // Unfortunately this method is not exposed in the public interface, hence, we need to work around this using Qt
   QMetaObject::invokeMethod( context_->getWindowManager()->getParentWindow(), "setFullScreen", Q_ARG( bool, value ));
+}
+
+QString QmlRvizContext::fixedFrame() const
+{
+  return context_->getFixedFrame();
+}
+
+void QmlRvizContext::setFixedFrame( const QString &frame )
+{
+  context_->getFrameManager()->setFixedFrame( frame.toStdString());
 }
 
 void QmlRvizContext::onWindowStateChanged( Qt::WindowState state )

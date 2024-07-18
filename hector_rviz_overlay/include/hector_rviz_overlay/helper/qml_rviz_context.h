@@ -39,6 +39,7 @@ Q_OBJECT
   Q_PROPERTY( QVariantMap config READ config WRITE setConfig NOTIFY configChanged )
   Q_PROPERTY( bool visible READ visible NOTIFY visibleChanged )
   Q_PROPERTY( bool isFullscreen READ isFullscreen WRITE setIsFullscreen NOTIFY isFullscreenChanged )
+  Q_PROPERTY( QString fixedFrame READ fixedFrame WRITE setFixedFrame NOTIFY fixedFrameChanged )
   Q_PROPERTY( QObject* toolManager READ toolManager CONSTANT )
   // @formatter:on
 public:
@@ -57,6 +58,10 @@ public:
   bool isFullscreen() const;
 
   void setIsFullscreen( bool value );
+
+  QString fixedFrame() const;
+
+  void setFixedFrame( const QString &frame );
 
   void load( const rviz::Config &config );
 
@@ -164,6 +169,8 @@ signals:
   void visibleChanged();
 
   void isFullscreenChanged();
+
+  void fixedFrameChanged();
 
 private slots:
   void onWindowStateChanged( Qt::WindowState state );

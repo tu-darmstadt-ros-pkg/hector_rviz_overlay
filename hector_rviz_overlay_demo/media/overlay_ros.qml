@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Layouts 1.10
-import Ros 1.0
+import Ros2 1.0
 
 Item {
   id: page
@@ -9,7 +9,7 @@ Item {
   anchors.fill: parent
   focus: true
 
-  Subscriber {
+  Subscription {
     id: subscriber
     topic: "/titleMessage"
     onNewMessage: helloText.text += message.data + "\n"
@@ -24,10 +24,10 @@ Item {
   }
 
 
-  // Transforms can be looked up or watched using a connection
-  Connections {
-    target: TfTransformListener
-    onTransformChanged: {
+  // Transforms can be looked up
+  Timer {
+    interval: 500; running: true; repeat: true
+    onTriggered: {
       var message = TfTransformListener.lookUpTransform("base_link", "world");
       var translation = message.transform.translation;
       var orientation = message.transform.rotation;
@@ -40,7 +40,7 @@ Item {
       // the transform. If an exception occured, the message will have an 'exception' field with the type and a 'message'
       // field with the exception message.
       transformConnectionText.text = text;
-   }
+    }
   }
 
   // Or using a TfTransform object
@@ -58,7 +58,7 @@ Item {
     implicitWidth: Math.min(tfLayout.implicitWidth, parent.width / 2)
     ColumnLayout {
       id: tfLayout
-      width: parent.width
+      anchors.fill: parent
 
       Text {
         Layout.fillWidth: true
@@ -67,6 +67,7 @@ Item {
       }
 
       Text {
+        id: transformConnectionText
         Layout.fillWidth: true
         text: "- Can Transform: Unknown\n- Position: Unknown\n- Orientation: Unknown\n- Valid: Unknown"
         wrapMode: Text.WordWrap

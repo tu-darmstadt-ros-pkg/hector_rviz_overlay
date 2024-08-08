@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/qml_tool_manager.h"
+#include "hector_rviz_overlay/helper/qml_tool_manager.hpp"
 
-#include <rviz/new_object_dialog.h>
-#include <rviz/tool_manager.h>
+#include <rviz_common/tool_manager.hpp>
 
 namespace hector_rviz_overlay
 {
 
-QmlTool::QmlTool( rviz::Tool *tool ) : tool_( tool ) { }
+QmlTool::QmlTool( rviz_common::Tool *tool ) : tool_( tool ) { }
 
 bool QmlTool::isSelected() const { return is_selected_; }
 
@@ -49,11 +48,11 @@ QString QmlTool::iconSource() const { return "image://rviz_tool_icons/" + classI
 
 // ======================== Tool Manager ========================
 
-QmlToolManager::QmlToolManager( rviz::ToolManager *tool_manager ) : tool_manager_( tool_manager )
+QmlToolManager::QmlToolManager( rviz_common::ToolManager *tool_manager ) : tool_manager_( tool_manager )
 {
-  connect( tool_manager_, &rviz::ToolManager::toolAdded, this, &QmlToolManager::onToolAdded );
-  connect( tool_manager_, &rviz::ToolManager::toolRemoved, this, &QmlToolManager::onToolRemoved );
-  connect( tool_manager_, &rviz::ToolManager::toolChanged, this, &QmlToolManager::onToolChanged );
+  connect( tool_manager_, &rviz_common::ToolManager::toolAdded, this, &QmlToolManager::onToolAdded );
+  connect( tool_manager_, &rviz_common::ToolManager::toolRemoved, this, &QmlToolManager::onToolRemoved );
+  connect( tool_manager_, &rviz_common::ToolManager::toolChanged, this, &QmlToolManager::onToolChanged );
 
   for ( int i = 0; i < tool_manager_->numTools(); ++i )
   {
@@ -71,7 +70,7 @@ QVariantList QmlToolManager::tools() const
   return result;
 }
 
-void QmlToolManager::onToolAdded( rviz::Tool *tool )
+void QmlToolManager::onToolAdded( rviz_common::Tool *tool )
 {
   QmlTool *result;
   tools_.append( result = new QmlTool( tool ));
@@ -79,7 +78,7 @@ void QmlToolManager::onToolAdded( rviz::Tool *tool )
   emit toolsChanged();
 }
 
-void QmlToolManager::onToolRemoved( rviz::Tool *tool )
+void QmlToolManager::onToolRemoved( rviz_common::Tool *tool )
 {
   for ( int i = 0; i < tools_.size(); ++i )
   {
@@ -92,7 +91,7 @@ void QmlToolManager::onToolRemoved( rviz::Tool *tool )
   emit toolsChanged();
 }
 
-void QmlToolManager::onToolChanged( rviz::Tool *tool )
+void QmlToolManager::onToolChanged( rviz_common::Tool *tool )
 {
   for ( auto &qml_tool : tools_ )
   {
@@ -103,20 +102,23 @@ void QmlToolManager::onToolChanged( rviz::Tool *tool )
 
 QObject *QmlToolManager::addTool()
 {
-  QString class_id;
-  auto *dialog = new rviz::NewObjectDialog( tool_manager_->getFactory(), "Tool",
-                                            QStringList(), tool_manager_->getToolClasses(),
-                                            &class_id );
-  if ( dialog->exec() == QDialog::Accepted )
-  {
-    return addTool( class_id );
-  }
+  // TODO: New solution for ROS2, maybe pass VisualizationFrame and call openNewToolDialog slot via Qt
+  // NewObjectDialog is private in src folder now
+  // QString class_id;
+  // auto *dialog = new rviz_common::NewObjectDialog( tool_manager_->getFactory(), "Tool",
+  //                                           QStringList(), tool_manager_->getToolClasses(),
+  //                                           &class_id );
+  // if ( dialog->exec() == QDialog::Accepted )
+  // {
+  //   return addTool( class_id );
+  // }
   return nullptr;
 }
 
 QObject *QmlToolManager::addTool( const QString &class_lookup_name )
 {
-  rviz::Tool *tool = tool_manager_->addTool( class_lookup_name );
+  rviz_common::Tool *tool = tool_manager_->addTool( class_lookup_name );
+  (void)tool; // Avoid unused warning if not building debug
   assert( !tools_.empty());
   assert( tools_.last()->tool() == tool );
   return tools_.last();
@@ -156,7 +158,7 @@ void QmlToolManager::removeAll()
 
 QObject *QmlToolManager::currentTool()
 {
-  rviz::Tool *current = tool_manager_->getCurrentTool();
+  rviz_common::Tool *current = tool_manager_->getCurrentTool();
   for ( const auto &tool : tools_ )
   {
     if ( tool->tool() == current ) return tool;

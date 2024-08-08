@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/qml_rviz_property.h"
+#include "hector_rviz_overlay/helper/qml_rviz_property.hpp"
 
 namespace hector_rviz_overlay
 {
 
-QmlRvizProperty::QmlRvizProperty( rviz::Property *property ) : property_( property )
+QmlRvizProperty::QmlRvizProperty( rviz_common::properties::Property *property ) : property_( property )
 {
-  connect( property_, &rviz::Property::changed, this, &QmlRvizProperty::onPropertyChanged );
+  connect( property_, &rviz_common::properties::Property::changed, this, &QmlRvizProperty::onPropertyChanged );
 }
 
 QVariant QmlRvizProperty::value() const
@@ -35,7 +35,7 @@ void QmlRvizProperty::setValue( const QVariant &value )
   property_->setValue( value );
 }
 
-rviz::Property *QmlRvizProperty::property()
+rviz_common::properties::Property *QmlRvizProperty::property()
 {
   return property_;
 }

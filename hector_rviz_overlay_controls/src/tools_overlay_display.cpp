@@ -21,13 +21,12 @@
 
 #include <QGridLayout>
 
-#include <rviz/properties/string_property.h>
-#include <rviz/properties/editable_enum_property.h>
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-#include <rviz/tool_manager.h>
-#include <rviz/view_manager.h>
-#include <rviz/frame_manager.h>
+#include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/editable_enum_property.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/tool_manager.hpp>
+#include <rviz_common/view_manager.hpp>
 
 using namespace hector_rviz_overlay;
 
@@ -35,14 +34,11 @@ namespace hector_rviz_overlay_controls
 {
 
 ToolsOverlayDisplay::ToolsOverlayDisplay()
-  : QWidgetOverlayDisplay( false ), grid_layout_( nullptr ), tools_widget_( nullptr )
+  : QWidgetOverlayDisplay( false )
 {
-  show_names_property_ = new rviz::BoolProperty( "Show Names", true,
+  show_names_property_ = new BoolProperty( "Show Names", true,
                                                  "Determines whether or not the names of the tools are shown in the buttons.",
                                                  this, SLOT( onShowNamesChanged()));
-  show_add_remove_buttons_property_ = new rviz::BoolProperty( "Show Add/Remove", true,
-                                                              "Determines whether or not the add and remove buttons are shown.",
-                                                              this, SLOT( onShowAddRemoveChanged()));
   style_sheet_property_->addOption( "package://hector_rviz_overlay_controls/styles/flat.qss" );
   style_sheet_property_->addOption( "package://hector_rviz_overlay_controls/styles/round.qss" );
   style_sheet_property_->setString( "package://hector_rviz_overlay_controls/styles/round.qss" );
@@ -51,11 +47,6 @@ ToolsOverlayDisplay::ToolsOverlayDisplay()
 void ToolsOverlayDisplay::onShowNamesChanged()
 {
   tools_widget_->setNamesVisible( show_names_property_->getBool());
-}
-
-void ToolsOverlayDisplay::onShowAddRemoveChanged()
-{
-  tools_widget_->setAddRemoveButtonsVisible( show_add_remove_buttons_property_->getBool());
 }
 
 void ToolsOverlayDisplay::onSetupUi( QWidget *widget )
@@ -71,5 +62,5 @@ void ToolsOverlayDisplay::onSetupUi( QWidget *widget )
 }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_controls::ToolsOverlayDisplay, rviz::Display )
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_controls::ToolsOverlayDisplay, rviz_common::Display )

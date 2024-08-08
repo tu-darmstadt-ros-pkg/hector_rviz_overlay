@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay_demo/demo_qml_ros_overlay_display.h"
+#include "hector_rviz_overlay_demo/demo_qml_ros_overlay_display.hpp"
 
 namespace hector_rviz_overlay_demo
 {
@@ -25,5 +25,5 @@ QString DemoQmlRosOverlayDisplay::getPathToQml()
 }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay, rviz::Display )
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay, rviz_common::Display )

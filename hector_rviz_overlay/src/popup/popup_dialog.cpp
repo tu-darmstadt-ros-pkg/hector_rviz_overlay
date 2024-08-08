@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/popup_dialog.h"
+#include "hector_rviz_overlay/popup/popup_dialog.hpp"
 
-#include "hector_rviz_overlay/popup/positioning/popup_move_bar.h"
+#include "hector_rviz_overlay/popup/positioning/popup_move_bar.hpp"
 
 #include <QGridLayout>
 #include <QLabel>

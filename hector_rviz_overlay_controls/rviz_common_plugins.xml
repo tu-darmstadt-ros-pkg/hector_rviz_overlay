@@ -1,0 +1,16 @@
+<library path="hector_rviz_overlay_controls">
+    <class name="hector_rviz_overlay_controls/ToolsOverlay"
+           type="hector_rviz_overlay_controls::ToolsOverlayDisplay"
+           base_class_type="rviz_common::Display">
+        <description>
+            Provides the tool panel as overlay for the render panel.
+        </description>
+    </class>
+    <class name="hector_rviz_overlay_controls/QmlOverlay"
+           type="hector_rviz_overlay_controls::QmlOverlayDisplay"
+           base_class_type="rviz_common::Display">
+        <description>
+            Load and display a QML file overlaid on top of the 3D scene.
+        </description>
+    </class>
+</library>

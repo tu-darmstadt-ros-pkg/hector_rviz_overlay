@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay_demo/demo_overlay_display.h"
+#include "hector_rviz_overlay_demo/demo_overlay_display.hpp"
 
 using namespace hector_rviz_overlay;
 
@@ -74,5 +74,5 @@ void DemoOverlayDisplay::onButtonClicked()
 }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoOverlayDisplay, rviz::Display )
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoOverlayDisplay, rviz_common::Display )

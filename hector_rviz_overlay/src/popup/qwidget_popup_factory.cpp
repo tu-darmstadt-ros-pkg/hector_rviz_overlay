@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/qwidget_popup_factory.h"
+#include "hector_rviz_overlay/popup/qwidget_popup_factory.hpp"
 
-#include "hector_rviz_overlay/popup/popup_container_widget.h"
-#include "hector_rviz_overlay/popup/popup_dialog.h"
+#include "hector_rviz_overlay/popup/popup_container_widget.hpp"
+#include "hector_rviz_overlay/popup/popup_dialog.hpp"
 
 #include <QLabel>
 

@@ -18,7 +18,7 @@
 #ifndef HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H
 
-#include <hector_rviz_overlay/displays/qwidget_overlay_display.h>
+#include <hector_rviz_overlay/displays/qwidget_overlay_display.hpp>
 
 class QGridLayout;
 
@@ -42,11 +42,11 @@ protected:
 
   void onSetupUi( QWidget *widget ) override;
 
-  rviz::BoolProperty *show_names_property_;
-  rviz::BoolProperty *show_add_remove_buttons_property_;
+  BoolProperty *show_names_property_;
+  BoolProperty *show_add_remove_buttons_property_;
 
-  ToolsWidget *tools_widget_;
-  QGridLayout *grid_layout_;
+  ToolsWidget *tools_widget_ = nullptr;
+  QGridLayout *grid_layout_ = nullptr;
 };
 }
 

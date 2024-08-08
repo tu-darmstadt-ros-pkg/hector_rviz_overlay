@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay_demo/popups/simple_popups_overlay_display.h"
+#include "hector_rviz_overlay_demo/popups/simple_popups_overlay_display.hpp"
 
-#include <hector_rviz_overlay/overlay_manager.h>
+#include <hector_rviz_overlay/overlay_manager.hpp>
 
 using namespace hector_rviz_overlay;
 
@@ -40,5 +40,5 @@ void SimplePopupsOverlayDisplay::onButtonClicked()
 }
 }
 
-#include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::SimplePopupsOverlayDisplay, rviz::Display )
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::SimplePopupsOverlayDisplay, rviz_common::Display )

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/ui/qwidget_overlay.h"
+#include "hector_rviz_overlay/ui/qwidget_overlay.hpp"
 
-#include "hector_rviz_overlay/events/qwidget_event_manager.h"
-#include "hector_rviz_overlay/render/renderer.h"
-#include "hector_rviz_overlay/overlay_widget.h"
+#include "hector_rviz_overlay/events/qwidget_event_manager.hpp"
+#include "hector_rviz_overlay/render/renderer.hpp"
+#include "hector_rviz_overlay/overlay_widget.hpp"
 
 #include <QPainter>
 

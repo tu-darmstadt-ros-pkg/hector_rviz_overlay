@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/ui/qml_overlay.h"
+#include "hector_rviz_overlay/ui/qml_overlay.hpp"
 
-#include "hector_rviz_overlay/helper/file_system_watcher.h"
-#include "hector_rviz_overlay/helper/qml_rviz_context.h"
-#include "hector_rviz_overlay/helper/rviz_tool_icon_provider.h"
-#include "hector_rviz_overlay/render/renderer.h"
-#include "hector_rviz_overlay/overlay_manager.h"
-#include "hector_rviz_overlay/path_helper.h"
+#include "hector_rviz_overlay/helper/file_system_watcher.hpp"
+#include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
+#include "hector_rviz_overlay/helper/rviz_tool_icon_provider.hpp"
+#include "hector_rviz_overlay/render/renderer.hpp"
+#include "hector_rviz_overlay/overlay_manager.hpp"
+#include "hector_rviz_overlay/path_helper.hpp"
 
 #include <QApplication>
 #include <QOffscreenSurface>
@@ -38,10 +38,9 @@
 #include <QQuickWindow>
 #include <QWidget>
 
-#include <rviz/display_context.h>
+#include <rviz_common/display_context.hpp>
 
-#include <ros/ros.h>
-#include <chrono>
+#include "../logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -107,7 +106,7 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   }
   catch ( std::logic_error &ex )
   {
-    ROS_WARN( "Could not get renderer's context! Reason: %s", ex.what());
+    LOG_WARN( "Could not get renderer's context! Reason: %s", ex.what());
     setStatus( Error );
     return;
   }
@@ -313,7 +312,7 @@ bool QmlOverlay::reload()
     if ( status() != Error ) setStatus( Uninitialized );
     return false;
   }
-  ROS_INFO( "Reloading qml file." );
+  LOG_INFO( "Reloading qml file." );
   engine_->clearComponentCache();
   return createRootItem();
 }
@@ -339,7 +338,7 @@ bool QmlOverlay::createRootItem()
   component_->loadUrl( QUrl( resolvePath( path_ )));
   if ( component_->isError())
   {
-    ROS_WARN_STREAM( "Error while trying to load QML: " << component_->errorString().toStdString());
+    LOG_WARN( "Error while trying to load QML: %s", component_->errorString().toStdString().c_str());
     setStatus( LoadingFailed );
     return false;
   }
@@ -347,7 +346,7 @@ bool QmlOverlay::createRootItem()
   QObject *root_object = component_->create();
   if ( component_->isError())
   {
-    ROS_WARN_STREAM( "Error while trying to create QML component: " << component_->errorString().toStdString());
+    LOG_WARN( "Error while trying to create QML component: %s", component_->errorString().toStdString().c_str());
     setStatus( CreationFailed );
     return false;
   }

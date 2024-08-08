@@ -15,14 +15,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/displays/overlay_display.h"
+#include "hector_rviz_overlay/displays/overlay_display.hpp"
 
-#include "hector_rviz_overlay/overlay_manager.h"
+#include "hector_rviz_overlay/overlay_manager.hpp"
 
-#include <rviz/properties/float_property.h>
-#include <rviz/properties/int_property.h>
-#include <rviz/display_context.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/int_property.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/view_manager.hpp>
+#include <rviz_rendering/render_system.hpp>
 
 namespace hector_rviz_overlay
 {
@@ -31,10 +32,10 @@ OverlayDisplay::OverlayDisplay() : OverlayDisplay( false ) { }
 
 OverlayDisplay::OverlayDisplay( bool allow_multiple ) : overlay_( nullptr ), allow_multiple_( allow_multiple )
 {
-  z_index_property_ = new rviz::IntProperty( "Z-Index", 0,
+  z_index_property_ = new rviz_common::properties::IntProperty( "Z-Index", 0,
                                              "The z-index of the overlay. In case of multiple overlays, the highest z-index will be drawn on top of the others.",
                                              this, SLOT( onZIndexChanged()));
-  scale_property_ = new rviz::FloatProperty( "Scale", 1.0,
+  scale_property_ = new rviz_common::properties::FloatProperty( "Scale", 1.0,
                                              "A scaling factor that is applied to the overlay so that people other than S. Kohlbrecher can see stuff on 4K monitors.",
                                              this, SLOT( onScaleChanged()));
   scale_property_->setMin( 0.1f );
@@ -63,7 +64,9 @@ void OverlayDisplay::onZIndexChanged()
 
 void OverlayDisplay::onInitialize()
 {
-  rviz::Display::onInitialize();
+  using namespace rviz_common::properties;
+  Display::onInitialize();
+  rviz_rendering::RenderSystem::get()->prepareOverlays(scene_manager_);
   OverlayManager::getSingleton().init( context_ );
 
   overlay_ = createOverlay();
@@ -73,18 +76,18 @@ void OverlayDisplay::onInitialize()
     {
       overlay_->hide();
     }
-    setStatus( rviz::StatusProperty::Ok, "Overlay", "Overlay created successfully." );
+    setStatus( StatusProperty::Ok, "Overlay", "Overlay created successfully." );
   }
   else
   {
-    setStatus( rviz::StatusProperty::Error, "Overlay",
+    setStatus( StatusProperty::Error, "Overlay",
                "Could not create overlay. This overlay is single instance only!" );
   }
 }
 
 void OverlayDisplay::onEnable()
 {
-  rviz::Display::onEnable();
+  Display::onEnable();
   if ( overlay_ == nullptr ) return;
 
   overlay_->show();
@@ -92,7 +95,7 @@ void OverlayDisplay::onEnable()
 
 void OverlayDisplay::onDisable()
 {
-  rviz::Display::onDisable();
+  Display::onDisable();
   if ( overlay_ == nullptr ) return;
 
   overlay_->hide();

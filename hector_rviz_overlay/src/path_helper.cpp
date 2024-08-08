@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/path_helper.h"
+#include "hector_rviz_overlay/path_helper.hpp"
 
-#include <ros/package.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace hector_rviz_overlay
 {
@@ -28,7 +28,7 @@ std::string resolvePath( const std::string &path )
   {
     unsigned long pos_end_package_name = path.find( '/', 10 );
     std::string package = path.substr( 10, pos_end_package_name - 10 );
-    return ros::package::getPath( package ) + path.substr( pos_end_package_name );
+    return ament_index_cpp::get_package_share_directory( package ) + path.substr( pos_end_package_name );
   }
   return path;
 }
@@ -39,7 +39,7 @@ QString resolvePath( const QString &path )
   {
     int pos_end_package_name = path.indexOf( '/', 10 );
     QString package = path.mid( 10, pos_end_package_name - 10 );
-    QString package_path = QString::fromStdString( ros::package::getPath( package.toStdString()));
+    auto package_path = QString::fromStdString( ament_index_cpp::get_package_share_directory( package.toStdString()));
     return package_path + path.mid( pos_end_package_name );
   }
   return path;

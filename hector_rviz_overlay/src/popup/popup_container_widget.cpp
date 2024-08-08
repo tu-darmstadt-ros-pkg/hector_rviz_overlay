@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/popup_container_widget.h"
+#include "hector_rviz_overlay/popup/popup_container_widget.hpp"
 
-#include "hector_rviz_overlay/popup/positioning/center_tracker.h"
+#include "hector_rviz_overlay/popup/positioning/center_tracker.hpp"
 
 #include <QEvent>
 #include <QPainter>
@@ -27,8 +27,8 @@ namespace hector_rviz_overlay
 {
 
 PopupContainerWidget::PopupContainerWidget()
-  : is_modal_( false ), modal_color_( QColor( 80, 80, 80, 180 )), anchor_point_( AnchorCenter )
-    , tracker_( std::make_shared<CenterTracker>()), popup_( nullptr ), last_position_()
+  : popup_( nullptr ), is_modal_( false ), modal_color_( QColor( 80, 80, 80, 180 ))
+    , anchor_point_( AnchorCenter ), tracker_( std::make_shared<CenterTracker>()), last_position_()
 {
 }
 
@@ -61,6 +61,8 @@ bool PopupContainerWidget::event( QEvent *event )
     case QEvent::LayoutRequest:
       popup_->setGeometry( popup_->geometry().left(), popup_->geometry().top(),
                            popup_->sizeHint().width(), popup_->sizeHint().height());
+      break;
+    default:
       break;
   }
   return QWidget::event( event );

@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>hector_rviz_overlay</name>
   <version>1.0.0</version>
   <description>Provides an Overlay that can be used i.e. in a Display plugin to display additional information on top of the rivz RenderPanel.</description>
@@ -18,7 +19,10 @@
   <depend>libqt5-qml</depend>
   <depend>libqt5-quick</depend>
   <depend>libqt5-widgets</depend>
-  <depend>roscpp</depend>
-  <depend>rviz</depend>
+  <depend>pluginlib</depend>
+  <depend>rviz_common</depend>
 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

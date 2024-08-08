@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/overlay_manager.h"
-#include "hector_rviz_overlay/render/overlay_renderer.h"
+#include "hector_rviz_overlay/overlay_manager.hpp"
+#include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>
@@ -25,11 +25,11 @@
 
 #include <Ogre.h>
 
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/view_manager.hpp>
 
-#include <ros/ros.h>
+#include "logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -52,12 +52,12 @@ OverlayManager::OverlayManager()
 
 OverlayManager::~OverlayManager() = default;
 
-rviz::DisplayContext *OverlayManager::displayContext()
+rviz_common::DisplayContext *OverlayManager::displayContext()
 {
   return context_;
 }
 
-void OverlayManager::init( rviz::DisplayContext *context )
+void OverlayManager::init( rviz_common::DisplayContext *context )
 {
   if ( renderer_ != nullptr ) return;
 
@@ -114,7 +114,7 @@ bool OverlayManager::addOverlay( OverlayPtr overlay, bool unique_name_if_exists 
     renderer_->addOverlay( overlay );
     return true;
   }
-  ROS_ERROR_NAMED( "OverlayManager", "Tried to add unknown type of overlay!" );
+  LOG_ERROR( "OverlayManager: Tried to add unknown type of overlay!" );
   return false;
 }
 
@@ -409,7 +409,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
       mouse_overlay_->handleEventsCanceled();
     }
 
-    if ( i == popup_overlays_.size() - 1 )
+    if ( i == static_cast<int>( popup_overlays_.size()) - 1 )
     {
       // The popup that is at the top did not handle the event but another one did, hence, we move the other to the top.
       popup_overlays_.erase( popup_overlays_.begin() + i );
@@ -463,12 +463,11 @@ bool OverlayManager::handleWheelEvent( QObject *receiver, QWheelEvent *event )
 {
   // Map the wheel event to the render panel because the top left of the render panel is equivalent to the top left of
   // the overlays.
-  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPos());
+  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPosition().toPoint());
   if ( !render_panel_->contentsRect().contains( render_panel_pos )) return false;
 
-  QWheelEvent child_event( render_panel_pos, event->globalPos(), event->pixelDelta(), event->angleDelta(),
-                           event->delta(),
-                           event->orientation(), event->buttons(), event->modifiers(), event->phase(), event->source());
+  QWheelEvent child_event( render_panel_pos, event->globalPosition(), event->pixelDelta(), event->angleDelta(),
+                           event->buttons(), event->modifiers(), event->phase(), event->source());
 
   std::unique_lock<std::recursive_mutex> scoped_lock( mutex_ );
   for ( int i = (int) popup_overlays_.size() - 1; i >= 0; --i )

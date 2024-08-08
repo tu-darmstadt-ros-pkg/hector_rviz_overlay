@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/displays/qml_overlay_display.h"
+#include "hector_rviz_overlay/displays/qml_overlay_display.hpp"
 
-#include "hector_rviz_overlay/helper/qml_rviz_context.h"
+#include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -27,7 +27,7 @@ QmlOverlayDisplay::QmlOverlayDisplay() : QmlOverlayDisplay( false ) { }
 
 QmlOverlayDisplay::QmlOverlayDisplay( bool allow_multiple ) : OverlayDisplay( allow_multiple )
 {
-  live_reload_property_ = new rviz::BoolProperty( "Live Reload", false,
+  live_reload_property_ = new rviz_common::properties::BoolProperty( "Live Reload", false,
                                                   "Watches the qml file and reloads it if it changed.\n"
                                                   " Useful for development.", this, SLOT( onLiveReloadChanged()));
 }
@@ -37,22 +37,22 @@ void QmlOverlayDisplay::onOverlayStatusChanged( QmlOverlay::Status status )
   switch ( status )
   {
     case QmlOverlay::Ok:
-      setStatus( rviz::StatusProperty::Ok, "Qml", "Successfully loaded." );
+      setStatus( rviz_common::properties::StatusProperty::Ok, "Qml", "Successfully loaded." );
       break;
     case QmlOverlay::Uninitialized:
-      setStatus( rviz::StatusProperty::Warn, "Qml", "Uninitialized." );
+      setStatus( rviz_common::properties::StatusProperty::Warn, "Qml", "Uninitialized." );
       break;
     case QmlOverlay::LoadingFailed:
-      setStatus( rviz::StatusProperty::Error, "Qml", "Loading the qml file failed!" );
+      setStatus( rviz_common::properties::StatusProperty::Error, "Qml", "Loading the qml file failed!" );
       break;
     case QmlOverlay::CreationFailed:
-      setStatus( rviz::StatusProperty::Error, "Qml", "Creating the QML component failed!" );
+      setStatus( rviz_common::properties::StatusProperty::Error, "Qml", "Creating the QML component failed!" );
       break;
     case QmlOverlay::Error:
-      setStatus( rviz::StatusProperty::Error, "Qml", "Unknown error! Check the console for potential details." );
+      setStatus( rviz_common::properties::StatusProperty::Error, "Qml", "Unknown error! Check the console for potential details." );
       break;
     default:
-      setStatus( rviz::StatusProperty::Warn, "Qml", "Unknown status." );
+      setStatus( rviz_common::properties::StatusProperty::Warn, "Qml", "Unknown status." );
   }
 }
 
@@ -88,14 +88,14 @@ UiOverlayPtr QmlOverlayDisplay::createOverlay()
 
 namespace
 {
-QVariant configToQml( const rviz::Config &config )
+QVariant configToQml( const rviz_common::Config &config )
 {
   switch ( config.getType())
   {
-    case rviz::Config::Map:
+    case rviz_common::Config::Map:
     {
       QVariantMap result;
-      rviz::Config::MapIterator it = config.mapIterator();
+      rviz_common::Config::MapIterator it = config.mapIterator();
       while ( it.isValid())
       {
         result.insert( it.currentKey(), configToQml( it.currentChild()));
@@ -103,7 +103,7 @@ QVariant configToQml( const rviz::Config &config )
       }
       return result;
     }
-    case rviz::Config::List:
+    case rviz_common::Config::List:
     {
       QVariantList result;
       for ( int i = 0; i < config.listLength(); ++i )
@@ -112,23 +112,23 @@ QVariant configToQml( const rviz::Config &config )
       }
       return result;
     }
-    case rviz::Config::Value:
+    case rviz_common::Config::Value:
       return config.getValue();
-    case rviz::Config::Empty:
-    case rviz::Config::Invalid:
+    case rviz_common::Config::Empty:
+    case rviz_common::Config::Invalid:
       return {};
   }
   return {};
 }
 
-void writeToConfig( rviz::Config config, const QVariantList &list );
+void writeToConfig( rviz_common::Config config, const QVariantList &list );
 
-void writeToConfig( rviz::Config config, const QVariant &variant )
+void writeToConfig( rviz_common::Config config, const QVariant &variant )
 {
   config.setValue( variant );
 }
 
-void writeToConfig( rviz::Config config, const QVariantMap &map )
+void writeToConfig( rviz_common::Config config, const QVariantMap &map )
 {
   for ( auto &key : map.keys())
   {
@@ -148,7 +148,7 @@ void writeToConfig( rviz::Config config, const QVariantMap &map )
   }
 }
 
-void writeToConfig( rviz::Config config, const QVariantList &list )
+void writeToConfig( rviz_common::Config config, const QVariantList &list )
 {
   for ( auto &item : list )
   {
@@ -167,7 +167,7 @@ void writeToConfig( rviz::Config config, const QVariantList &list )
 }
 }
 
-void QmlOverlayDisplay::load( const rviz::Config &config )
+void QmlOverlayDisplay::load( const rviz_common::Config &config )
 {
   Display::load( config );
   overlay_config_ = config.mapGetChild( "Configuration" );
@@ -181,7 +181,7 @@ void QmlOverlayDisplay::load( const rviz::Config &config )
   qml_overlay_->context()->load( overlay_config_ );
 }
 
-void QmlOverlayDisplay::save( rviz::Config config ) const
+void QmlOverlayDisplay::save( rviz_common::Config config ) const
 {
   Display::save( config );
   writeToConfig( config.mapMakeChild( "Overlay Configuration" ), qml_overlay_->configuration());

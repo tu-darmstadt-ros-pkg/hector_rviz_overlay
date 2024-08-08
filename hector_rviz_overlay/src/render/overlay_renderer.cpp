@@ -15,35 +15,33 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/overlay_renderer.h"
+#include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
-#include "hector_rviz_overlay/render/glx_overlay_renderer.h"
-#include "hector_rviz_overlay/render/image_overlay_renderer.h"
+#include "hector_rviz_overlay/render/qimage_texture_overlay_renderer.hpp"
+#include "hector_rviz_overlay/render/qopengl_texture_overlay_renderer.hpp"
 
 #include <chrono>
 
 #include <QPainter>
 
-#include <ros/ros.h>
-
-#include <rviz/display_context.h>
-#include <rviz/render_panel.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/view_manager.hpp>
 
 namespace hector_rviz_overlay
 {
 
-OverlayRenderer *OverlayRenderer::create( rviz::DisplayContext *context )
+OverlayRenderer *OverlayRenderer::create( rviz_common::DisplayContext *context )
 {
 #ifdef RENDER_OVERLAYS_USING_OPENGL
-  OverlayRenderer *renderer = new GLXOverlayRenderer( context );
+  OverlayRenderer *renderer = new QOpenGLTextureOverlayRenderer( context );
 #else
-  OverlayRenderer *renderer = new ImageOverlayRenderer( context );
+  OverlayRenderer *renderer = new QImageTextureOverlayRenderer( context );
 #endif
   return renderer;
 }
 
-OverlayRenderer::OverlayRenderer( rviz::DisplayContext *context )
+OverlayRenderer::OverlayRenderer( rviz_common::DisplayContext *context )
   : context_( context ), timer_index_( 0 ), no_visible_overlays_( true )
 {
   render_panel_ = context_->getViewManager()->getRenderPanel();
@@ -62,11 +60,12 @@ void OverlayRenderer::addOverlay( OverlayPtr &overlay )
            Qt::QueuedConnection );
 
   no_visible_overlays_ &= !overlay->isVisible();
+  is_dirty_ = true;
   if ( !initialized_ ) return;
   prepareOverlay( overlay );
 }
 
-void OverlayRenderer::insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, int index )
+void OverlayRenderer::insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, size_t index )
 {
   if ( index >= overlays_.size())
   {
@@ -78,6 +77,7 @@ void OverlayRenderer::insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, i
            Qt::QueuedConnection );
 
   no_visible_overlays_ &= !overlay->isVisible();
+  is_dirty_ = true;
   if ( !initialized_ ) return;
   prepareOverlay( overlay );
 }
@@ -107,6 +107,7 @@ void OverlayRenderer::removeOverlay( OverlayPtr &overlay )
       hide();
     }
   }
+  is_dirty_ = true;
 }
 
 void OverlayRenderer::onVisibilityChanged()
@@ -184,7 +185,8 @@ void OverlayRenderer::render()
     overlay->update( delta );
   }
 
-  bool is_dirty = false;
+  bool is_dirty = is_dirty_;
+  is_dirty_ = false;
 
   int width = render_panel_->width();
   int height = render_panel_->height();
@@ -219,7 +221,7 @@ void OverlayRenderer::render()
 
   prepareRender( width, height );
   // Draw the overlays
-  for ( int i = 0; i < overlays_.size(); ++i )
+  for ( size_t i = 0; i < overlays_.size(); ++i )
   {
     OverlayPtr overlay = overlays_[i];
     if ( !overlay->isVisible()) continue;

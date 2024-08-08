@@ -15,25 +15,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/events/qwidget_event_manager.h"
+#include "hector_rviz_overlay/events/qwidget_event_manager.hpp"
 
-#include "hector_rviz_overlay/overlay_widget.h"
+#include "hector_rviz_overlay/overlay_widget.hpp"
 
 #include <QApplication>
 #include <QMouseEvent>
 #include <QWidget>
-
-#include <ros/ros.h>
 
 namespace hector_rviz_overlay
 {
 
 QWidgetEventManager::QWidgetEventManager( QWidget *widget )
   : widget_( widget )
-    , mouse_down_widget_( nullptr )
-    , mouse_over_widget_( nullptr )
-    , focus_widget_( nullptr )
-    , scale_( 1.0f )
 {
 }
 
@@ -134,22 +128,22 @@ bool QWidgetEventManager::handleWheelEvent( QWheelEvent *event )
 {
   // Map the wheel event to the render panel because the top left of the render panel is equivalent to
   // the top left of the widget. Using the widget to map does not work because Qt doesn't know where the widget is drawn.
-  QPoint local_pos = event->pos() / scale_;
-  QWidget *child = widget_->childAt( local_pos );
+  QPointF local_pos = event->position() / scale_;
+  QWidget *child = widget_->childAt( local_pos.toPoint() );
   if ( child == nullptr )
   {
     return false;
   }
 
   // Now forward the event to the child with the position of the mouse relative to the child widget
-  local_pos = child->mapFrom( widget_, local_pos );
-  QWheelEvent child_event( local_pos, event->globalPos(), event->pixelDelta(), event->angleDelta(), event->delta(),
-                           event->orientation(), event->buttons(), event->modifiers(), event->phase(),
+  local_pos = child->mapFrom( widget_, local_pos.toPoint() );
+  QWheelEvent child_event( local_pos, event->globalPosition(), event->pixelDelta(), event->angleDelta(),
+                           event->buttons(), event->modifiers(), event->phase(),
                            event->source());
   bool handled = QApplication::sendEvent( child, &child_event );
   if ( !handled || !child_event.isAccepted())
   {
-    // This stops wheel events from passing to the rviz::RenderPanel if the widget is not scrollable
+    // This stops wheel events from passing to the rviz_common::RenderPanel if the widget is not scrollable
     // TODO: Maybe there's a better way to find out whether to pass on scroll events or not
     // Checking pixel color would be an option but very inefficient
     QWidget *widget = mouse_over_widget_;
@@ -170,12 +164,11 @@ bool QWidgetEventManager::handleWheelEvent( QWheelEvent *event )
 bool QWidgetEventManager::handleKeyEvent( QKeyEvent *event )
 {
   if ( focus_widget_ == nullptr ) return false;
-#ifdef RENDER_OVERLAYS_USING_OPENGL
-  ROS_WARN_ONCE( "Key events are currently not supported when rendering QtWidgets using OpenGL due to a weird crash." );
-  return false;
-#else
+// #ifdef RENDER_OVERLAYS_USING_OPENGL
+//   return false;
+// #else
   return QApplication::sendEvent( focus_widget_, event ) && event->isAccepted();
-#endif
+// #endif
 }
 
 void QWidgetEventManager::sendHoverEvents( QWidget *child, QPoint pos, QMouseEvent *event )

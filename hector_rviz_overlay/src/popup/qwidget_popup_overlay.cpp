@@ -15,22 +15,20 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/qwidget_popup_overlay.h"
+#include "hector_rviz_overlay/popup/qwidget_popup_overlay.hpp"
 
-#include "hector_rviz_overlay/events/qwidget_event_manager.h"
-#include "hector_rviz_overlay/popup/popup_container_widget.h"
-#include "hector_rviz_overlay/render/renderer.h"
+#include "hector_rviz_overlay/events/qwidget_event_manager.hpp"
+#include "hector_rviz_overlay/popup/popup_container_widget.hpp"
+#include "hector_rviz_overlay/render/renderer.hpp"
 
 #include <QEvent>
 #include <QPainter>
-
-#include <ros/ros.h>
 
 namespace hector_rviz_overlay
 {
 
 QWidgetPopupOverlay::QWidgetPopupOverlay( const std::string &name )
-  : PopupOverlay( name )
+  : PopupOverlay( name ), mouse_down_outside_popup_( false ), light_dismissable_( false )
 {
   widget_ = new PopupContainerWidget;
   event_manager_ = new QWidgetEventManager( widget_ );

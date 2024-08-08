@@ -15,24 +15,21 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/texture_overlay_renderer.h"
+#include "hector_rviz_overlay/render/texture_overlay_renderer.hpp"
 
-#include <rviz/display_context.h>
-#include <rviz/view_manager.h>
-#include <rviz/render_panel.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/view_manager.hpp>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_rendering/render_window.hpp>
 
 #include <Ogre.h>
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayManager.h>
+#include <Overlay/OgreOverlay.h>
+#include <Overlay/OgreOverlayContainer.h>
+#include <Overlay/OgreOverlayManager.h>
+#include <RenderSystems/GL/OgreGLTexture.h>
 #include <OgreRenderTargetListener.h>
 
-#include <ros/ros.h>
-
-#include <QPainter>
-
-#include <chrono>
-#include <hector_rviz_overlay/render/texture_overlay_renderer.h>
-
+#include "../logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -54,51 +51,61 @@ private:
 
 namespace
 {
-unsigned int getSmallestPowerOf2GreaterThan( int value )
-{
-  unsigned int power = 2;
-  // Subtracting 1 from value so that powers of 2 e.h. 512 don't end up taking double the space (1024)
-  value -= 1;
-  while ((value >>= 1) != 0 ) power <<= 1;
-  return power;
-}
+
+  size_t bit_ceil( size_t value )
+  {
+#if __cplusplus >= 202002L
+    return std::bit_ceil( value );
+#else
+    if ( value == 0 )
+      return 1;
+    --value;
+    value |= value >> 1;
+    value |= value >> 2;
+    value |= value >> 4;
+    value |= value >> 8;
+    value |= value >> 16;
+    return value + 1;
+#endif
+  }
 }
 
-TextureOverlayRenderer::TextureOverlayRenderer( rviz::DisplayContext *context )
+TextureOverlayRenderer::TextureOverlayRenderer( rviz_common::DisplayContext *context )
 : OverlayRenderer( context ), render_panel_( context->getViewManager()->getRenderPanel() )
 {
 
   Ogre::OverlayManager &overlay_manager = Ogre::OverlayManager::getSingleton();
-  ogre_overlay_ = overlay_manager.create( "hector_rviz_overlay" );
-  material_ = Ogre::MaterialManager::getSingleton().create( "hector_rviz_overlay_OverlayMaterial",
+  ogre_overlay_ = overlay_manager.create( "hector_rviz_overlay/Overlay" );
+  material_ = Ogre::MaterialManager::getSingleton().create( "hector_rviz_overlay/OverlayMaterial",
                                                             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+  material_->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
   overlay_panel_ = dynamic_cast<Ogre::OverlayContainer *>( overlay_manager.createOverlayElement( "Panel",
-                                                                                                 "hector_rviz_overlay_Panel" ));
+                                                                                                 "hector_rviz_overlay/MainPanel" ));
   overlay_panel_->setPosition( 0.0, 0.0 );
   overlay_panel_->setDimensions( 1.0, 1.0 );
-  overlay_panel_->setMaterialName( "hector_rviz_overlay_OverlayMaterial" );
+  overlay_panel_->setMaterial( material_ );
 
   ogre_overlay_->add2D( overlay_panel_ );
 
   render_target_listener_ = new RenderTargetListener( this );
-  render_panel_->getRenderWindow()->addListener( render_target_listener_ );
-  QObject::connect( render_panel_, &rviz::RenderPanel::destroyed, this, &TextureOverlayRenderer::onRenderPanelDestroyed );
+  rviz_rendering::RenderWindowOgreAdapter::addListener( render_panel_->getRenderWindow(), render_target_listener_ );
+  QObject::connect( render_panel_, &rviz_common::RenderPanel::destroyed, this, &TextureOverlayRenderer::onRenderPanelDestroyed );
 }
 
 TextureOverlayRenderer::~TextureOverlayRenderer()
 {
   if ( render_panel_ != nullptr )
   {
-    render_panel_->getRenderWindow()->removeListener( render_target_listener_ );
+    rviz_rendering::RenderWindowOgreAdapter::removeListener( render_panel_->getRenderWindow(), render_target_listener_ );
     delete render_target_listener_;
   }
 
   ogre_overlay_->hide();
   material_->unload();
-  Ogre::OverlayManager::getSingleton().destroy( "hector_rviz_overlay" );
+  Ogre::OverlayManager::getSingleton().destroy( "hector_rviz_overlay/Overlay" );
   Ogre::OverlayManager::getSingleton().destroyOverlayElement( overlay_panel_ );
   Ogre::MaterialManager::getSingleton().remove( material_->getName());
-  if ( !texture_.isNull()) Ogre::TextureManager::getSingleton().remove( texture_->getName());
+  if ( texture_ != nullptr ) Ogre::TextureManager::getSingleton().remove( texture_->getName());
 }
 
 void TextureOverlayRenderer::onRenderPanelDestroyed()
@@ -141,15 +148,16 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
 {
   if ( texture_multiple_of_two_required_ )
   {
-    texture_width = getSmallestPowerOf2GreaterThan( texture_width );
-    texture_height = getSmallestPowerOf2GreaterThan( texture_height );
+    texture_width = bit_ceil( texture_width );
+    texture_height = bit_ceil( texture_height );
   }
-  if ( !texture_.isNull() && texture_->getWidth() == texture_width && texture_->getHeight() == texture_height ) return;
-  if ( !texture_.isNull())
+  if ( texture_ && texture_->getWidth() == texture_width && texture_->getHeight() == texture_height ) return;
+  if ( texture_ )
   {
     Ogre::TextureManager::getSingleton().remove( texture_->getName());
 
     material_->getTechnique( 0 )->getPass( 0 )->removeAllTextureUnitStates();
+    texture_unit_state_ = nullptr;
   }
   try
   {
@@ -165,26 +173,28 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
     );
   } catch ( std::exception &ex )
   {
-    ROS_WARN( "Caught exception while creating overlay texture: %s", ex.what());
+    LOG_WARN( "Caught exception while creating overlay texture: %s", ex.what());
   }
-  if ( texture_.isNull())
+  if ( !texture_ )
   {
     if ( texture_multiple_of_two_required_ )
     {
-      ROS_WARN( "Failed to create texture of size (%u, %u)!", texture_width, texture_height );
+      LOG_WARN( "Failed to create texture of size (%u, %u)!", texture_width, texture_height );
     }
     else
     {
       texture_multiple_of_two_required_ = true;
-      ROS_WARN( "Failed to create texture of size (%u, %u)! Switching to textures sized by powers of 2.", texture_width,
+      LOG_WARN( "Failed to create texture of size (%u, %u)! Switching to textures sized by powers of 2.", texture_width,
                 texture_height );
       updateTexture( texture_width, texture_height );
     }
     return;
   }
+  auto *gl_texture = dynamic_cast<Ogre::GLTexture *>( texture_.get());
+  if (gl_texture != nullptr) {
+    texture_id_ = gl_texture->getGLID();
+  }
 
-  material_->getTechnique( 0 )->getPass( 0 )->createTextureUnitState( texture_->getName());
-  material_->getTechnique( 0 )->getPass( 0 )->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
-  material_->getTechnique( 0 )->getPass( 0 )->setSceneBlending( Ogre::SBF_ONE, Ogre::SBF_ONE_MINUS_SOURCE_ALPHA );
+  texture_unit_state_ = material_->getTechnique( 0 )->getPass( 0 )->createTextureUnitState( texture_->getName());
 }
 }

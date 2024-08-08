@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/popup/positioning/ogre_tracker.h"
+#include "hector_rviz_overlay/popup/positioning/ogre_tracker.hpp"
 
-#include <rviz/display_context.h>
-#include <rviz/view_manager.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/view_manager.hpp>
 
 #include <OgreCamera.h>
-#include <OgreVector4.h>
 
 namespace hector_rviz_overlay
 {
 
-OgreTracker::OgreTracker( const Ogre::Vector3 &point, const rviz::DisplayContext *context )
+OgreTracker::OgreTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context )
   : point_( point ), context_( context )
 {
 }

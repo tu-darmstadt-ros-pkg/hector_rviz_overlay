@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/file_system_watcher.h"
+#include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 
 #include <boost/filesystem.hpp>
-#include <ros/ros.h>
 #include <sys/inotify.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "../logging.hpp"
 
 namespace hector_rviz_overlay
 {
@@ -47,7 +48,7 @@ bool FileSystemWatcher::isValid() const
 
 bool FileSystemWatcher::addWatch( const std::string &path )
 {
-  if ( path.length() == 0 ) return false;
+  if ( path.empty()) return false;
   if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end())
   {
     watched_paths_.push_back( path );
@@ -76,12 +77,12 @@ bool FileSystemWatcher::addWatch( const std::string &path )
         if ( !boost::filesystem::is_directory( dir.path())) continue;
         if ( !addWatch( dir.path().string()))
         {
-          ROS_WARN_NAMED( "OverlayManager", "Could not add file system watch for '%s'!", dir.path().c_str());
+          LOG_WARN( "OverlayManager: Could not add file system watch for '%s'!", dir.path().c_str());
         }
       }
     }
     it = watched_directories_.insert( { folder, watch } ).first;
-    watch_info_.insert( { watch, { .is_directory = is_directory }} );
+    watch_info_.insert( { watch, { is_directory, {} }} );
   }
   watched_paths_.push_back( path );
   WatchInfo &info = watch_info_.at( it->second );
@@ -142,7 +143,7 @@ bool FileSystemWatcher::checkForChanges() const
     if ( changed ) continue;
     size_t offset = 0;
     struct inotify_event *event;
-    while ( offset < count )
+    while ( offset < static_cast<size_t>( count ))
     {
       event = reinterpret_cast<inotify_event *>(buffer + offset);
       offset += sizeof( struct inotify_event ) + event->len;

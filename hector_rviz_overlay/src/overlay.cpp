@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/overlay.h"
+#include "hector_rviz_overlay/overlay.hpp"
 
 namespace hector_rviz_overlay
 {

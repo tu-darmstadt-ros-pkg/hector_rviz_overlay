@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/render/qopengl_wrapper.h"
+#include "qopengl_wrapper.hpp"
+
+#include "../logging.hpp"
 
 #include <QOffscreenSurface>
 #include <QOpenGLFramebufferObject>
@@ -23,10 +25,7 @@
 #include <QOpenGLPaintDevice>
 #include <QPainter>
 
-#include <ros/ros.h>
-
 #include <GL/glx.h>
-#include <QtPlatformHeaders/QGLXNativeContext>
 
 namespace hector_rviz_overlay
 {
@@ -38,35 +37,29 @@ struct QOpenGLWrapper::NativeContextInformation
   Display *display;
 };
 
-QOpenGLWrapper::QOpenGLWrapper( Display *display, const QSize &size )
-  : opengl_context_( nullptr ), opengl_context_is_current_( false ), fbo_( nullptr ), texture_fbo_( nullptr )
-    , native_context_information_( nullptr ), paint_device_( nullptr ), surface_( nullptr ), size_( size )
+QOpenGLWrapper::QOpenGLWrapper( QOpenGLContext *native_context, const QSize &size, int gl_version )
+  : size_( size ), native_opengl_context_( native_context ), opengl_context_( nullptr ), surface_( nullptr ), fbo_( nullptr )
+    , texture_fbo_( nullptr ), paint_device_( nullptr ), opengl_context_is_current_( false ), native_context_information_( nullptr )
 {
   native_context_information_ = new NativeContextInformation;
-  native_context_information_->display = display;
-
-  native_opengl_context_ = new QOpenGLContext;
-  native_opengl_context_->setNativeHandle(
-    QVariant::fromValue( QGLXNativeContext( glXGetCurrentContext(), native_context_information_->display )));
-  if ( !native_opengl_context_->create())
-  {
-    ROS_ERROR( "OverlayManager: Fatal! Failed to create native context!" );
-  }
 
   QSurfaceFormat format;
   format.setDepthBufferSize( 16 );
   format.setStencilBufferSize( 8 );
   format.setRenderableType(QSurfaceFormat::OpenGL);
+  if (gl_version != 0)
+    format.setVersion(gl_version / 100, gl_version % 100);
 
   opengl_context_ = new QOpenGLContext;
-  opengl_context_->setShareContext( native_opengl_context_ );
+  if (native_opengl_context_ != nullptr)
+    opengl_context_->setShareContext( native_opengl_context_ );
   opengl_context_->setFormat( format );
 
   if ( !opengl_context_->create())
   {
-    ROS_ERROR( "OverlayManager: Fatal! Failed to create context!" );
+    LOG_ERROR( "OverlayManager: Fatal! Failed to create context!" );
   }
-  ROS_INFO("Hector RViz Overlay rendering using OpenGL %d.%d", opengl_context_->format().majorVersion(), opengl_context_->format().minorVersion());
+  LOG_INFO("Hector RViz Overlay rendering using OpenGL %d.%d", opengl_context_->format().majorVersion(), opengl_context_->format().minorVersion());
   surface_ = new QOffscreenSurface;
   surface_->setFormat( format );
   surface_->create();
@@ -104,6 +97,7 @@ void QOpenGLWrapper::makeCurrent()
 {
   if ( opengl_context_is_current_ ) return;
   opengl_context_is_current_ = true;
+  native_context_information_->display = glXGetCurrentDisplay();
   native_context_information_->drawable = glXGetCurrentDrawable();
   native_context_information_->context = glXGetCurrentContext();
   opengl_context_->makeCurrent( surface_ );

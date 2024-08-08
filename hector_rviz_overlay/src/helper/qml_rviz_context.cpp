@@ -15,30 +15,35 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/qml_rviz_context.h"
-#include "hector_rviz_overlay/positioning/ogre_position_tracker.h"
+#include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
+#include "hector_rviz_overlay/positioning/ogre_position_tracker.hpp"
 
-#include <rviz/properties/bool_property.h>
-#include <rviz/properties/float_property.h>
-#include <rviz/properties/ros_topic_property.h>
-#include <rviz/properties/string_property.h>
-#include <rviz/properties/tf_frame_property.h>
-#include <rviz/display_context.h>
-#include <rviz/window_manager_interface.h>
+#include <rviz_common/properties/bool_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
+#include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/tf_frame_property.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/frame_manager_iface.hpp>
+#include <rviz_common/window_manager_interface.hpp>
 #include <QWidget>
 #include <QWindow>
+
+#include "../logging.hpp"
+
+using namespace rviz_common::properties;
 
 namespace hector_rviz_overlay
 {
 
-QmlRvizContext::QmlRvizContext( rviz::DisplayContext *context, const Overlay *overlay, bool visible )
+QmlRvizContext::QmlRvizContext( rviz_common::DisplayContext *context, const Overlay *overlay, bool visible )
   : context_( context ), overlay_( overlay ), visible_( visible )
 {
-  configuration_property_ = new rviz::Property( "Configuration", QVariant(),
-                                                "Container for configurable settings of the overlay." );
+  configuration_property_ = new Property( "Configuration", QVariant(),
+                                          "Container for configurable settings of the overlay." );
   tool_manager_ = new QmlToolManager( context_->getToolManager());
   // If rviz is used as widget inside an application, the window manager interface may not be available
-  rviz::WindowManagerInterface *wmi = context_->getWindowManager();
+  rviz_common::WindowManagerInterface *wmi = context_->getWindowManager();
   QWindow *window = wmi == nullptr ? nullptr : wmi->getParentWindow()->windowHandle();
   if ( window == nullptr )
   {
@@ -46,7 +51,7 @@ QmlRvizContext::QmlRvizContext( rviz::DisplayContext *context, const Overlay *ov
     return;
   }
   connect( window, &QWindow::windowStateChanged, this, &QmlRvizContext::onWindowStateChanged );
-  connect( context_->getFrameManager(), &rviz::FrameManager::fixedFrameChanged, this, &QmlRvizContext::fixedFrameChanged );
+  connect( context_->getFrameManager(), &rviz_common::FrameManagerIface::fixedFrameChanged, this, &QmlRvizContext::fixedFrameChanged );
   window_state_ = window->windowState();
 }
 
@@ -87,11 +92,10 @@ bool QmlRvizContext::isFullscreen() const
 void QmlRvizContext::setIsFullscreen( bool value )
 {
   // If rviz is used as widget inside an application, the window manager interface may not be available
-  rviz::WindowManagerInterface *wmi = context_->getWindowManager();
+  rviz_common::WindowManagerInterface *wmi = context_->getWindowManager();
   if ( wmi == nullptr )
   {
-    ROS_ERROR_NAMED( "hector_rviz_overlay", "setIsFullscreen failed: Window could not be obtained! "
-                                            "Implement the WindowManagerInterface in the DisplayContext." );
+    LOG_ERROR( "setIsFullscreen failed: Window could not be obtained! Implement the WindowManagerInterface in the DisplayContext." );
     return;
   }
   // Unfortunately this method is not exposed in the public interface, hence, we need to work around this using Qt
@@ -114,7 +118,7 @@ void QmlRvizContext::onWindowStateChanged( Qt::WindowState state )
   window_state_ = state;
 }
 
-void QmlRvizContext::setConfigurationPropertyParent( rviz::Property *parent )
+void QmlRvizContext::setConfigurationPropertyParent( Property *parent )
 {
   if ( configuration_property_->getParent() != nullptr )
     configuration_property_->getParent()->takeChild( configuration_property_ );
@@ -124,7 +128,7 @@ void QmlRvizContext::setConfigurationPropertyParent( rviz::Property *parent )
 
 namespace
 {
-rviz::Property *findChildProperty( rviz::Property *property, const QString &path )
+Property *findChildProperty( Property *property, const QString &path )
 {
   for ( int i = 0; i < property->numChildren(); ++i )
   {
@@ -134,50 +138,50 @@ rviz::Property *findChildProperty( rviz::Property *property, const QString &path
   return nullptr;
 }
 
-void loadConfig( const rviz::Config &config, rviz::Property *property )
+void loadConfig( const rviz_common::Config &config, Property *property )
 {
   if ( !config.isValid()) return;
-  if ( config.getType() == rviz::Config::Value )
+  if ( config.getType() == rviz_common::Config::Value )
   {
     property->load( config );
     return;
   }
-  if ( config.getType() != rviz::Config::Map ) return;
+  if ( config.getType() != rviz_common::Config::Map ) return;
   for ( int i = 0; i < property->numChildren(); ++i )
   {
     loadConfig( config.mapGetChild( property->childAt( i )->getName()), property->childAt( i ));
   }
 }
 
-rviz::Config getPropertyConfig( const rviz::Config &config, std::vector<QString> &path )
+rviz_common::Config getPropertyConfig( const rviz_common::Config &config, std::vector<QString> &path )
 {
   if ( path.empty())
   {
-    if ( !config.isValid() || config.getType() != rviz::Config::Value ) return {};
+    if ( !config.isValid() || config.getType() != rviz_common::Config::Value ) return {};
     return config;
   }
-  if ( !config.isValid() || config.getType() != rviz::Config::Map ) return {};
-  const rviz::Config &child = config.mapGetChild( path.back());
+  if ( !config.isValid() || config.getType() != rviz_common::Config::Map ) return {};
+  const rviz_common::Config &child = config.mapGetChild( path.back());
   path.pop_back();
   return getPropertyConfig( child, path );
 }
 }
 
-void QmlRvizContext::loadPropertyFromConfig( rviz::Property *property )
+void QmlRvizContext::loadPropertyFromConfig( Property *property )
 {
-  const rviz::Property *prop = property;
+  const Property *prop = property;
   std::vector<QString> path;
   while ( prop != configuration_property_ && prop != nullptr )
   {
     path.push_back( prop->getName());
     prop = prop->getParent();
   }
-  rviz::Config config = getPropertyConfig( property_config_, path );
+  rviz_common::Config config = getPropertyConfig( property_config_, path );
   if ( !config.isValid()) return;
   property->load( config );
 }
 
-void QmlRvizContext::load( const rviz::Config &config )
+void QmlRvizContext::load( const rviz_common::Config &config )
 {
   property_config_ = config;
   loadConfig( config, configuration_property_ );
@@ -200,7 +204,7 @@ QObject *QmlRvizContext::registerPropertyContainer( QmlRvizProperty *parent, con
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::Property( name, QVariant(), description, parent->property());
+    prop = new Property( name, QVariant(), description, parent->property());
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );
@@ -218,7 +222,7 @@ QObject *QmlRvizContext::registerBoolProperty( QmlRvizProperty *parent, const QS
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::BoolProperty( name, default_value, description, parent->property());
+    prop = new BoolProperty( name, default_value, description, parent->property());
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );
@@ -237,7 +241,7 @@ QObject *QmlRvizContext::registerFloatProperty( QmlRvizProperty *parent, const Q
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::FloatProperty( name, default_value, description, parent->property());
+    prop = new FloatProperty( name, default_value, description, parent->property());
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );
@@ -256,7 +260,7 @@ QObject *QmlRvizContext::registerStringProperty( QmlRvizProperty *parent, const 
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::StringProperty( name, default_value, description, parent->property());
+    prop = new StringProperty( name, default_value, description, parent->property());
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );
@@ -276,7 +280,7 @@ QObject *QmlRvizContext::registerRosTopicProperty( QmlRvizProperty *parent, cons
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::RosTopicProperty( name, default_value, message_type, description, parent->property());
+    prop = new RosTopicProperty( name, default_value, message_type, description, parent->property());
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );
@@ -297,8 +301,8 @@ QObject *QmlRvizContext::registerTfFrameProperty( QmlRvizProperty *parent, const
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr )
   {
-    prop = new rviz::TfFrameProperty( name, default_value, description, parent->property(),
-                                      context_->getFrameManager(), include_fixed_frame );
+    prop = new TfFrameProperty( name, default_value, description, parent->property(),
+                                nullptr, include_fixed_frame );
     loadPropertyFromConfig( prop );
   }
   return new QmlRvizProperty( prop );

@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "hector_rviz_overlay/helper/rviz_tool_icon_provider.h"
+#include "hector_rviz_overlay/helper/rviz_tool_icon_provider.hpp"
 
-#include <rviz/tool_manager.h>
+#include <rviz_common/tool_manager.hpp>
 
 namespace hector_rviz_overlay
 {
 
-RvizToolIconProvider::RvizToolIconProvider( rviz::ToolManager *tool_manager )
+RvizToolIconProvider::RvizToolIconProvider( rviz_common::ToolManager *tool_manager )
   : QQuickImageProvider( Pixmap ), tool_manager_( tool_manager ) { }
 
 QPixmap RvizToolIconProvider::requestPixmap( const QString &id, QSize *size, const QSize &requestedSize )
 {
   for ( int i = 0; i < tool_manager_->numTools(); ++i )
   {
-    rviz::Tool *tool = tool_manager_->getTool( i );
+    rviz_common::Tool *tool = tool_manager_->getTool( i );
     if ( tool->getClassId() != id ) continue;
     QList<QSize> sizes = tool->getIcon().availableSizes();
     QSize max_size( -1, -1 );

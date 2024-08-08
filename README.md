@@ -43,6 +43,7 @@ The hector_rviz_overlay::QWidgetOverlayDisplay also features a style sheet prope
 If you encounter any problems, feel free to hit me (up).
 
 ## Known Bugs
+
 * The widgets - especially obvious with QTextEdit - don't look like they have focus.  
   > That's because they don't, it seems that caused by the way they are rendered, they can't have
   > focus but the widgets should act like they did except you can't switch focus using tab.
@@ -52,7 +53,3 @@ If you encounter any problems, feel free to hit me (up).
   > To prevent a widget from consuming scroll events add a dynamic property
   > "IgnoreWheelEvents" and set it to the bool value true.``
 * Key events crash QtWidget overlays if rendering with OpenGL. (QML overlays should work)
-* I don't find the jokes in this README THAT funny anymore but keeping them for legacy reasons.
-
-## Who's a good boy?
-You are!

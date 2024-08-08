@@ -51,6 +51,10 @@ void ToolsWidget::initializeTools( rviz_common::ToolManager *tool_manager )
     rviz_common::Tool *tool = tool_manager_->getTool( i );
     addTool( tool );
   }
+  // Select currently active tool
+  const auto *current_tool = tool_manager_->getCurrentTool();
+  if ( current_tool == nullptr ) return;
+  tool_buttons_[current_tool->getName()]->setChecked( true );
 }
 
 void ToolsWidget::setNamesVisible( bool value )

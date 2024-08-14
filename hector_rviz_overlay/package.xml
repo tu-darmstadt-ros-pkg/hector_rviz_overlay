@@ -10,7 +10,7 @@
   <license>GPLv3</license>
   <author email="fabian@sim.tu-darmstadt.de">Stefan Fabian</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   
   <build_depend>qtbase5-dev</build_depend>
   <build_depend>qtdeclarative5-dev</build_depend>

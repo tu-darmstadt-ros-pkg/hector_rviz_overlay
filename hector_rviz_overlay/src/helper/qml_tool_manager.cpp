@@ -18,6 +18,7 @@
 #include "hector_rviz_overlay/helper/qml_tool_manager.hpp"
 
 #include <rviz_common/tool_manager.hpp>
+#include <QApplication>
 
 namespace hector_rviz_overlay
 {
@@ -53,6 +54,8 @@ QmlToolManager::QmlToolManager( rviz_common::ToolManager *tool_manager ) : tool_
   connect( tool_manager_, &rviz_common::ToolManager::toolAdded, this, &QmlToolManager::onToolAdded );
   connect( tool_manager_, &rviz_common::ToolManager::toolRemoved, this, &QmlToolManager::onToolRemoved );
   connect( tool_manager_, &rviz_common::ToolManager::toolChanged, this, &QmlToolManager::onToolChanged );
+  // Disconnect signals when the application is about to quit to avoid segfaults
+  connect( qApp, &QApplication::aboutToQuit, this, &QmlToolManager::disconnectSignals );
 
   for ( int i = 0; i < tool_manager_->numTools(); ++i )
   {
@@ -60,6 +63,12 @@ QmlToolManager::QmlToolManager( rviz_common::ToolManager *tool_manager ) : tool_
     if ( tool->tool() == tool_manager_->getCurrentTool()) tool->setIsSelected( true );
     tools_.append( tool );
   }
+}
+
+void QmlToolManager::disconnectSignals() {
+  disconnect( tool_manager_, &rviz_common::ToolManager::toolAdded, this, &QmlToolManager::onToolAdded );
+  disconnect( tool_manager_, &rviz_common::ToolManager::toolRemoved, this, &QmlToolManager::onToolRemoved );
+  disconnect( tool_manager_, &rviz_common::ToolManager::toolChanged, this, &QmlToolManager::onToolChanged );
 }
 
 QVariantList QmlToolManager::tools() const
@@ -80,6 +89,8 @@ void QmlToolManager::onToolAdded( rviz_common::Tool *tool )
 
 void QmlToolManager::onToolRemoved( rviz_common::Tool *tool )
 {
+  // Check if Qt application is exiting
+
   for ( int i = 0; i < tools_.size(); ++i )
   {
     if ( tools_[i]->tool() != tool ) continue;
@@ -117,7 +128,7 @@ QObject *QmlToolManager::addTool()
 
 QObject *QmlToolManager::addTool( const QString &class_lookup_name )
 {
-  rviz_common::Tool *tool = tool_manager_->addTool( class_lookup_name );
+  const rviz_common::Tool *tool = tool_manager_->addTool( class_lookup_name );
   (void)tool; // Avoid unused warning if not building debug
   assert( !tools_.empty());
   assert( tools_.last()->tool() == tool );
@@ -158,7 +169,7 @@ void QmlToolManager::removeAll()
 
 QObject *QmlToolManager::currentTool()
 {
-  rviz_common::Tool *current = tool_manager_->getCurrentTool();
+  const rviz_common::Tool *current = tool_manager_->getCurrentTool();
   for ( const auto &tool : tools_ )
   {
     if ( tool->tool() == current ) return tool;
@@ -172,4 +183,5 @@ void QmlToolManager::setCurrentTool( QObject *qtool )
   if ( tool == nullptr ) return;
   tool_manager_->setCurrentTool( tool->tool());
 }
+
 }

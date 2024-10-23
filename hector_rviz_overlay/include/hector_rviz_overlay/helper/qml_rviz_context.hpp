@@ -184,7 +184,7 @@ private:
   rviz_common::Config property_config_;
   Qt::WindowState window_state_;
   rviz_common::DisplayContext *context_;
-  QmlToolManager *tool_manager_;
+  std::unique_ptr<QmlToolManager> tool_manager_;
   const Overlay *overlay_;
   rviz_common::properties::Property *configuration_property_;
   bool visible_;

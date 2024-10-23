@@ -112,6 +112,8 @@ signals:
 
 private slots:
 
+  void disconnectSignals();
+
   void onToolAdded( rviz_common::Tool * );
 
   void onToolRemoved( rviz_common::Tool * );

@@ -41,7 +41,7 @@ QmlRvizContext::QmlRvizContext( rviz_common::DisplayContext *context, const Over
 {
   configuration_property_ = new Property( "Configuration", QVariant(),
                                           "Container for configurable settings of the overlay." );
-  tool_manager_ = new QmlToolManager( context_->getToolManager());
+  tool_manager_ = std::make_unique<QmlToolManager>( context_->getToolManager());
   // If rviz is used as widget inside an application, the window manager interface may not be available
   rviz_common::WindowManagerInterface *wmi = context_->getWindowManager();
   QWindow *window = wmi == nullptr ? nullptr : wmi->getParentWindow()->windowHandle();
@@ -55,7 +55,11 @@ QmlRvizContext::QmlRvizContext( rviz_common::DisplayContext *context, const Over
   window_state_ = window->windowState();
 }
 
-QmlRvizContext::~QmlRvizContext() = default;
+QmlRvizContext::~QmlRvizContext()
+{
+  if (configuration_property_ != nullptr && configuration_property_->getParent() == nullptr)
+    delete configuration_property_;
+}
 
 const QVariantMap &QmlRvizContext::config() const
 {
@@ -189,7 +193,7 @@ void QmlRvizContext::load( const rviz_common::Config &config )
 
 QObject *QmlRvizContext::toolManager() const
 {
-  return tool_manager_;
+  return tool_manager_.get();
 }
 
 QObject *QmlRvizContext::registerPropertyContainer( const QString &name, const QString &description )

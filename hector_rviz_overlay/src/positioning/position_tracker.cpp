@@ -22,15 +22,12 @@ namespace hector_rviz_overlay
 namespace positioning
 {
 
-const QVector3D &PositionTracker::position() const
-{
-  return position_;
-}
+const QVector3D &PositionTracker::position() const { return position_; }
 
 void PositionTracker::updatePosition( const QVector3D &position )
 {
   position_ = position;
   emit positionChanged( position_ );
 }
-}
-}
+} // namespace positioning
+} // namespace hector_rviz_overlay

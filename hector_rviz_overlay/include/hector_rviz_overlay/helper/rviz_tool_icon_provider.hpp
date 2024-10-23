@@ -31,13 +31,13 @@ namespace hector_rviz_overlay
 class RvizToolIconProvider : public QQuickImageProvider
 {
 public:
-  explicit RvizToolIconProvider(rviz_common::ToolManager *tool_manager);
+  explicit RvizToolIconProvider( rviz_common::ToolManager *tool_manager );
 
   QPixmap requestPixmap( const QString &id, QSize *size, const QSize &requestedSize ) override;
 
 private:
   rviz_common::ToolManager *tool_manager_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H
+#endif // HECTOR_RVIZ_OVERLAY_RVIZ_TOOL_ICON_PROVIDER_H

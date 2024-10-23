@@ -23,7 +23,7 @@ QString DemoQmlRosOverlayDisplay::getPathToQml()
 {
   return "package://hector_rviz_overlay_demo/media/overlay_ros.qml";
 }
-}
+} // namespace hector_rviz_overlay_demo
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::DemoQmlRosOverlayDisplay, rviz_common::Display )

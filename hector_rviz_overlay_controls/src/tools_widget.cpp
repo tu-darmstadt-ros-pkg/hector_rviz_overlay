@@ -33,7 +33,7 @@ ToolsWidget::ToolsWidget( QWidget *parent ) : QWidget( parent )
   tool_button_group_ = new QButtonGroup( this );
 
   const auto layout = new QHBoxLayout( this );
-  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setContentsMargins( 0, 0, 0, 0 );
   tools_layout_ = new QHBoxLayout;
   layout->addLayout( tools_layout_ );
 }
@@ -46,14 +46,14 @@ void ToolsWidget::initializeTools( rviz_common::ToolManager *tool_manager )
   connect( tool_manager_, &rviz_common::ToolManager::toolRemoved, this, &ToolsWidget::onToolRemoved );
   connect( tool_manager_, &rviz_common::ToolManager::toolChanged, this, &ToolsWidget::onToolChanged );
 
-  for ( int i = 0; i < tool_manager_->numTools(); ++i )
-  {
+  for ( int i = 0; i < tool_manager_->numTools(); ++i ) {
     rviz_common::Tool *tool = tool_manager_->getTool( i );
     addTool( tool );
   }
   // Select currently active tool
   const auto *current_tool = tool_manager_->getCurrentTool();
-  if ( current_tool == nullptr ) return;
+  if ( current_tool == nullptr )
+    return;
   tool_buttons_[current_tool->getName()]->setChecked( true );
 }
 
@@ -61,42 +61,36 @@ void ToolsWidget::setNamesVisible( bool value )
 {
   names_visible_ = value;
   const auto &keys = tool_map_.keys();
-  for ( int i = 0; i < keys.count(); ++i )
-  {
+  for ( int i = 0; i < keys.count(); ++i ) {
     keys[i]->setText( value ? tool_map_[keys[i]]->getName() : "" );
   }
 }
 
-void ToolsWidget::onToolAdded( rviz_common::Tool *tool )
-{
-  addTool( tool );
-}
+void ToolsWidget::onToolAdded( rviz_common::Tool *tool ) { addTool( tool ); }
 
 void ToolsWidget::onToolChanged( rviz_common::Tool *tool )
 {
-  if ( tool != nullptr )
-  {
+  if ( tool != nullptr ) {
     tool_buttons_[tool->getName()]->setChecked( true );
   }
 }
 
-void ToolsWidget::onToolRemoved( rviz_common::Tool *tool )
-{
-  removeTool( tool );
-}
+void ToolsWidget::onToolRemoved( rviz_common::Tool *tool ) { removeTool( tool ); }
 
 void ToolsWidget::onToolButtonChecked( bool checked )
 {
-  if ( !checked ) return;
-  auto *sender = static_cast<QPushButton *>(QObject::sender());
-  if ( tool_manager_->getCurrentTool() == tool_map_[sender] ) return;
+  if ( !checked )
+    return;
+  auto *sender = static_cast<QPushButton *>( QObject::sender() );
+  if ( tool_manager_->getCurrentTool() == tool_map_[sender] )
+    return;
   tool_manager_->setCurrentTool( tool_map_[sender] );
 }
 
 void ToolsWidget::addTool( rviz_common::Tool *tool )
 {
   auto *tool_button = new QPushButton( tool->getIcon(), names_visible_ ? tool->getName() : "" );
-  tool_button->setToolTip( tool->getName());
+  tool_button->setToolTip( tool->getName() );
   tool_button->setMouseTracking( true );
   tool_button->setCheckable( true );
 
@@ -105,7 +99,7 @@ void ToolsWidget::addTool( rviz_common::Tool *tool )
   tool_map_[tool_button] = tool;
   tool_button_group_->addButton( tool_button );
 
-  connect( tool_button, SIGNAL( toggled( bool )), this, SLOT( onToolButtonChecked( bool )));
+  connect( tool_button, SIGNAL( toggled( bool ) ), this, SLOT( onToolButtonChecked( bool ) ) );
 }
 
 void ToolsWidget::removeTool( rviz_common::Tool *tool )
@@ -120,8 +114,5 @@ void ToolsWidget::removeTool( rviz_common::Tool *tool )
   tool_buttons_.remove( name );
 }
 
-bool ToolsWidget::namesVisible() const
-{
-  return names_visible_;
-}
-}
+bool ToolsWidget::namesVisible() const { return names_visible_; }
+} // namespace hector_rviz_overlay_controls

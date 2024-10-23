@@ -15,13 +15,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "hector_rviz_overlay/popup/positioning/center_tracker.hpp"
+#include "hector_rviz_overlay/popup/positioning/center_tracker.hpp"
 
- namespace hector_rviz_overlay
- {
+namespace hector_rviz_overlay
+{
 
- QPoint CenterTracker::getPoint( int width, int height )
- {
-   return { width / 2, height / 2 };
- }
- }
+QPoint CenterTracker::getPoint( int width, int height ) { return { width / 2, height / 2 }; }
+} // namespace hector_rviz_overlay

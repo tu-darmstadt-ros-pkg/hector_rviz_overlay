@@ -33,8 +33,9 @@ void PopupMoveBar::mousePressEvent( QMouseEvent *event )
 {
   QWidget::mousePressEvent( event );
 
-  auto container = dynamic_cast<PopupContainerWidget *>(topLevelWidget());
-  if (container == nullptr) return;
+  auto container = dynamic_cast<PopupContainerWidget *>( topLevelWidget() );
+  if ( container == nullptr )
+    return;
 
   start_mouse_position_ = event->globalPos();
   start_position_ = container->popupPosition();
@@ -51,10 +52,11 @@ void PopupMoveBar::mouseMoveEvent( QMouseEvent *event )
 {
   QWidget::mouseMoveEvent( event );
 
-  auto container = dynamic_cast<PopupContainerWidget *>(topLevelWidget());
-  if (container == nullptr) return;
+  auto container = dynamic_cast<PopupContainerWidget *>( topLevelWidget() );
+  if ( container == nullptr )
+    return;
 
-  container->setPopupPosition(start_position_ + event->globalPos() - start_mouse_position_);
+  container->setPopupPosition( start_position_ + event->globalPos() - start_mouse_position_ );
   event->accept();
 }
-}
+} // namespace hector_rviz_overlay

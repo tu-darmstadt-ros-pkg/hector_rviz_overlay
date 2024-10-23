@@ -27,18 +27,17 @@ namespace hector_rviz_overlay_demo
 void SimplePopupsOverlayDisplay::onSetupUi( QWidget *widget )
 {
   ui_.setupUi( widget );
-  connect( ui_.pushButton, SIGNAL( clicked()), this, SLOT( onButtonClicked()));
+  connect( ui_.pushButton, SIGNAL( clicked() ), this, SLOT( onButtonClicked() ) );
 
-  popup_ = QWidgetPopupFactory().createMessagePopup("SimplePopup", "Test", "This is a test popup!\nThe message should be long and have a forced and maybe an automatic linebreak.");
+  popup_ = QWidgetPopupFactory().createMessagePopup(
+      "SimplePopup",
+      "Test", "This is a test popup!\nThe message should be long and have a forced and maybe an automatic linebreak." );
   popup_->setIsLightDismissable( true );
   OverlayManager::getSingleton().addOverlay( popup_, true );
 }
 
-void SimplePopupsOverlayDisplay::onButtonClicked()
-{
-  popup_->show();
-}
-}
+void SimplePopupsOverlayDisplay::onButtonClicked() { popup_->show(); }
+} // namespace hector_rviz_overlay_demo
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_demo::SimplePopupsOverlayDisplay, rviz_common::Display )

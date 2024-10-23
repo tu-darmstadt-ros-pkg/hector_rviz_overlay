@@ -31,19 +31,19 @@ namespace hector_rviz_overlay
 {
 
 /*!
- * A container widget for a single popup which manages the position of the popup and filling the background if the popup
- * is modal.
+ * A container widget for a single popup which manages the position of the popup and filling the
+ * background if the popup is modal.
  */
 class PopupContainerWidget : public OverlayWidget
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   PopupContainerWidget();
 
   /*!
    * The popup widget is usually a dialog which should not contain the entire screen.
-   * This container manages filling the background if it is modal and the position on the screen e.g. if it should be
-   * fixed to a 3D location.
+   * This container manages filling the background if it is modal and the position on the screen
+   * e.g. if it should be fixed to a 3D location.
    * @return The popup that is managed by this container widget.
    */
   QWidget *popup();
@@ -75,8 +75,8 @@ public:
   void setPopupPosition( const QPoint &position );
 
   /*!
-   * A modal popup fills the background with a color specified by modalColor() and catches all MouseEvents (even outside
-   * the popup's bounds)
+   * A modal popup fills the background with a color specified by modalColor() and catches all
+   * MouseEvents (even outside the popup's bounds)
    * @return Whether or not the popup is modal.
    */
   bool isModalPopup() const;
@@ -126,7 +126,6 @@ public:
   void trackPoint( std::shared_ptr<PointTracker> tracker );
 
 protected:
-
   void paintEvent( QPaintEvent *event ) override;
 
   bool event( QEvent *event ) override;
@@ -139,6 +138,6 @@ protected:
   std::shared_ptr<PointTracker> tracker_;
   QPoint last_position_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_POPUP_CONTAINER_WIDGET_H
+#endif // HECTOR_RVIZ_OVERLAY_POPUP_CONTAINER_WIDGET_H

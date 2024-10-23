@@ -21,8 +21,7 @@
 namespace hector_rviz_overlay
 {
 
-enum AnchorPoint
-{
+enum AnchorPoint {
   AnchorAuto,
   AnchorTopLeft,
   AnchorTopRight,
@@ -32,4 +31,4 @@ enum AnchorPoint
 };
 }
 
-#endif //HECTOR_RVIZ_OVERLAY_ANCHOR_POINT_H
+#endif // HECTOR_RVIZ_OVERLAY_ANCHOR_POINT_H

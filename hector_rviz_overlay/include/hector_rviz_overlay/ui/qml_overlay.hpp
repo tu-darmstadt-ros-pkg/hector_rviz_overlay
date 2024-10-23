@@ -46,16 +46,9 @@ class QmlRvizContext;
  */
 class QmlOverlay : public UiOverlay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
-  enum Status
-  {
-    Ok = 0,
-    Uninitialized,
-    LoadingFailed,
-    CreationFailed,
-    Error
-  };
+  enum Status { Ok = 0, Uninitialized, LoadingFailed, CreationFailed, Error };
 
   explicit QmlOverlay( const std::string &name );
 
@@ -119,9 +112,8 @@ public:
   QmlOverlay::Status status();
 
   /*!
-   * Sets whether or not the loaded qml file should be watched for changes and reloaded if something changed.
-   * Useful for development.
-   * Default: false.
+   * Sets whether or not the loaded qml file should be watched for changes and reloaded if something
+   * changed. Useful for development. Default: false.
    * @param value True to enable live reload, false to disable it.
    */
   void setLiveReloadEnabled( bool value );
@@ -160,7 +152,6 @@ protected slots:
   void onVisibilityChanged();
 
 protected:
-
   bool createRootItem();
 
   void updateGeometry();
@@ -196,8 +187,8 @@ protected:
 
 typedef std::shared_ptr<QmlOverlay> QmlOverlayPtr;
 typedef std::shared_ptr<const QmlOverlay> QmlOverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
 Q_DECLARE_METATYPE( hector_rviz_overlay::QmlOverlay::Status );
 
-#endif //HECTOR_RVIZ_OVERLAY_QML_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_QML_OVERLAY_H

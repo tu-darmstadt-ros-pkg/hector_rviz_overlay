@@ -26,7 +26,7 @@ namespace rviz_common::properties
 {
 class FloatProperty;
 class IntProperty;
-}
+} // namespace rviz_common::properties
 
 namespace hector_rviz_overlay
 {
@@ -38,7 +38,7 @@ namespace hector_rviz_overlay
  */
 class OverlayDisplay : public rviz_common::Display
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   /*!
    * Creates an instance of OverlayDisplay that does not allow multiple instances.
@@ -68,7 +68,6 @@ protected slots:
   virtual void onZIndexChanged();
 
 protected:
-
   /*!
    * Creates the Overlay instance using createOverlay() and tries to add it to the OverlayManager.
    * @see rviz_common::Display::onInitialize()
@@ -99,10 +98,11 @@ protected:
   rviz_common::properties::FloatProperty *scale_property_;
   /*! A pointer to an instance of Overlay which is created in onInitialize(). */
   UiOverlayPtr overlay_;
+
 private:
   /*! A boolean indicating whether multiple instances of this overlay are allowed */
   bool allow_multiple_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_OVERLAY_DISPLAY_H

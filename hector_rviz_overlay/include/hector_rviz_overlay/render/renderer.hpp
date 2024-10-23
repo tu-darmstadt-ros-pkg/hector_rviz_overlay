@@ -53,6 +53,6 @@ public:
 
   virtual QWindow *window() = 0;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_RENDERER_H
+#endif // HECTOR_RVIZ_OVERLAY_RENDERER_H

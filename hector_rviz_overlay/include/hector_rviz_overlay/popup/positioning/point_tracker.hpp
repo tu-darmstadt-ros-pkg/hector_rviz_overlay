@@ -38,6 +38,6 @@ public:
    */
   virtual QPoint getPoint( int width, int height ) = 0;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_POINT_TRACKER_H
+#endif // HECTOR_RVIZ_OVERLAY_POINT_TRACKER_H

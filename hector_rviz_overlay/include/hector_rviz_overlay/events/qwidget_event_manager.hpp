@@ -37,20 +37,19 @@ namespace hector_rviz_overlay
 class QWidgetEventManager
 {
 public:
-  explicit QWidgetEventManager(QWidget *widget);
+  explicit QWidgetEventManager( QWidget *widget );
 
   virtual ~QWidgetEventManager();
 
   float scale() const;
 
-  void setScale(float value);
+  void setScale( float value );
 
   bool handleEvent( QObject *receiver, QEvent *event );
 
   void handleEventsCanceled();
 
 protected:
-
   bool handleMouseEvent( QMouseEvent *event );
 
   bool handleWheelEvent( QWheelEvent *event );
@@ -67,6 +66,6 @@ protected:
   QWidget *mouse_down_widget_ = nullptr;
   QWidget *focus_widget_ = nullptr;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_EVENT_MANAGER_H
+#endif // HECTOR_RVIZ_OVERLAY_QWIDGET_EVENT_MANAGER_H

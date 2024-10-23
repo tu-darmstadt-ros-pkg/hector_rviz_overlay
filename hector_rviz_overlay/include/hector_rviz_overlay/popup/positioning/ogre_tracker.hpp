@@ -41,6 +41,6 @@ protected:
   Ogre::Vector3 point_;
   const rviz_common::DisplayContext *context_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H
+#endif // HECTOR_RVIZ_OVERLAY_OGRE_TRACKER_H

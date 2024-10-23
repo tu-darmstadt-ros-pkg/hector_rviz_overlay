@@ -30,10 +30,10 @@ namespace hector_rviz_overlay
  */
 class OverlayWidget : public QWidget
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   OverlayWidget();
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OVERLAY_WIDGET_H
+#endif // HECTOR_RVIZ_OVERLAY_OVERLAY_WIDGET_H

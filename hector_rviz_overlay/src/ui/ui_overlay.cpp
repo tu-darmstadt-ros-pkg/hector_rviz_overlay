@@ -17,7 +17,6 @@
 
 #include "hector_rviz_overlay/ui/ui_overlay.hpp"
 
-
 namespace hector_rviz_overlay
 {
 
@@ -34,4 +33,4 @@ void UiOverlay::setZIndex( int value )
   emit zIndexChanged();
   requestRender();
 }
-}
+} // namespace hector_rviz_overlay

@@ -20,8 +20,5 @@
 namespace hector_rviz_overlay
 {
 
-OverlayWidget::OverlayWidget() : QWidget()
-{
-  setAttribute( Qt::WA_NoSystemBackground );
-}
-}
+OverlayWidget::OverlayWidget() : QWidget() { setAttribute( Qt::WA_NoSystemBackground ); }
+} // namespace hector_rviz_overlay

@@ -20,28 +20,18 @@
 namespace hector_rviz_overlay
 {
 
-QmlRvizProperty::QmlRvizProperty( rviz_common::properties::Property *property ) : property_( property )
+QmlRvizProperty::QmlRvizProperty( rviz_common::properties::Property *property )
+    : property_( property )
 {
-  connect( property_, &rviz_common::properties::Property::changed, this, &QmlRvizProperty::onPropertyChanged );
+  connect( property_, &rviz_common::properties::Property::changed, this,
+           &QmlRvizProperty::onPropertyChanged );
 }
 
-QVariant QmlRvizProperty::value() const
-{
-  return property_->getValue();
-}
+QVariant QmlRvizProperty::value() const { return property_->getValue(); }
 
-void QmlRvizProperty::setValue( const QVariant &value )
-{
-  property_->setValue( value );
-}
+void QmlRvizProperty::setValue( const QVariant &value ) { property_->setValue( value ); }
 
-rviz_common::properties::Property *QmlRvizProperty::property()
-{
-  return property_;
-}
+rviz_common::properties::Property *QmlRvizProperty::property() { return property_; }
 
-void QmlRvizProperty::onPropertyChanged()
-{
-  emit valueChanged( property_->getValue());
-}
-}
+void QmlRvizProperty::onPropertyChanged() { emit valueChanged( property_->getValue() ); }
+} // namespace hector_rviz_overlay

@@ -38,6 +38,6 @@ protected:
   Ui::DemoWidget ui_;
 };
 
-}
+} // namespace hector_rviz_overlay_demo
 
-#endif //HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H

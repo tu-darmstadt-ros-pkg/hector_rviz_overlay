@@ -19,8 +19,8 @@
 #define HECTOR_RVIZ_OVERLAY_FILE_WATCHER_H
 
 #include <map>
-#include <string>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace hector_rviz_overlay
@@ -28,8 +28,7 @@ namespace hector_rviz_overlay
 
 class FileSystemWatcher
 {
-  struct WatchInfo
-  {
+  struct WatchInfo {
     bool is_directory;
     std::set<std::string> filenames;
   };
@@ -60,6 +59,6 @@ private:
    */
   std::map<int, WatchInfo> watch_info_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_FILE_WATCHER_H
+#endif // HECTOR_RVIZ_OVERLAY_FILE_WATCHER_H

@@ -33,7 +33,7 @@ namespace hector_rviz_overlay
 class PopupMoveBar : public QWidget
 {
 public:
-  explicit PopupMoveBar(QWidget *parent = nullptr);
+  explicit PopupMoveBar( QWidget *parent = nullptr );
 
 protected:
   void mousePressEvent( QMouseEvent *event ) override;
@@ -46,6 +46,6 @@ protected:
   QPoint start_position_;
   QPoint start_mouse_position_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_POPUP_MOVE_BAR_H
+#endif // HECTOR_RVIZ_OVERLAY_POPUP_MOVE_BAR_H

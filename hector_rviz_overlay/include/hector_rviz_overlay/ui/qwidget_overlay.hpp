@@ -36,7 +36,7 @@ class QWidgetEventManager;
  */
 class QWidgetOverlay : public UiOverlay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   explicit QWidgetOverlay( const std::string &name );
 
@@ -72,7 +72,6 @@ public:
   bool isDirty() const override;
 
 protected:
-
   ///@inherit
   void renderImpl( Renderer *renderer ) override;
 
@@ -82,6 +81,6 @@ protected:
 
 typedef std::shared_ptr<QWidgetOverlay> QWidgetOverlayPtr;
 typedef std::shared_ptr<const QWidgetOverlay> QWidgetOverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_QWIDGET_OVERLAY_H

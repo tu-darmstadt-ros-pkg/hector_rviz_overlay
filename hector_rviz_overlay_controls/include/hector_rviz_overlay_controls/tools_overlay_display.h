@@ -29,7 +29,7 @@ class ToolsWidget;
 
 class ToolsOverlayDisplay : public hector_rviz_overlay::QWidgetOverlayDisplay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   ToolsOverlayDisplay();
 
@@ -39,7 +39,6 @@ protected slots:
   void onShowAddRemoveChanged();
 
 protected:
-
   void onSetupUi( QWidget *widget ) override;
 
   BoolProperty *show_names_property_;
@@ -48,6 +47,6 @@ protected:
   ToolsWidget *tools_widget_ = nullptr;
   QGridLayout *grid_layout_ = nullptr;
 };
-}
+} // namespace hector_rviz_overlay_controls
 
-#endif //HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_DEMO_DEMO_OVERLAY_DISPLAY_H

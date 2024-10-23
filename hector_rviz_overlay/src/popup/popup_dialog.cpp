@@ -24,11 +24,11 @@
 #include <QMouseEvent>
 #include <QPushButton>
 
-
 namespace hector_rviz_overlay
 {
 
-PopupDialog::PopupDialog( QWidget *parent, Qt::WindowFlags flags ) : QFrame( parent, flags ), content_( nullptr )
+PopupDialog::PopupDialog( QWidget *parent, Qt::WindowFlags flags )
+    : QFrame( parent, flags ), content_( nullptr )
 {
   layout_ = new QGridLayout;
   label_ = new QLabel;
@@ -69,36 +69,28 @@ PopupDialog::PopupDialog( QWidget *parent, Qt::WindowFlags flags ) : QFrame( par
 
   setAttribute( Qt::WA_NoMousePropagation );
   setAttribute( Qt::WA_Hover );
-  setStyleSheet(
-    "hector_rviz_overlay--PopupDialog {"
-    " background-color: #dddddd;"
-    " border: 2px solid #aaaaaa;"
-    " border-radius: 6px;"
-    " min-height: 120px;"
-    " min-width: 320px;"
-    "}"
-    ""
-    "QLabel#Label { background-color: #aaaaaa; padding: 4px 8px; }"
-    ""
-    "#Content {"
-    " padding: 12px;"
-    "}" );
+  setStyleSheet( "hector_rviz_overlay--PopupDialog {"
+                 " background-color: #dddddd;"
+                 " border: 2px solid #aaaaaa;"
+                 " border-radius: 6px;"
+                 " min-height: 120px;"
+                 " min-width: 320px;"
+                 "}"
+                 ""
+                 "QLabel#Label { background-color: #aaaaaa; padding: 4px 8px; }"
+                 ""
+                 "#Content {"
+                 " padding: 12px;"
+                 "}" );
 }
 
-QWidget *PopupDialog::content()
-{
-  return content_;
-}
+QWidget *PopupDialog::content() { return content_; }
 
-const QWidget *PopupDialog::content() const
-{
-  return content_;
-}
+const QWidget *PopupDialog::content() const { return content_; }
 
 void PopupDialog::setContent( QWidget *widget )
 {
-  if ( content_ != nullptr )
-  {
+  if ( content_ != nullptr ) {
     layout_->removeWidget( content_ );
   }
   content_ = widget;
@@ -106,67 +98,46 @@ void PopupDialog::setContent( QWidget *widget )
   layout_->addWidget( content_, 1, 0 );
 }
 
-QString PopupDialog::title() const
-{
-  return label_->text();
-}
+QString PopupDialog::title() const { return label_->text(); }
 
-void PopupDialog::setTitle( const QString &value )
-{
-  label_->setText( value );
-}
+void PopupDialog::setTitle( const QString &value ) { label_->setText( value ); }
 
 bool PopupDialog::event( QEvent *event )
 {
   bool handled = QFrame::event( event );
-  if ( handled && event->isAccepted()) return true;
+  if ( handled && event->isAccepted() )
+    return true;
 
-  switch (event->type())
-  {
-    case QEvent::MouseButtonPress:
-    case QEvent::MouseButtonRelease:
-    case QEvent::HoverEnter:
-    case QEvent::HoverLeave:
-    case QEvent::HoverMove:
-    case QEvent::MouseMove:
-      event->accept();
-      return true;
-    default:
-      return handled;
+  switch ( event->type() ) {
+  case QEvent::MouseButtonPress:
+  case QEvent::MouseButtonRelease:
+  case QEvent::HoverEnter:
+  case QEvent::HoverLeave:
+  case QEvent::HoverMove:
+  case QEvent::MouseMove:
+    event->accept();
+    return true;
+  default:
+    return handled;
   }
 }
 
-int PopupDialog::buttons() const
-{
-  return buttons_;
-}
+int PopupDialog::buttons() const { return buttons_; }
 
 void PopupDialog::setButtons( int buttons )
 {
   buttons_ = buttons;
-  button_yes_->setVisible( (buttons & PopupButtons::ButtonYes) == PopupButtons::ButtonYes );
-  button_no_->setVisible( (buttons & PopupButtons::ButtonNo) == PopupButtons::ButtonNo );
-  button_ok_->setVisible( (buttons & PopupButtons::ButtonOk) == PopupButtons::ButtonOk );
-  button_cancel_->setVisible( (buttons & PopupButtons::ButtonCancel) == PopupButtons::ButtonCancel );
+  button_yes_->setVisible( ( buttons & PopupButtons::ButtonYes ) == PopupButtons::ButtonYes );
+  button_no_->setVisible( ( buttons & PopupButtons::ButtonNo ) == PopupButtons::ButtonNo );
+  button_ok_->setVisible( ( buttons & PopupButtons::ButtonOk ) == PopupButtons::ButtonOk );
+  button_cancel_->setVisible( ( buttons & PopupButtons::ButtonCancel ) == PopupButtons::ButtonCancel );
 }
 
-void PopupDialog::yesClicked()
-{
-  emit buttonClicked(ButtonYes);
-}
+void PopupDialog::yesClicked() { emit buttonClicked( ButtonYes ); }
 
-void PopupDialog::noClicked()
-{
-  emit buttonClicked(ButtonNo);
-}
+void PopupDialog::noClicked() { emit buttonClicked( ButtonNo ); }
 
-void PopupDialog::okClicked()
-{
-  emit buttonClicked(ButtonOk);
-}
+void PopupDialog::okClicked() { emit buttonClicked( ButtonOk ); }
 
-void PopupDialog::cancelClicked()
-{
-  emit buttonClicked(ButtonCancel);
-}
-}
+void PopupDialog::cancelClicked() { emit buttonClicked( ButtonCancel ); }
+} // namespace hector_rviz_overlay

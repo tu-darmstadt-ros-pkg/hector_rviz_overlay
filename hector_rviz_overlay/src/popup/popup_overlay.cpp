@@ -20,11 +20,11 @@
 namespace hector_rviz_overlay
 {
 
-PopupOverlay::PopupOverlay( const std::string &name ) : Overlay(name)
+PopupOverlay::PopupOverlay( const std::string &name ) : Overlay( name )
 {
   qRegisterMetaType<hector_rviz_overlay::PopupOverlayPtr>();
 }
 
 PopupOverlay::~PopupOverlay() = default;
 
-}
+} // namespace hector_rviz_overlay

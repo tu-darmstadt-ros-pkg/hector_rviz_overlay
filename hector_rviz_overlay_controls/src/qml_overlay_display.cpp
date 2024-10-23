@@ -22,26 +22,24 @@ using namespace rviz_common::properties;
 
 namespace hector_rviz_overlay_controls
 {
-  QmlOverlayDisplay::QmlOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay(true)
-  {
-    path_property_ = new StringProperty("Path", "",
-                                        "The path to the qml file that should be loaded. "
-                                        "May use 'package://{PACKAGE_NAME}/' to refer to package relative paths",
-                                        this, SLOT(onPathChanged()));
-  }
-
-  void QmlOverlayDisplay::onPathChanged()
-  {
-    if (qml_overlay_ == nullptr)
-      return;
-    qml_overlay_->load(path_property_->getString());
-  }
-
-  QString QmlOverlayDisplay::getPathToQml()
-  {
-    return path_property_->getString();
-  }
+QmlOverlayDisplay::QmlOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay( true )
+{
+  path_property_ =
+      new StringProperty( "Path", "",
+                          "The path to the qml file that should be loaded. "
+                          "May use 'package://{PACKAGE_NAME}/' to refer to package relative paths",
+                          this, SLOT( onPathChanged() ) );
 }
 
+void QmlOverlayDisplay::onPathChanged()
+{
+  if ( qml_overlay_ == nullptr )
+    return;
+  qml_overlay_->load( path_property_->getString() );
+}
+
+QString QmlOverlayDisplay::getPathToQml() { return path_property_->getString(); }
+} // namespace hector_rviz_overlay_controls
+
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(hector_rviz_overlay_controls::QmlOverlayDisplay, rviz_common::Display)
+PLUGINLIB_EXPORT_CLASS( hector_rviz_overlay_controls::QmlOverlayDisplay, rviz_common::Display )

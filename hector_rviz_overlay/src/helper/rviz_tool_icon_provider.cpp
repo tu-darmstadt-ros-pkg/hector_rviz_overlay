@@ -23,41 +23,39 @@ namespace hector_rviz_overlay
 {
 
 RvizToolIconProvider::RvizToolIconProvider( rviz_common::ToolManager *tool_manager )
-  : QQuickImageProvider( Pixmap ), tool_manager_( tool_manager ) { }
-
-QPixmap RvizToolIconProvider::requestPixmap( const QString &id, QSize *size, const QSize &requestedSize )
+    : QQuickImageProvider( Pixmap ), tool_manager_( tool_manager )
 {
-  for ( int i = 0; i < tool_manager_->numTools(); ++i )
-  {
+}
+
+QPixmap RvizToolIconProvider::requestPixmap( const QString &id, QSize *size,
+                                             const QSize &requestedSize )
+{
+  for ( int i = 0; i < tool_manager_->numTools(); ++i ) {
     rviz_common::Tool *tool = tool_manager_->getTool( i );
-    if ( tool->getClassId() != id ) continue;
+    if ( tool->getClassId() != id )
+      continue;
     QList<QSize> sizes = tool->getIcon().availableSizes();
     QSize max_size( -1, -1 );
-    for ( const auto &s : sizes )
-    {
-      if ( s.width() > max_size.width()) max_size = s;
+    for ( const auto &s : sizes ) {
+      if ( s.width() > max_size.width() )
+        max_size = s;
     }
-    if ( max_size.width() == -1 ) max_size = QSize( 48, 48 );
+    if ( max_size.width() == -1 )
+      max_size = QSize( 48, 48 );
     *size = requestedSize;
-    if ( size->width() == -1 )
-    {
-      if ( size->height() == -1 )
-      {
-        size->setHeight( max_size.width());
-        size->setWidth( max_size.height());
+    if ( size->width() == -1 ) {
+      if ( size->height() == -1 ) {
+        size->setHeight( max_size.width() );
+        size->setWidth( max_size.height() );
+      } else {
+        size->setWidth( max_size.width() * size->height() / max_size.height() );
       }
-      else
-      {
-        size->setWidth( max_size.width() * size->height() / max_size.height());
-      }
-    }
-    else if ( size->height() == -1 )
-    {
-      size->setHeight( max_size.height() * size->width() / max_size.width());
+    } else if ( size->height() == -1 ) {
+      size->setHeight( max_size.height() * size->width() / max_size.width() );
     }
     *size = tool->getIcon().actualSize( *size );
     return tool->getIcon().pixmap( *size );
   }
   return QQuickImageProvider::requestPixmap( id, size, requestedSize );
 }
-}
+} // namespace hector_rviz_overlay

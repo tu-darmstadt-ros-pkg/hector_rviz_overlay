@@ -25,7 +25,8 @@
 namespace hector_rviz_overlay
 {
 
-QWidgetPopupOverlayPtr QWidgetPopupFactory::createMessagePopup( const std::string &name, const QString &title,
+QWidgetPopupOverlayPtr QWidgetPopupFactory::createMessagePopup( const std::string &name,
+                                                                const QString &title,
                                                                 const QString &message, int buttons )
 {
   QWidgetPopupOverlayPtr overlay = std::make_shared<QWidgetPopupOverlay>( name );
@@ -38,4 +39,4 @@ QWidgetPopupOverlayPtr QWidgetPopupFactory::createMessagePopup( const std::strin
   overlay->popupContainerWidget()->setPopup( popup );
   return overlay;
 }
-}
+} // namespace hector_rviz_overlay

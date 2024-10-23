@@ -28,7 +28,7 @@ namespace rviz_common
 class DisplayContext;
 
 class RenderPanel;
-}
+} // namespace rviz_common
 
 namespace hector_rviz_overlay
 {
@@ -37,16 +37,16 @@ namespace hector_rviz_overlay
  * @class OverlayRenderer
  * @brief Responsible for rendering the overlays.
  *
- * This base class provides functionality to manage the rendered overlays and renders them in order (first to last).
- * See subclasses for specific rendering methods.
+ * This base class provides functionality to manage the rendered overlays and renders them in order
+ * (first to last). See subclasses for specific rendering methods.
  */
 class OverlayRenderer : public QObject, public Renderer
 {
-Q_OBJECT
+  Q_OBJECT
 private:
   static const unsigned int TimerHistoryLength = 16;
-public:
 
+public:
   /*!
    * Creates an instance of an OverlayRenderer implementation depending on compile flags.
    * This method may cache the renderer or return a different instance on each call.
@@ -89,8 +89,8 @@ public:
   void insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, size_t index );
 
   /*!
-   * Removes the overlay from the collection of overlays that are rendered by this renderer and disconnects the
-   * visibility signal.
+   * Removes the overlay from the collection of overlays that are rendered by this renderer and
+   * disconnects the visibility signal.
    * @param overlay The overlay that is removed.
    */
   void removeOverlay( hector_rviz_overlay::OverlayPtr &overlay );
@@ -108,7 +108,6 @@ protected slots:
   void onVisibilityChanged();
 
 protected:
-
   /*!
    * Initializes all resources required for rendering.
    * You can expect that rviz_common's OpenGL context already exists at this point.
@@ -122,8 +121,8 @@ protected:
   virtual void prepareOverlay( OverlayPtr &overlay );
 
   /*!
-   * Will release the rendering resources for this overlay. This method is only called if prepareOverlay was called for
-   * this overlay.
+   * Will release the rendering resources for this overlay. This method is only called if
+   * prepareOverlay was called for this overlay.
    * @param overlay The overlay that is release.
    */
   virtual void releaseOverlay( OverlayPtr &overlay );
@@ -135,8 +134,8 @@ protected:
   virtual void render();
 
   /*!
-   * If the scene hasn't changed there is no need to render it again. Hence, this method should simply redraw the last
-   * rendered scene.
+   * If the scene hasn't changed there is no need to render it again. Hence, this method should
+   * simply redraw the last rendered scene.
    */
   virtual void redrawLastFrame() = 0;
 
@@ -155,9 +154,9 @@ protected:
   virtual void finishRender() = 0;
 
   /*!
-   * This method is called if all overlays are removed or invisible in which case remains of previous renderings should
-   * be removed if necessary since the prepareRender and finishRender methods won't be called until an overlay is added
-   * or visible again.
+   * This method is called if all overlays are removed or invisible in which case remains of
+   * previous renderings should be removed if necessary since the prepareRender and finishRender
+   * methods won't be called until an overlay is added or visible again.
    */
   virtual void hide() = 0;
 
@@ -166,7 +165,8 @@ protected:
   std::vector<OverlayPtr> overlays_;
   QRect geometry_;
 
-  std::chrono::high_resolution_clock::time_point last_update_ = std::chrono::high_resolution_clock::time_point::max();
+  std::chrono::high_resolution_clock::time_point last_update_ =
+      std::chrono::high_resolution_clock::time_point::max();
   int timer_index_;
   double timer_history_[TimerHistoryLength];
   double timer_average_;
@@ -175,6 +175,6 @@ protected:
   bool no_visible_overlays_ = false;
   bool initialized_ = false;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OVERLAY_RENDERER_H
+#endif // HECTOR_RVIZ_OVERLAY_OVERLAY_RENDERER_H

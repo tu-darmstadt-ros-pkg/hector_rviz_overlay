@@ -29,7 +29,7 @@ namespace hector_rviz_overlay_demo
 
 class SimplePopupsOverlayDisplay : public hector_rviz_overlay::QWidgetOverlayDisplay
 {
-Q_OBJECT
+  Q_OBJECT
 
 protected slots:
   void onButtonClicked();
@@ -41,6 +41,6 @@ protected:
   hector_rviz_overlay::QWidgetPopupOverlayPtr popup_;
 };
 
-}
+} // namespace hector_rviz_overlay_demo
 
-#endif //HECTOR_RVIZ_OVERLAY_DEMO_SIMPLE_POPUPS_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_DEMO_SIMPLE_POPUPS_OVERLAY_DISPLAY_H

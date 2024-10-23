@@ -28,6 +28,6 @@ class CenterTracker : public PointTracker
 public:
   QPoint getPoint( int width, int height ) override;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_CENTER_TRACKER_H
+#endif // HECTOR_RVIZ_OVERLAY_CENTER_TRACKER_H

@@ -25,14 +25,14 @@ namespace hector_rviz_overlay_demo
 
 class DemoQmlRosOverlayDisplay : public hector_rviz_overlay::QmlOverlayDisplay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
-  DemoQmlRosOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay() {}
+  DemoQmlRosOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay() { }
 
 protected:
   QString getPathToQml() override;
 };
 
-} // hector_rviz_overlay_demo
+} // namespace hector_rviz_overlay_demo
 
-#endif //HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_ROS_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_ROS_OVERLAY_DISPLAY_H

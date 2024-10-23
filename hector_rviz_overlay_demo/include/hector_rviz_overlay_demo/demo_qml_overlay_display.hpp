@@ -27,12 +27,12 @@ class DemoQmlOverlayDisplay : public hector_rviz_overlay::QmlOverlayDisplay
 {
   Q_OBJECT
 public:
-  DemoQmlOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay() {}
+  DemoQmlOverlayDisplay() : hector_rviz_overlay::QmlOverlayDisplay() { }
 
 protected:
   QString getPathToQml() override;
 };
 
-}
+} // namespace hector_rviz_overlay_demo
 
-#endif //HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_DEMO_DEMO_QML_OVERLAY_DISPLAY_H

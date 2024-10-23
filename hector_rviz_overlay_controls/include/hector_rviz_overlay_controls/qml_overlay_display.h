@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #ifndef HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H
 #define HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H
 
@@ -44,6 +43,6 @@ protected:
 private:
   rviz_common::properties::StringProperty *path_property_;
 };
-}
+} // namespace hector_rviz_overlay_controls
 
-#endif //HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_CONTROLS_QML_OVERLAY_DISPLAY_H

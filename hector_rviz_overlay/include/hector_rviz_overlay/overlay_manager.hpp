@@ -18,13 +18,12 @@
 #ifndef HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H
 #define HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H
 
-#include "hector_rviz_overlay/ui/ui_overlay.hpp"
 #include "hector_rviz_overlay/popup/popup_overlay.hpp"
+#include "hector_rviz_overlay/ui/ui_overlay.hpp"
 
 #include <mutex>
 
 #include <QImage>
-
 
 class QKeyEvent;
 class QMouseEvent;
@@ -34,7 +33,7 @@ namespace rviz_common
 {
 class DisplayContext;
 class RenderPanel;
-}
+} // namespace rviz_common
 
 namespace hector_rviz_overlay
 {
@@ -50,10 +49,9 @@ class OverlayRenderer;
  */
 class OverlayManager : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
 
 public:
-
   // This makes sure that we don't get copies accidentally.
   OverlayManager( OverlayManager const & ) = delete;
 
@@ -183,6 +181,6 @@ private:
   // Mutex for the access on overlays_
   mutable std::recursive_mutex mutex_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H
+#endif // HECTOR_RVIZ_OVERLAY_OVERLAY_MANAGER_H

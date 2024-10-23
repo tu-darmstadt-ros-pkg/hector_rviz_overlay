@@ -36,7 +36,7 @@ class QWidgetEventManager;
  */
 class QWidgetPopupOverlay : public PopupOverlay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   explicit QWidgetPopupOverlay( const std::string &name );
 
@@ -56,7 +56,8 @@ public:
 
   ///@{
   /*!
-   * @return The top level container widget that is drawn on top of the rviz_common::RenderPanel and which manages the popup as its single child widget.
+   * @return The top level container widget that is drawn on top of the rviz_common::RenderPanel and
+   * which manages the popup as its single child widget.
    */
   PopupContainerWidget *popupContainerWidget();
 
@@ -86,7 +87,6 @@ public:
   bool isDirty() const override;
 
 protected:
-
   ///@inherit
   void renderImpl( Renderer *renderer ) override;
 
@@ -100,6 +100,6 @@ protected:
 
 typedef std::shared_ptr<QWidgetPopupOverlay> QWidgetPopupOverlayPtr;
 typedef std::shared_ptr<const QWidgetPopupOverlay> QWidgetPopupOverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_OVERLAY_H

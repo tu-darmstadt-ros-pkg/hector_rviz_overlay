@@ -18,8 +18,8 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H
 #define HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H
 
-#include <qopenglcontext.h>
 #include <QSize>
+#include <qopenglcontext.h>
 
 class QOpenGLContext;
 class QOpenGLPaintDevice;
@@ -34,6 +34,7 @@ class QOpenGLWrapper
 {
 private:
   struct NativeContextInformation;
+
 public:
   /**
    *
@@ -80,6 +81,6 @@ private:
 
   NativeContextInformation *native_context_information_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H
+#endif // HECTOR_RVIZ_OVERLAY_QOPENGL_WRAPPER_H

@@ -27,8 +27,7 @@ class QPushButton;
 namespace hector_rviz_overlay
 {
 
-enum PopupButtons
-{
+enum PopupButtons {
   ButtonOk = 0b0001,
   ButtonCancel = 0b0010,
   ButtonYes = 0b0100,
@@ -41,7 +40,7 @@ enum PopupButtons
  */
 class PopupDialog : public QFrame
 {
-Q_OBJECT
+  Q_OBJECT
 protected:
   bool event( QEvent *event ) override;
 
@@ -56,7 +55,7 @@ public:
   /*!
    * @param value The text that should be set as the title of the popup dialog.
    */
-  void setTitle(const QString &value);
+  void setTitle( const QString &value );
 
   /*!
    * @return The widget that is the content of the popup.
@@ -74,7 +73,7 @@ public:
    *
    * @param widget The widget that should be set as content of the popup.
    */
-  void setContent(QWidget *widget);
+  void setContent( QWidget *widget );
 
   /*!
    * @return A combination of the PopupButtons flags which determine which buttons are shown.
@@ -84,10 +83,10 @@ public:
   /*!
    * @param buttons A combination of the PopupButtons flags determining which buttons to show.
    */
-  void setButtons(int buttons);
+  void setButtons( int buttons );
 
 signals:
-  void buttonClicked(PopupButtons button);
+  void buttonClicked( PopupButtons button );
 
 protected slots:
   void yesClicked();
@@ -108,6 +107,6 @@ protected:
   QPushButton *button_cancel_;
   int buttons_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_POPUP_WIDGET_H
+#endif // HECTOR_RVIZ_OVERLAY_POPUP_WIDGET_H

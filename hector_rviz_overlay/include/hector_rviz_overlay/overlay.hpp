@@ -23,7 +23,6 @@
 #include <QObject>
 #include <QRect>
 
-
 class QEvent;
 
 namespace hector_rviz_overlay
@@ -35,19 +34,19 @@ class Renderer;
  * @class Overlay
  * @brief A base class for different kinds of overlays.
  *
- * Do NOT inherit from this class. Instead inherit from either UiOverlay or PopupOverlay because these are the two types
- * of overlays that are handled by the OverlayManager.
+ * Do NOT inherit from this class. Instead inherit from either UiOverlay or PopupOverlay because
+ * these are the two types of overlays that are handled by the OverlayManager.
  *
  * @see OverlayManager
  */
 class Overlay : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   /*!
-   * The name passed here can differ from the name the overlay will have after it is passed to the OverlayManager if
-   * when passing it to the OverlayManager it is specified that it should use a unique name if an overlay with the given
-   * name already exists.
+   * The name passed here can differ from the name the overlay will have after it is passed to the
+   * OverlayManager if when passing it to the OverlayManager it is specified that it should use a
+   * unique name if an overlay with the given name already exists.
    *
    * @param name The name of the overlay.
    */
@@ -56,11 +55,11 @@ public:
   ~Overlay() override;
 
   /*!
-   * This method is called before each render; regardless of whether the overlay is marked dirty or not and the overlay
-   * can still be marked dirty by this method to require a render.
+   * This method is called before each render; regardless of whether the overlay is marked dirty or
+   * not and the overlay can still be marked dirty by this method to require a render.
    * @param dt The time elapsed since the last update in seconds. (0 on the first call)
    */
-  virtual void update( float dt ) { (void) dt; }
+  virtual void update( float dt ) { (void)dt; }
 
   /*!
    * This method is called once for the overlay to perform a one-time initialization before it is rendered.
@@ -92,8 +91,8 @@ public:
   virtual bool handleEvent( QObject *receiver, QEvent *event ) = 0;
 
   /*!
-   * This method is called whenever another overlay takes precedence over this overlay and ongoing events like mouse
-   * hover events should be canceled i.e. by sending HoverLeave events.
+   * This method is called whenever another overlay takes precedence over this overlay and ongoing
+   * events like mouse hover events should be canceled i.e. by sending HoverLeave events.
    */
   virtual void handleEventsCanceled() = 0;
 
@@ -123,8 +122,8 @@ public:
   void hide() { setIsVisible( false ); }
 
   /*!
-   * This property allows to easily scale the content of an overlay i.e. for users with a high dpi monitor.
-   * Default is 1.0.
+   * This property allows to easily scale the content of an overlay i.e. for users with a high dpi
+   * monitor. Default is 1.0.
    * @return The scaling factor of this overlay instance.
    */
   float scale() const { return scale_; }
@@ -136,16 +135,17 @@ public:
   virtual void setScale( float value );
 
   /*!
-   * If the scaling factor differs from 1.0, the geometry of the overlay will NOT be equal to the geometry of its content.
-   * The geometry is updated by the OverlayManager and should always represent the global top-left, the width and the
-   * height of the rviz_common::RenderPanel.
+   * If the scaling factor differs from 1.0, the geometry of the overlay will NOT be equal to the
+   * geometry of its content. The geometry is updated by the OverlayManager and should always
+   * represent the global top-left, the width and the height of the rviz_common::RenderPanel.
    * @return The geometry of this overlay.
    */
   const QRect &geometry() const { return geometry_; }
 
   /*!
-   * This method is used by OverlayManager to update the overlay's geometry every time the rviz_common::RenderPanel's size changes.
-   * If the scaling factor differs from 1.0, the geometry of the overlay will NOT be equal to the geometry of its content.
+   * This method is used by OverlayManager to update the overlay's geometry every time the
+   * rviz_common::RenderPanel's size changes. If the scaling factor differs from 1.0, the geometry
+   * of the overlay will NOT be equal to the geometry of its content.
    * @param value The new geometry
    */
   virtual void setGeometry( const QRect &value );
@@ -178,7 +178,6 @@ signals:
   void visibilityChanged();
 
 protected:
-
   /*!
    * This method has to be implemented in subclasses.
    * It should use the given Renderer to render its contents according to the geometry of the widget.
@@ -201,8 +200,8 @@ private:
 
 typedef std::shared_ptr<Overlay> OverlayPtr;
 typedef std::shared_ptr<const Overlay> OverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
 Q_DECLARE_METATYPE( hector_rviz_overlay::OverlayPtr );
 
-#endif //HECTOR_RVIZ_OVERLAY_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_OVERLAY_H

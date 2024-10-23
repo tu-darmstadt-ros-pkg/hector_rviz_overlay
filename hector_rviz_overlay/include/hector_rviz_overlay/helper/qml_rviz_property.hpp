@@ -28,7 +28,7 @@ namespace hector_rviz_overlay
 
 class QmlRvizProperty : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
   // @formatter:off
   Q_PROPERTY( QVariant value READ value WRITE setValue NOTIFY valueChanged )
   // @formatter:on
@@ -51,6 +51,6 @@ private slots:
 private:
   rviz_common::properties::Property *property_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QML_RVIZ_PROPERTY_H
+#endif // HECTOR_RVIZ_OVERLAY_QML_RVIZ_PROPERTY_H

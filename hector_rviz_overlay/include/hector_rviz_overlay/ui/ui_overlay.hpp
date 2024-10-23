@@ -25,7 +25,7 @@ namespace hector_rviz_overlay
 
 class UiOverlay : public Overlay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   explicit UiOverlay( const std::string &name );
 
@@ -49,14 +49,13 @@ signals:
   void zIndexChanged();
 
 protected:
-
   int z_index_;
 };
 
 typedef std::shared_ptr<UiOverlay> UiOverlayPtr;
 typedef std::shared_ptr<const UiOverlay> UiOverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
-Q_DECLARE_METATYPE(hector_rviz_overlay::UiOverlayPtr);
+Q_DECLARE_METATYPE( hector_rviz_overlay::UiOverlayPtr );
 
-#endif //HECTOR_RVIZ_OVERLAY_UI_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_UI_OVERLAY_H

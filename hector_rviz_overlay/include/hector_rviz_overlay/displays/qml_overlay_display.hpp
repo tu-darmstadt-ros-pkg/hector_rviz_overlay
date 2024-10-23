@@ -29,14 +29,14 @@ namespace hector_rviz_overlay
  * @class QmlOverlayDisplay
  * @brief A base class for QML overlay displays. Inherits from OverlayDisplay.
  *
- * Classes that inherit from this class should implement the getPathToQml() method and return the path to the qml file
- * that should be loaded.
- * 
+ * Classes that inherit from this class should implement the getPathToQml() method and return the
+ * path to the qml file that should be loaded.
+ *
  * Also, do not forget the Q_OBJECT macro, otherwise, your display may clash with other displays.
  */
 class QmlOverlayDisplay : public OverlayDisplay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   QmlOverlayDisplay();
 
@@ -54,8 +54,8 @@ protected slots:
   void onOverlayContextCreated();
 
   /*!
-   * The changed slot for the live reload property. Live reload means the qml file is watched for changes and reloaded if
-   * it changed which is particularly useful for development.
+   * The changed slot for the live reload property. Live reload means the qml file is watched for
+   * changes and reloaded if it changed which is particularly useful for development.
    */
   virtual void onLiveReloadChanged();
 
@@ -69,6 +69,6 @@ protected:
   rviz_common::Config overlay_config_;
   BoolProperty *live_reload_property_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QML_OVERLAY_DISPLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_QML_OVERLAY_DISPLAY_H

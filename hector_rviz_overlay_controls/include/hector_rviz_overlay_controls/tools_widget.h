@@ -31,19 +31,15 @@ namespace rviz_common
 {
 class Tool;
 class ToolManager;
-}
+} // namespace rviz_common
 
 namespace hector_rviz_overlay_controls
 {
 
 class ToolsWidget : public QWidget
 {
-Q_OBJECT
-  Q_PROPERTY( bool namesVisible
-                READ
-                namesVisible
-                WRITE
-                setNamesVisible )
+  Q_OBJECT
+  Q_PROPERTY( bool namesVisible READ namesVisible WRITE setNamesVisible )
 public:
   explicit ToolsWidget( QWidget *parent = nullptr );
 
@@ -64,7 +60,6 @@ private slots:
   void onToolButtonChecked( bool checked );
 
 private:
-
   void addTool( rviz_common::Tool *tool );
 
   void removeTool( rviz_common::Tool *tool );
@@ -78,6 +73,6 @@ private:
 
   bool names_visible_ = true;
 };
-}
+} // namespace hector_rviz_overlay_controls
 
-#endif //HECTOR_RVIZ_OVERLAY_CONTROLS_TOOLS_WIDGET_H
+#endif // HECTOR_RVIZ_OVERLAY_CONTROLS_TOOLS_WIDGET_H

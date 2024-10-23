@@ -27,8 +27,7 @@ namespace positioning
 {
 namespace anchor_points
 {
-enum AnchorPoint
-{
+enum AnchorPoint {
   AnchorAuto,
   AnchorTopLeft,
   AnchorTopRight,
@@ -37,6 +36,7 @@ enum AnchorPoint
   AnchorBottomRight
 };
 }
+
 typedef anchor_points::AnchorPoint AnchorPoint;
 
 /*!
@@ -44,7 +44,7 @@ typedef anchor_points::AnchorPoint AnchorPoint;
  */
 class PositionTracker : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
   // @formatter:off
   //! The position of the tracked point on the screen. May have a z-component indicating the depth.
   //! If no depth is available, z will be NaN.
@@ -63,7 +63,7 @@ protected:
 private:
   QVector3D position_;
 };
-}
-}
+} // namespace positioning
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_POSITION_TRACKER_H
+#endif // HECTOR_RVIZ_OVERLAY_POSITION_TRACKER_H

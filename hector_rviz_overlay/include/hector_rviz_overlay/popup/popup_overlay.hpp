@@ -28,13 +28,13 @@ namespace hector_rviz_overlay
  * Popup overlays are handled a little different than UiOverlays by the OverlayManager.
  * While the drawing and event order of UiOverlays is determined by their z-order.
  * The order of PopupOverlays depends on the last interaction.
- * When it is added, the PopupOverlay is added to the top - meaning it's drawn on top of everything else - if the
- * PopupOverlay that is on top does not handle a mouse event but another one does, the popup handling the event is moved
- * to the top.
+ * When it is added, the PopupOverlay is added to the top - meaning it's drawn on top of everything
+ * else - if the PopupOverlay that is on top does not handle a mouse event but another one does, the
+ * popup handling the event is moved to the top.
  */
 class PopupOverlay : public Overlay
 {
-Q_OBJECT
+  Q_OBJECT
 public:
   explicit PopupOverlay( const std::string &name );
 
@@ -43,8 +43,8 @@ public:
 
 typedef std::shared_ptr<PopupOverlay> PopupOverlayPtr;
 typedef std::shared_ptr<const PopupOverlay> PopupOverlayConstPtr;
-}
+} // namespace hector_rviz_overlay
 
-Q_DECLARE_METATYPE(hector_rviz_overlay::PopupOverlayPtr);
+Q_DECLARE_METATYPE( hector_rviz_overlay::PopupOverlayPtr );
 
-#endif //HECTOR_RVIZ_OVERLAY_POPUP_OVERLAY_H
+#endif // HECTOR_RVIZ_OVERLAY_POPUP_OVERLAY_H

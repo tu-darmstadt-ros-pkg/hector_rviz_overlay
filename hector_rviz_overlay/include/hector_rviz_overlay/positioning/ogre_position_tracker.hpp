@@ -43,14 +43,15 @@ namespace positioning
  * @brief Tracks a 3D point in the Ogre scene.
  *
  * Returns x and y position in viewport coordinates (pixel).
- * Returns the distance as z-coordinate unless it is not available, e.g., for a orthographic projection, in which case
- * z is set to NaN.
+ * Returns the distance as z-coordinate unless it is not available, e.g., for a orthographic
+ * projection, in which case z is set to NaN.
  */
 class OgrePositionTracker : public PositionTracker
 {
-Q_OBJECT
+  Q_OBJECT
 public:
-  OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context, const Overlay *overlay );
+  OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context,
+                       const Overlay *overlay );
 
   ~OgrePositionTracker() override;
 
@@ -68,7 +69,7 @@ private:
 
   std::unique_ptr<Listener> listener_;
 };
-}
-}
+} // namespace positioning
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_OGRE_POSITION_TRACKER_H
+#endif // HECTOR_RVIZ_OVERLAY_OGRE_POSITION_TRACKER_H

@@ -20,7 +20,7 @@
 namespace hector_rviz_overlay
 {
 
-Overlay::Overlay( std::string name ) : name_(std::move( name ))
+Overlay::Overlay( std::string name ) : name_( std::move( name ) )
 {
   qRegisterMetaType<hector_rviz_overlay::OverlayPtr>();
 }
@@ -46,14 +46,11 @@ void Overlay::setIsVisible( bool value )
   requestRender();
 }
 
-void Overlay::requestRender()
-{
-  is_dirty_ = true;
-}
+void Overlay::requestRender() { is_dirty_ = true; }
 
 void Overlay::render( Renderer *renderer )
 {
   is_dirty_ = false;
   renderImpl( renderer );
 }
-}
+} // namespace hector_rviz_overlay

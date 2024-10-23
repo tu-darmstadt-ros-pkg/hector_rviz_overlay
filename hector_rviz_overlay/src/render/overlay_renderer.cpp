@@ -42,16 +42,14 @@ OverlayRenderer *OverlayRenderer::create( rviz_common::DisplayContext *context )
 }
 
 OverlayRenderer::OverlayRenderer( rviz_common::DisplayContext *context )
-  : context_( context ), timer_index_( 0 ), no_visible_overlays_( true )
+    : context_( context ), timer_index_( 0 ), no_visible_overlays_( true )
 {
   render_panel_ = context_->getViewManager()->getRenderPanel();
   std::fill( timer_history_, timer_history_ + TimerHistoryLength, 0.0 );
   timer_average_ = 0;
 }
 
-OverlayRenderer::~OverlayRenderer()
-{
-}
+OverlayRenderer::~OverlayRenderer() { }
 
 void OverlayRenderer::addOverlay( OverlayPtr &overlay )
 {
@@ -61,14 +59,14 @@ void OverlayRenderer::addOverlay( OverlayPtr &overlay )
 
   no_visible_overlays_ &= !overlay->isVisible();
   is_dirty_ = true;
-  if ( !initialized_ ) return;
+  if ( !initialized_ )
+    return;
   prepareOverlay( overlay );
 }
 
 void OverlayRenderer::insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, size_t index )
 {
-  if ( index >= overlays_.size())
-  {
+  if ( index >= overlays_.size() ) {
     addOverlay( overlay );
     return;
   }
@@ -78,32 +76,32 @@ void OverlayRenderer::insertOverlay( hector_rviz_overlay::OverlayPtr &overlay, s
 
   no_visible_overlays_ &= !overlay->isVisible();
   is_dirty_ = true;
-  if ( !initialized_ ) return;
+  if ( !initialized_ )
+    return;
   prepareOverlay( overlay );
 }
 
 void OverlayRenderer::removeOverlay( OverlayPtr &overlay )
 {
-  disconnect( overlay.get(), &Overlay::visibilityChanged, this, &OverlayRenderer::onVisibilityChanged );
-  overlays_.erase( std::remove( overlays_.begin(), overlays_.end(), overlay ), overlays_.end());
+  disconnect( overlay.get(), &Overlay::visibilityChanged, this,
+              &OverlayRenderer::onVisibilityChanged );
+  overlays_.erase( std::remove( overlays_.begin(), overlays_.end(), overlay ), overlays_.end() );
 
   if ( initialized_ )
     releaseOverlay( overlay );
 
-  if ( !no_visible_overlays_ && overlay->isVisible())
-  {
+  if ( !no_visible_overlays_ && overlay->isVisible() ) {
     bool last_visible = true;
-    for ( OverlayPtr &o : overlays_ )
-    {
-      if ( !o->isVisible()) continue;
+    for ( OverlayPtr &o : overlays_ ) {
+      if ( !o->isVisible() )
+        continue;
 
       last_visible = false;
       break;
     }
     no_visible_overlays_ = last_visible;
 
-    if ( no_visible_overlays_ && initialized_ )
-    {
+    if ( no_visible_overlays_ && initialized_ ) {
       hide();
     }
   }
@@ -112,78 +110,58 @@ void OverlayRenderer::removeOverlay( OverlayPtr &overlay )
 
 void OverlayRenderer::onVisibilityChanged()
 {
-  auto sender = static_cast<Overlay *>(QObject::sender());
-  if ( sender->isVisible())
-  {
+  auto sender = static_cast<Overlay *>( QObject::sender() );
+  if ( sender->isVisible() ) {
     // If the overlay is visible make sure it is drawn
     no_visible_overlays_ = false;
-  }
-  else
-  {
+  } else {
     bool no_visible = true;
-    for ( OverlayPtr &overlay : overlays_ )
-    {
-      if ( !overlay->isVisible()) continue;
+    for ( OverlayPtr &overlay : overlays_ ) {
+      if ( !overlay->isVisible() )
+        continue;
 
       no_visible = false;
       break;
     }
     no_visible_overlays_ = no_visible;
-    if ( no_visible_overlays_ && initialized_ )
-    {
+    if ( no_visible_overlays_ && initialized_ ) {
       hide();
     }
   }
 }
 
-bool OverlayRenderer::hasVisibleOverlay()
-{
-  return !no_visible_overlays_;
-}
+bool OverlayRenderer::hasVisibleOverlay() { return !no_visible_overlays_; }
 
-bool OverlayRenderer::isRendering() const
-{
-  return initialized_ && !no_visible_overlays_;
-}
+bool OverlayRenderer::isRendering() const { return initialized_ && !no_visible_overlays_; }
 
-const std::vector<OverlayPtr> &OverlayRenderer::overlays()
-{
-  return overlays_;
-}
+const std::vector<OverlayPtr> &OverlayRenderer::overlays() { return overlays_; }
 
 std::vector<OverlayConstPtr> OverlayRenderer::overlays() const
 {
-  return std::vector<OverlayConstPtr>( overlays_.begin(), overlays_.end());
+  return std::vector<OverlayConstPtr>( overlays_.begin(), overlays_.end() );
 }
 
-void OverlayRenderer::prepareOverlay( OverlayPtr &overlay )
-{
-  overlay->prepareRender( this );
-}
+void OverlayRenderer::prepareOverlay( OverlayPtr &overlay ) { overlay->prepareRender( this ); }
 
-void OverlayRenderer::releaseOverlay( OverlayPtr &overlay )
-{
-  overlay->releaseRenderResources();
-}
+void OverlayRenderer::releaseOverlay( OverlayPtr &overlay ) { overlay->releaseRenderResources(); }
 
 void OverlayRenderer::render()
 {
-  if ( no_visible_overlays_ ) return;
-  if ( !initialized_ )
-  {
+  if ( no_visible_overlays_ )
+    return;
+  if ( !initialized_ ) {
     initialize();
     initialized_ = true;
     for ( auto &overlay : overlays_ ) prepareOverlay( overlay );
   }
 
   auto start = std::chrono::high_resolution_clock::now();
-  float delta = std::chrono::duration_cast<std::chrono::nanoseconds>( start - last_update_ ).count() / 1E9f;
-  if ( delta < 0 ) delta = 0;
+  float delta =
+      std::chrono::duration_cast<std::chrono::nanoseconds>( start - last_update_ ).count() / 1E9f;
+  if ( delta < 0 )
+    delta = 0;
   last_update_ = start;
-  for ( const auto &overlay : overlays_ )
-  {
-    overlay->update( delta );
-  }
+  for ( const auto &overlay : overlays_ ) { overlay->update( delta ); }
 
   bool is_dirty = is_dirty_;
   is_dirty_ = false;
@@ -192,41 +170,36 @@ void OverlayRenderer::render()
   int height = render_panel_->height();
 
   // Have to compare size because geometry compares instances which would always create a new fbo
-  if ( geometry_.size() != render_panel_->geometry().size())
-  {
+  if ( geometry_.size() != render_panel_->geometry().size() ) {
     geometry_ = render_panel_->geometry();
     is_dirty = true;
   }
 
-  const QPoint &render_panel_top_left = render_panel_->mapToGlobal( QPoint( 0, 0 ));
-  if ( geometry_.topLeft() != render_panel_top_left )
-  {
+  const QPoint &render_panel_top_left = render_panel_->mapToGlobal( QPoint( 0, 0 ) );
+  if ( geometry_.topLeft() != render_panel_top_left ) {
     geometry_.moveTopLeft( render_panel_top_left );
     is_dirty = true;
-  }
-  else
-  {
-    for ( const auto &overlay : overlays_ )
-    {
-      if ( !overlay->isDirty()) continue;
+  } else {
+    for ( const auto &overlay : overlays_ ) {
+      if ( !overlay->isDirty() )
+        continue;
       is_dirty = true;
       break;
     }
   }
-  if ( !is_dirty )
-  {
+  if ( !is_dirty ) {
     redrawLastFrame();
     return;
   }
 
   prepareRender( width, height );
   // Draw the overlays
-  for ( size_t i = 0; i < overlays_.size(); ++i )
-  {
+  for ( size_t i = 0; i < overlays_.size(); ++i ) {
     OverlayPtr overlay = overlays_[i];
-    if ( !overlay->isVisible()) continue;
-    if ( overlay->geometry().topLeft() != geometry_.topLeft() || overlay->geometry().size() != geometry_.size())
-    {
+    if ( !overlay->isVisible() )
+      continue;
+    if ( overlay->geometry().topLeft() != geometry_.topLeft() ||
+         overlay->geometry().size() != geometry_.size() ) {
       overlays_[i]->setGeometry( geometry_ );
     }
 
@@ -234,10 +207,11 @@ void OverlayRenderer::render()
   }
 
 #ifdef DRAW_RENDERTIME
-  QPainter painter( paintDevice());
-  painter.setFont( QFont( "Arial", 16 ));
+  QPainter painter( paintDevice() );
+  painter.setFont( QFont( "Arial", 16 ) );
   painter.setPen( Qt::red );
-  painter.drawText( 10, 80, QString( "Rendertime (ms): %1" ).arg( timer_average_ / TimerHistoryLength ));
+  painter.drawText( 10, 80,
+                    QString( "Rendertime (ms): %1" ).arg( timer_average_ / TimerHistoryLength ) );
   painter.end();
 #endif
 
@@ -245,13 +219,11 @@ void OverlayRenderer::render()
 
   auto end = std::chrono::high_resolution_clock::now();
   timer_average_ -= timer_history_[timer_index_];
-  timer_history_[timer_index_] = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count() / 1000.0;
+  timer_history_[timer_index_] =
+      std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count() / 1000.0;
   timer_average_ += timer_history_[timer_index_];
-  timer_index_ = (timer_index_ + 1) % TimerHistoryLength;
+  timer_index_ = ( timer_index_ + 1 ) % TimerHistoryLength;
 }
 
-QWindow *OverlayRenderer::window()
-{
-  return render_panel_->windowHandle();
-}
-}
+QWindow *OverlayRenderer::window() { return render_panel_->windowHandle(); }
+} // namespace hector_rviz_overlay

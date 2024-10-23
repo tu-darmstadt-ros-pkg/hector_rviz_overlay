@@ -31,7 +31,7 @@ namespace hector_rviz_overlay
 
 class QmlTool : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
   // @formatter:off
   Q_PROPERTY( bool isSelected READ isSelected NOTIFY isSelectedChanged )
   Q_PROPERTY( QChar shortcutKey READ shortcutKey CONSTANT )
@@ -40,7 +40,7 @@ Q_OBJECT
   Q_PROPERTY( QString description READ description CONSTANT )
   Q_PROPERTY( QString classId READ classId CONSTANT )
   Q_PROPERTY( QString iconSource READ iconSource CONSTANT )
-  Q_PROPERTY( QObject* tool READ tool CONSTANT )
+  Q_PROPERTY( QObject *tool READ tool CONSTANT )
   // @formatter:on
 public:
   explicit QmlTool( rviz_common::Tool *tool );
@@ -74,7 +74,7 @@ private:
 
 class QmlToolManager : public QObject
 {
-Q_OBJECT
+  Q_OBJECT
   // @formatter:off
   Q_PROPERTY( QVariantList tools READ tools NOTIFY toolsChanged )
   Q_PROPERTY( QObject *currentTool READ currentTool WRITE setCurrentTool NOTIFY toolChanged )
@@ -124,6 +124,6 @@ private:
   rviz_common::ToolManager *tool_manager_;
   QList<QmlTool *> tools_;
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QML_TOOL_MANAGER_H
+#endif // HECTOR_RVIZ_OVERLAY_QML_TOOL_MANAGER_H

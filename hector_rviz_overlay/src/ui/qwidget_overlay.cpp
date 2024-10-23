@@ -18,16 +18,15 @@
 #include "hector_rviz_overlay/ui/qwidget_overlay.hpp"
 
 #include "hector_rviz_overlay/events/qwidget_event_manager.hpp"
-#include "hector_rviz_overlay/render/renderer.hpp"
 #include "hector_rviz_overlay/overlay_widget.hpp"
+#include "hector_rviz_overlay/render/renderer.hpp"
 
 #include <QPainter>
 
 namespace hector_rviz_overlay
 {
 
-QWidgetOverlay::QWidgetOverlay( const std::string &name )
-  : UiOverlay( name )
+QWidgetOverlay::QWidgetOverlay( const std::string &name ) : UiOverlay( name )
 {
   widget_ = new OverlayWidget;
   event_manager_ = new QWidgetEventManager( widget_ );
@@ -47,7 +46,8 @@ void QWidgetOverlay::setScale( float value )
 {
   Overlay::setScale( value );
   widget_->setGeometry( QRect( geometry().left(), geometry().top(),
-                               (int) (geometry().width() / scale()), (int) (geometry().height() / scale())));
+                               (int)( geometry().width() / scale() ),
+                               (int)( geometry().height() / scale() ) ) );
   event_manager_->setScale( value );
 }
 
@@ -55,20 +55,18 @@ void QWidgetOverlay::setGeometry( const QRect &value )
 {
   Overlay::setGeometry( value );
   widget_->setGeometry( QRect( geometry().left(), geometry().top(),
-                               (int) (geometry().width() / scale()), (int) (geometry().height() / scale())));
+                               (int)( geometry().width() / scale() ),
+                               (int)( geometry().height() / scale() ) ) );
 }
 
 void QWidgetOverlay::renderImpl( Renderer *renderer )
 {
-  QPainter painter( renderer->paintDevice());
+  QPainter painter( renderer->paintDevice() );
   painter.scale( scale(), scale() );
   widget_->render( &painter );
 }
 
-void QWidgetOverlay::handleEventsCanceled()
-{
-  event_manager_->handleEventsCanceled();
-}
+void QWidgetOverlay::handleEventsCanceled() { event_manager_->handleEventsCanceled(); }
 
 bool QWidgetOverlay::handleEvent( QObject *receiver, QEvent *event )
 {
@@ -80,4 +78,4 @@ bool QWidgetOverlay::isDirty() const
   // Widgets are always dirty since there is currently no reliable way of finding out whether that's true
   return true;
 }
-}
+} // namespace hector_rviz_overlay

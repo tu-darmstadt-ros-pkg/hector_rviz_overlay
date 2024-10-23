@@ -26,18 +26,18 @@ namespace hector_rviz_overlay
 {
 
 OgreTracker::OgreTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context )
-  : point_( point ), context_( context )
+    : point_( point ), context_( context )
 {
 }
 
 QPoint OgreTracker::getPoint( int width, int height )
 {
   Ogre::Camera *camera_ = context_->getViewManager()->getCurrent()->getCamera();
-  Ogre::Vector4 screen_point =
-    camera_->getProjectionMatrix() * camera_->getViewMatrix() * Ogre::Vector4( point_.x, point_.y, point_.z, 1 );
+  Ogre::Vector4 screen_point = camera_->getProjectionMatrix() * camera_->getViewMatrix() *
+                               Ogre::Vector4( point_.x, point_.y, point_.z, 1 );
   double x = screen_point.x * 0.5 / screen_point.w + 0.5;
   double y = -screen_point.y * 0.5 / screen_point.w + 0.5;
 
-  return { (int) (x * width), (int) (y * height) };
+  return { (int)( x * width ), (int)( y * height ) };
 }
-}
+} // namespace hector_rviz_overlay

@@ -28,9 +28,9 @@ namespace hector_rviz_overlay
 class QWidgetPopupFactory
 {
 public:
-  QWidgetPopupOverlayPtr createMessagePopup( const std::string &name, const QString &title, const QString &message,
-                                             int buttons = ButtonOk );
+  QWidgetPopupOverlayPtr createMessagePopup( const std::string &name, const QString &title,
+                                             const QString &message, int buttons = ButtonOk );
 };
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H
+#endif // HECTOR_RVIZ_OVERLAY_QWIDGET_POPUP_FACTORY_H

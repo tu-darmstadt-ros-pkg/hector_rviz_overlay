@@ -30,36 +30,36 @@
 namespace hector_rviz_overlay
 {
 
-struct QOpenGLWrapper::NativeContextInformation
-{
+struct QOpenGLWrapper::NativeContextInformation {
   GLXDrawable drawable;
   GLXContext context;
   Display *display;
 };
 
 QOpenGLWrapper::QOpenGLWrapper( QOpenGLContext *native_context, const QSize &size, int gl_version )
-  : size_( size ), native_opengl_context_( native_context ), opengl_context_( nullptr ), surface_( nullptr ), fbo_( nullptr )
-    , texture_fbo_( nullptr ), paint_device_( nullptr ), opengl_context_is_current_( false ), native_context_information_( nullptr )
+    : size_( size ), native_opengl_context_( native_context ), opengl_context_( nullptr ),
+      surface_( nullptr ), fbo_( nullptr ), texture_fbo_( nullptr ), paint_device_( nullptr ),
+      opengl_context_is_current_( false ), native_context_information_( nullptr )
 {
   native_context_information_ = new NativeContextInformation;
 
   QSurfaceFormat format;
   format.setDepthBufferSize( 16 );
   format.setStencilBufferSize( 8 );
-  format.setRenderableType(QSurfaceFormat::OpenGL);
-  if (gl_version != 0)
-    format.setVersion(gl_version / 100, gl_version % 100);
+  format.setRenderableType( QSurfaceFormat::OpenGL );
+  if ( gl_version != 0 )
+    format.setVersion( gl_version / 100, gl_version % 100 );
 
   opengl_context_ = new QOpenGLContext;
-  if (native_opengl_context_ != nullptr)
+  if ( native_opengl_context_ != nullptr )
     opengl_context_->setShareContext( native_opengl_context_ );
   opengl_context_->setFormat( format );
 
-  if ( !opengl_context_->create())
-  {
+  if ( !opengl_context_->create() ) {
     LOG_ERROR( "OverlayManager: Fatal! Failed to create context!" );
   }
-  LOG_INFO("Hector RViz Overlay rendering using OpenGL %d.%d", opengl_context_->format().majorVersion(), opengl_context_->format().minorVersion());
+  LOG_INFO( "Hector RViz Overlay rendering using OpenGL %d.%d",
+            opengl_context_->format().majorVersion(), opengl_context_->format().minorVersion() );
   surface_ = new QOffscreenSurface;
   surface_->setFormat( format );
   surface_->create();
@@ -67,8 +67,7 @@ QOpenGLWrapper::QOpenGLWrapper( QOpenGLContext *native_context, const QSize &siz
   makeCurrent();
 
   paint_device_ = new QOpenGLPaintDevice( size_ );
-  if ( size_.width() == 0 || size_.height() == 0 )
-  {
+  if ( size_.width() == 0 || size_.height() == 0 ) {
     doneCurrent();
     return;
   }
@@ -78,8 +77,7 @@ QOpenGLWrapper::QOpenGLWrapper( QOpenGLContext *native_context, const QSize &siz
 
 QOpenGLWrapper::~QOpenGLWrapper()
 {
-  if ( opengl_context_ != nullptr )
-  {
+  if ( opengl_context_ != nullptr ) {
     makeCurrent();
     delete paint_device_;
     delete surface_;
@@ -95,7 +93,8 @@ QOpenGLWrapper::~QOpenGLWrapper()
 
 void QOpenGLWrapper::makeCurrent()
 {
-  if ( opengl_context_is_current_ ) return;
+  if ( opengl_context_is_current_ )
+    return;
   opengl_context_is_current_ = true;
   native_context_information_->display = glXGetCurrentDisplay();
   native_context_information_->drawable = glXGetCurrentDrawable();
@@ -105,7 +104,8 @@ void QOpenGLWrapper::makeCurrent()
 
 void QOpenGLWrapper::doneCurrent()
 {
-  if ( !opengl_context_is_current_ ) return;
+  if ( !opengl_context_is_current_ )
+    return;
   opengl_context_is_current_ = false;
   opengl_context_->doneCurrent();
   glXMakeCurrent( native_context_information_->display, native_context_information_->drawable,
@@ -114,9 +114,8 @@ void QOpenGLWrapper::doneCurrent()
 
 void QOpenGLWrapper::prepareRender()
 {
-  if ( paint_device_->size() != size())
-  {
-    paint_device_->setSize( size());
+  if ( paint_device_->size() != size() ) {
+    paint_device_->setSize( size() );
     createFbo();
   }
   fbo_->bind();
@@ -151,6 +150,6 @@ void QOpenGLWrapper::createFbo()
   format.setSamples( 4 );
   format.setAttachment( QOpenGLFramebufferObject::CombinedDepthStencil );
   fbo_ = new QOpenGLFramebufferObject( size(), format );
-  texture_fbo_ = new QOpenGLFramebufferObject( size());
+  texture_fbo_ = new QOpenGLFramebufferObject( size() );
 }
-}
+} // namespace hector_rviz_overlay

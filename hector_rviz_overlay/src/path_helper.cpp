@@ -24,24 +24,24 @@ namespace hector_rviz_overlay
 
 std::string resolvePath( const std::string &path )
 {
-  if ( path.compare( 0, 10, "package://" ) == 0 )
-  {
+  if ( path.compare( 0, 10, "package://" ) == 0 ) {
     unsigned long pos_end_package_name = path.find( '/', 10 );
     std::string package = path.substr( 10, pos_end_package_name - 10 );
-    return ament_index_cpp::get_package_share_directory( package ) + path.substr( pos_end_package_name );
+    return ament_index_cpp::get_package_share_directory( package ) +
+           path.substr( pos_end_package_name );
   }
   return path;
 }
 
 QString resolvePath( const QString &path )
 {
-  if ( path.startsWith( "package://" ))
-  {
+  if ( path.startsWith( "package://" ) ) {
     int pos_end_package_name = path.indexOf( '/', 10 );
     QString package = path.mid( 10, pos_end_package_name - 10 );
-    auto package_path = QString::fromStdString( ament_index_cpp::get_package_share_directory( package.toStdString()));
+    auto package_path = QString::fromStdString(
+        ament_index_cpp::get_package_share_directory( package.toStdString() ) );
     return package_path + path.mid( pos_end_package_name );
   }
   return path;
 }
-}
+} // namespace hector_rviz_overlay

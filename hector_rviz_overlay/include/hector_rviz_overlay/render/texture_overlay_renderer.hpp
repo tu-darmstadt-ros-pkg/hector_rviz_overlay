@@ -27,7 +27,7 @@ namespace Ogre
 {
 class Overlay;
 class OverlayContainer;
-}
+} // namespace Ogre
 
 namespace rviz_common
 {
@@ -56,7 +56,6 @@ protected slots:
   void onRenderPanelDestroyed();
 
 protected:
-
   void hide() override;
 
   void redrawLastFrame() override;
@@ -66,7 +65,7 @@ protected:
    * Makes sure that the texture has the appropriate size and resizes the overlay if necessary.
    * When overriding make sure to call the base implementation.
    */
-  void prepareRender(int width, int height) override;
+  void prepareRender( int width, int height ) override;
 
   /*!
    * @inherit
@@ -107,6 +106,6 @@ private:
 
   bool texture_multiple_of_two_required_ = false;
 };
-} // hector_rviz_overlay
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_TEXTURE_OVERLAY_RENDERER_H
+#endif // HECTOR_RVIZ_OVERLAY_TEXTURE_OVERLAY_RENDERER_H

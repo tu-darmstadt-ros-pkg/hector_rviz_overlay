@@ -22,19 +22,14 @@
 namespace hector_rviz_overlay
 {
 
-QImageTextureOverlayRenderer::QImageTextureOverlayRenderer( rviz_common::DisplayContext *context ) : TextureOverlayRenderer( context )
+QImageTextureOverlayRenderer::QImageTextureOverlayRenderer( rviz_common::DisplayContext *context )
+    : TextureOverlayRenderer( context )
 {
 }
 
-void QImageTextureOverlayRenderer::initialize()
-{
-  /* Nothing to do */
-}
+void QImageTextureOverlayRenderer::initialize() { /* Nothing to do */ }
 
-void QImageTextureOverlayRenderer::releaseResources()
-{
-  /* Nothing to do */
-}
+void QImageTextureOverlayRenderer::releaseResources() { /* Nothing to do */ }
 
 void QImageTextureOverlayRenderer::prepareRender( int width, int height )
 {
@@ -43,16 +38,16 @@ void QImageTextureOverlayRenderer::prepareRender( int width, int height )
   buffer_->lock( Ogre::HardwareBuffer::HBL_DISCARD );
   const Ogre::PixelBox &pixel_box = buffer_->getCurrentLock();
 
-  auto data = static_cast<Ogre::uint8 *>(pixel_box.data);
+  auto data = static_cast<Ogre::uint8 *>( pixel_box.data );
   int bytes_per_line = pixel_box.getWidth() * 4;
   // Empties the texture by overwriting all ARGB data with 0.
   Ogre::uint8 *offset = data;
-  for ( int i = 0; i < height; ++i )
-  {
+  for ( int i = 0; i < height; ++i ) {
     memset( offset, 0, width * 4 );
     offset += bytes_per_line;
   }
-  paint_device_image_ = QImage( data, width, height, bytes_per_line, QImage::Format_ARGB32_Premultiplied );
+  paint_device_image_ =
+      QImage( data, width, height, bytes_per_line, QImage::Format_ARGB32_Premultiplied );
 }
 
 void QImageTextureOverlayRenderer::finishRender()
@@ -62,24 +57,23 @@ void QImageTextureOverlayRenderer::finishRender()
   TextureOverlayRenderer::finishRender();
 }
 
-QPaintDevice *QImageTextureOverlayRenderer::paintDevice() noexcept
-{
-  return &paint_device_image_;
-}
+QPaintDevice *QImageTextureOverlayRenderer::paintDevice() noexcept { return &paint_device_image_; }
 
 QOpenGLFramebufferObject *QImageTextureOverlayRenderer::framebufferObject()
 {
-  throw std::logic_error( "ImageOverlayRenderer doesn't have a QOpenGLFramebufferObject."
-                          " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
-                          " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
+  throw std::logic_error(
+      "ImageOverlayRenderer doesn't have a QOpenGLFramebufferObject."
+      " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
+      " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
 }
 
 QOpenGLContext *QImageTextureOverlayRenderer::context()
 {
-  throw std::logic_error( "ImageOverlayRenderer doesn't have a QOpenGLContext."
-                          " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
-                          " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
+  throw std::logic_error(
+      "ImageOverlayRenderer doesn't have a QOpenGLContext."
+      " Perhaps you've tried adding a QML overlay with a version of hector_rviz_overlay that was"
+      " not compiled with the 'RENDER_OVERLAYS_USING_OPENGL' flag." );
 }
 
 bool QImageTextureOverlayRenderer::framebufferObjectUpdated() noexcept { return false; }
-}
+} // namespace hector_rviz_overlay

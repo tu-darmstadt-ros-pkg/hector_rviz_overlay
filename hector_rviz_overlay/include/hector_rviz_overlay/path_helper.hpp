@@ -24,20 +24,20 @@ namespace hector_rviz_overlay
 {
 
 /*!
- * Resolves the given path which means if it starts with package://{package-name}/, the start is substituted with the
- * absolute path of the package. Otherwise the path is returned unchanged.
+ * Resolves the given path which means if it starts with package://{package-name}/, the start is
+ * substituted with the absolute path of the package. Otherwise the path is returned unchanged.
  * @param path The path.
  * @return The absolute path as described above.
  */
 std::string resolvePath( const std::string &path );
 
 /*!
- * Resolves the given path which means if it starts with package://{package-name}/, the start is substituted with the
- * absolute path of the package. Otherwise the path is returned unchanged.
+ * Resolves the given path which means if it starts with package://{package-name}/, the start is
+ * substituted with the absolute path of the package. Otherwise the path is returned unchanged.
  * @param path The path.
  * @return The absolute path as described above.
  */
 QString resolvePath( const QString &path );
-}
+} // namespace hector_rviz_overlay
 
-#endif //HECTOR_RVIZ_OVERLAY_PATH_HELPER_H
+#endif // HECTOR_RVIZ_OVERLAY_PATH_HELPER_H

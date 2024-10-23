@@ -15,7 +15,7 @@ add_definitions(-DRENDER_OVERLAYS_USING_OPENGL)
 
 find_package(ament_cmake REQUIRED)
 find_package(rviz_common REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets Gui Quick Qml REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Quick Qml)
 find_package(GLEW REQUIRED)
 
 ## We also use Ogre
@@ -49,7 +49,6 @@ set(SOURCES
   include/hector_rviz_overlay/positioning/position_tracker.hpp
   include/hector_rviz_overlay/render/qimage_texture_overlay_renderer.hpp
   include/hector_rviz_overlay/render/overlay_renderer.hpp
-  src/render/qopengl_wrapper.hpp
   include/hector_rviz_overlay/render/renderer.hpp
   include/hector_rviz_overlay/render/texture_overlay_renderer.hpp
   include/hector_rviz_overlay/ui/qml_overlay.hpp
@@ -81,6 +80,7 @@ set(SOURCES
   src/render/gl_helpers.h
   src/render/qimage_texture_overlay_renderer.cpp
   src/render/overlay_renderer.cpp
+  src/render/qopengl_wrapper.hpp
   src/render/qopengl_wrapper.cpp
   src/render/texture_overlay_renderer.cpp
   src/ui/qml_overlay.cpp
@@ -97,7 +97,7 @@ set(SOURCES
 # Create the library
 add_library(hector_rviz_overlay SHARED ${SOURCES})
 target_include_directories(hector_rviz_overlay PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -113,8 +113,17 @@ target_link_libraries(hector_rviz_overlay PUBLIC
 target_link_libraries(hector_rviz_overlay PRIVATE
   ${GLEW_LIBRARIES}
 )
+ament_export_dependencies(Qt5 rviz_common)
 
-install(TARGETS hector_rviz_overlay
+# Export old-style CMake variables
+ament_export_include_directories(include)
+ament_export_libraries(hector_rviz_overlay)
+
+# Export modern CMake targets
+ament_export_targets(hector_rviz_overlay)
+
+install(
+  TARGETS hector_rviz_overlay
   EXPORT hector_rviz_overlay
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -123,8 +132,4 @@ install(TARGETS hector_rviz_overlay
 
 install(DIRECTORY include/ DESTINATION include)
 
-# Export package information
-ament_export_include_directories(include)
-ament_export_targets(hector_rviz_overlay)
-ament_export_dependencies(rviz_common Qt5)
-ament_package()
+ament_package(CONFIG_EXTRAS "hector_rviz_overlay-extras.cmake")

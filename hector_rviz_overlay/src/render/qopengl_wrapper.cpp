@@ -48,7 +48,7 @@ QOpenGLWrapper::QOpenGLWrapper( QOpenGLContext *native_context, const QSize &siz
   format.setStencilBufferSize( 8 );
   format.setRenderableType( QSurfaceFormat::OpenGL );
   if ( gl_version != 0 )
-    format.setVersion( gl_version / 100, gl_version % 100 );
+    format.setVersion( gl_version / 100, (gl_version % 100) / 10 );
 
   opengl_context_ = new QOpenGLContext;
   if ( native_opengl_context_ != nullptr )

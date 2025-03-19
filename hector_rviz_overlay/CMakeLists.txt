@@ -16,7 +16,6 @@ add_definitions(-DRENDER_OVERLAYS_USING_OPENGL)
 find_package(ament_cmake REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Quick Qml)
-find_package(GLEW REQUIRED)
 
 ## We also use Ogre
 #include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
@@ -109,9 +108,6 @@ target_link_libraries(hector_rviz_overlay PUBLIC
   Qt5::Quick
   Qt5::Qml
   rviz_common::rviz_common
-)
-target_link_libraries(hector_rviz_overlay PRIVATE
-  ${GLEW_LIBRARIES}
 )
 ament_export_dependencies(Qt5 rviz_common)
 

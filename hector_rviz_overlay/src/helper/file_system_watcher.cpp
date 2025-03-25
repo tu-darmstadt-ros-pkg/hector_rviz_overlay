@@ -17,7 +17,7 @@
 
 #include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <sys/inotify.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -31,7 +31,7 @@ FileSystemWatcher::FileSystemWatcher() { file_descriptor_ = inotify_init1( IN_NO
 
 FileSystemWatcher::~FileSystemWatcher()
 {
-  for ( auto &kv : watched_directories_ ) { inotify_rm_watch( file_descriptor_, kv.second ); }
+  for ( const auto &[_, wd] : watched_directories_ ) { inotify_rm_watch( file_descriptor_, wd ); }
   if ( file_descriptor_ >= 0 )
     close( file_descriptor_ );
 }
@@ -43,19 +43,31 @@ bool FileSystemWatcher::addWatch( const std::string &path )
   if ( path.empty() )
     return false;
   if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end() ) {
+    // Already watching this path, just add another reference
     watched_paths_.push_back( path );
     return true;
   }
-  struct stat path_stat;
-  if ( stat( path.c_str(), &path_stat ) != 0 || ( path_stat.st_mode & ( S_IFDIR | S_IFREG ) ) == 0 )
+  if ( std::filesystem::is_symlink( path ) ) {
+    // Follow symlinks
+    std::error_code error;
+    std::string target = std::filesystem::read_symlink( path, error );
+    if ( error ) {
+      LOG_WARN( "OverlayManager: Could not read link '%s' (%s)!", path.c_str(),
+                error.message().c_str() );
+      return false;
+    }
+    return addWatch( target );
+  }
+  const bool is_directory = std::filesystem::is_directory( path );
+  if ( !is_directory && !std::filesystem::is_regular_file( path ) ) {
     return false;
-
-  const bool is_directory = ( path_stat.st_mode & S_IFDIR ) == S_IFDIR;
+  }
 
   std::string::size_type separator_pos = path.find_last_of( '/' );
-  if ( separator_pos == std::string::npos )
+  std::filesystem::path p( path );
+  if ( !p.has_parent_path() )
     return false;
-  std::string folder = is_directory ? path : path.substr( 0, separator_pos );
+  std::string folder = is_directory ? path : p.parent_path().string();
 
   auto it = watched_directories_.find( folder );
   if ( it == watched_directories_.end() ) {
@@ -65,15 +77,16 @@ bool FileSystemWatcher::addWatch( const std::string &path )
       return false;
     if ( is_directory ) {
       // Include subdirectories
-      for ( const auto &dir : boost::filesystem::directory_iterator( folder ) ) {
-        if ( !boost::filesystem::is_directory( dir.path() ) )
+      for ( const auto &dir : std::filesystem::directory_iterator(
+                folder, std::filesystem::directory_options::follow_directory_symlink ) ) {
+        if ( !std::filesystem::is_directory( dir.path() ) )
           continue;
         if ( !addWatch( dir.path().string() ) ) {
           LOG_WARN( "OverlayManager: Could not add file system watch for '%s'!", dir.path().c_str() );
         }
       }
     }
-    it = watched_directories_.insert( { folder, watch } ).first;
+    it = watched_directories_.try_emplace( folder, watch ).first;
     watch_info_.insert( { watch, { is_directory, {} } } );
   }
   watched_paths_.push_back( path );
@@ -87,15 +100,27 @@ bool FileSystemWatcher::addWatch( const std::string &path )
 void FileSystemWatcher::removeWatch( const std::string &path )
 {
   watched_paths_.erase( std::find( watched_paths_.begin(), watched_paths_.end(), path ) );
+  // Only unregister if no other watches are left
   if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end() )
     return;
+  if ( std::filesystem::is_symlink( path ) ) {
+    // Follow symlinks
+    std::error_code error;
+    std::string target = std::filesystem::read_symlink( path, error );
+    if ( error ) {
+      LOG_WARN( "OverlayManager: Could not read link '%s' (%s) when removing watch!", path.c_str(),
+                error.message().c_str() );
+      return;
+    }
+    removeWatch( target );
+    return;
+  }
 
   // Check if folder
-  auto it = watched_directories_.find( path );
-  if ( it != watched_directories_.end() ) {
+  if ( auto it = watched_directories_.find( path ); it != watched_directories_.end() ) {
     // Remove subfolder watches
-    for ( const auto &dir : boost::filesystem::directory_iterator( path ) ) {
-      if ( !boost::filesystem::is_directory( dir.path() ) )
+    for ( const auto &dir : std::filesystem::directory_iterator( path ) ) {
+      if ( !std::filesystem::is_directory( dir.path() ) || path == dir.path().string() )
         continue;
       removeWatch( dir.path().string() );
     }
@@ -117,7 +142,7 @@ void FileSystemWatcher::removeWatch( const std::string &path )
 
 void FileSystemWatcher::removeAllWatches()
 {
-  for ( auto &kv : watched_directories_ ) { inotify_rm_watch( file_descriptor_, kv.second ); }
+  for ( const auto &[_, wd] : watched_directories_ ) { inotify_rm_watch( file_descriptor_, wd ); }
   watched_directories_.clear();
   watched_paths_.clear();
   watch_info_.clear();
@@ -126,21 +151,21 @@ void FileSystemWatcher::removeAllWatches()
 bool FileSystemWatcher::checkForChanges() const
 {
   const size_t buffer_length = 16 * sizeof( struct inotify_event );
-  static unsigned char buffer[buffer_length];
+  unsigned char buffer[buffer_length];
   bool changed = false;
   ssize_t count;
   while ( ( count = read( file_descriptor_, buffer, buffer_length ) ) > 0 ) {
     if ( changed )
       continue;
     size_t offset = 0;
-    struct inotify_event *event;
+    const struct inotify_event *event;
     while ( offset < static_cast<size_t>( count ) ) {
-      event = reinterpret_cast<inotify_event *>( buffer + offset );
+      event = reinterpret_cast<const inotify_event *>( buffer + offset );
       offset += sizeof( struct inotify_event ) + event->len;
 
       // Ignore qmlc file changes because we create them. Some of them are temps and end in .qmlc.[RANDOMSTRING]
-      std::string name = event->name;
-      if ( name.find( ".qmlc." ) != std::string::npos ||
+      if ( std::string name = event->name;
+           name.find( ".qmlc." ) != std::string::npos ||
            ( name.length() > 5 && name.substr( name.length() - 5 ) == ".qmlc" ) ) {
         continue;
       }
@@ -151,16 +176,13 @@ bool FileSystemWatcher::checkForChanges() const
         continue;
       if ( it->second.is_directory ) {
         changed = true;
-        break;
-      }
-      const std::set<std::string> &filenames = it->second.filenames;
-      if ( event->len && filenames.find( event->name ) != filenames.end() ) {
+      } else if ( const auto &filenames = it->second.filenames;
+                  event->len && filenames.find( event->name ) != filenames.end() ) {
         // Check if it was an action that might change the files content.
-        if ( event->mask & ( IN_MODIFY | IN_MOVED_TO | IN_CLOSE_WRITE ) ) {
-          changed = true;
-          break;
-        }
+        changed = event->mask & ( IN_MODIFY | IN_MOVED_TO | IN_CLOSE_WRITE );
       }
+      if ( changed )
+        break;
     }
   }
   return changed;
@@ -168,7 +190,7 @@ bool FileSystemWatcher::checkForChanges() const
 
 void FileSystemWatcher::removeFolderWatchIfNoFilesLeft( const std::string &path )
 {
-  for ( auto &file : watched_paths_ ) {
+  for ( const auto &file : watched_paths_ ) {
     if ( file.length() < path.length() || file.substr( 0, path.length() ) != path )
       continue;
     return;

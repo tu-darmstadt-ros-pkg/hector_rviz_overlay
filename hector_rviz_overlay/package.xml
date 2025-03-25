@@ -21,6 +21,7 @@
   <depend>libqt5-widgets</depend>
   <depend>pluginlib</depend>
   <depend>rviz_common</depend>
+  <depend>rviz_ogre_vendor</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

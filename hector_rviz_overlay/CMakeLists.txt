@@ -15,6 +15,7 @@ add_definitions(-DRENDER_OVERLAYS_USING_OPENGL)
 
 find_package(ament_cmake REQUIRED)
 find_package(rviz_common REQUIRED)
+find_package(rviz_ogre_vendor REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Quick Qml)
 
 ## We also use Ogre
@@ -109,7 +110,7 @@ target_link_libraries(hector_rviz_overlay PUBLIC
   Qt5::Qml
   rviz_common::rviz_common
 )
-ament_export_dependencies(Qt5 rviz_common)
+ament_target_dependencies(hector_rviz_overlay PUBLIC rviz_ogre_vendor)
 
 # Export old-style CMake variables
 ament_export_include_directories(include)
@@ -128,4 +129,5 @@ install(
 
 install(DIRECTORY include/ DESTINATION include)
 
+ament_export_dependencies(Qt5 rviz_common rviz_ogre_vendor)
 ament_package(CONFIG_EXTRAS "hector_rviz_overlay-extras.cmake")

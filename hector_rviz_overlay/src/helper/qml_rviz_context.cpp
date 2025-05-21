@@ -304,4 +304,20 @@ QObject *QmlRvizContext::registerTfFrameProperty( QmlRvizProperty *parent, const
   }
   return new QmlRvizProperty( prop );
 }
+
+QString QmlRvizContext::ns() const
+{
+  auto node = context_->getRosNodeAbstraction().lock();
+  if ( !node )
+    return {};
+  return { node->get_raw_node()->get_namespace() };
+}
+
+QString QmlRvizContext::nodeName() const
+{
+  auto node = context_->getRosNodeAbstraction().lock();
+  if ( !node )
+    return {};
+  return { node->get_raw_node()->get_name() };
+}
 } // namespace hector_rviz_overlay

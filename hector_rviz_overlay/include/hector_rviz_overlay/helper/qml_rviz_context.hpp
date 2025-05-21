@@ -43,6 +43,8 @@ class QmlRvizContext : public QObject
   Q_PROPERTY( bool isFullscreen READ isFullscreen WRITE setIsFullscreen NOTIFY isFullscreenChanged )
   Q_PROPERTY( QString fixedFrame READ fixedFrame WRITE setFixedFrame NOTIFY fixedFrameChanged )
   Q_PROPERTY( QObject *toolManager READ toolManager CONSTANT )
+  Q_PROPERTY( QString namespace READ ns CONSTANT)
+  Q_PROPERTY( QString nodeName READ nodeName CONSTANT)
   // @formatter:on
 public:
   explicit QmlRvizContext( rviz_common::DisplayContext *context, const Overlay *overlay,
@@ -71,6 +73,10 @@ public:
   void setConfigurationPropertyParent( rviz_common::properties::Property *parent );
 
   QObject *toolManager() const;
+
+  QString ns() const;
+
+  QString nodeName() const;
 
   /*!
    * Creates a position tracker with a notifying read-only position vector3d property, that will

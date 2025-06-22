@@ -23,10 +23,9 @@
 #include <rviz_rendering/render_window.hpp>
 
 #include <Ogre.h>
+#include <OgreRectangle2D.h>
 #include <OgreRenderTargetListener.h>
-#include <Overlay/OgreOverlay.h>
-#include <Overlay/OgreOverlayContainer.h>
-#include <Overlay/OgreOverlayManager.h>
+#include <OgreSceneNode.h>
 #include <RenderSystems/GL/OgreGLTexture.h>
 
 #include "../logging.hpp"
@@ -71,25 +70,11 @@ size_t bit_ceil( size_t value )
 } // namespace
 
 TextureOverlayRenderer::TextureOverlayRenderer( rviz_common::DisplayContext *context )
-    : OverlayRenderer( context ), render_panel_( context->getViewManager()->getRenderPanel() )
+    : OverlayRenderer( context )
 {
-
-  Ogre::OverlayManager &overlay_manager = Ogre::OverlayManager::getSingleton();
-  ogre_overlay_ = overlay_manager.create( "hector_rviz_overlay/Overlay" );
-  material_ = Ogre::MaterialManager::getSingleton().create(
-      "hector_rviz_overlay/OverlayMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
-  material_->getTechnique( 0 )->getPass( 0 )->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
-  overlay_panel_ = dynamic_cast<Ogre::OverlayContainer *>(
-      overlay_manager.createOverlayElement( "Panel", "hector_rviz_overlay/MainPanel" ) );
-  overlay_panel_->setPosition( 0.0, 0.0 );
-  overlay_panel_->setDimensions( 1.0, 1.0 );
-  overlay_panel_->setMaterial( material_ );
-
-  ogre_overlay_->add2D( overlay_panel_ );
-
-  render_target_listener_ = new RenderTargetListener( this );
+  render_target_listener_ = std::make_unique<RenderTargetListener>( this );
   rviz_rendering::RenderWindowOgreAdapter::addListener( render_panel_->getRenderWindow(),
-                                                        render_target_listener_ );
+                                                        render_target_listener_.get() );
   QObject::connect( render_panel_, &rviz_common::RenderPanel::destroyed, this,
                     &TextureOverlayRenderer::onRenderPanelDestroyed );
 }
@@ -98,53 +83,50 @@ TextureOverlayRenderer::~TextureOverlayRenderer()
 {
   if ( render_panel_ != nullptr ) {
     rviz_rendering::RenderWindowOgreAdapter::removeListener( render_panel_->getRenderWindow(),
-                                                             render_target_listener_ );
-    delete render_target_listener_;
+                                                             render_target_listener_.get() );
   }
 
-  ogre_overlay_->hide();
-  material_->unload();
-  Ogre::OverlayManager::getSingleton().destroy( "hector_rviz_overlay/Overlay" );
-  Ogre::OverlayManager::getSingleton().destroyOverlayElement( overlay_panel_ );
-  Ogre::MaterialManager::getSingleton().remove( material_->getName() );
+  if ( material_ != nullptr ) {
+    material_->unload();
+    Ogre::MaterialManager::getSingleton().remove( material_->getName() );
+  }
   if ( texture_ != nullptr )
     Ogre::TextureManager::getSingleton().remove( texture_->getName() );
 }
 
 void TextureOverlayRenderer::onRenderPanelDestroyed()
 {
-  delete render_target_listener_;
   render_panel_ = nullptr;
+  render_target_listener_.reset();
 }
 
 void TextureOverlayRenderer::redrawLastFrame()
 {
   // Make sure it's visible, that's all
-  ogre_overlay_->show();
+  overlay_node_->setVisible( true );
 }
 
 void TextureOverlayRenderer::prepareRender( int width, int height )
 {
+  setupOverlay();
   // Create or resize texture if necessary
   updateTexture( width, height );
 
   if ( last_width_ != width || last_height_ != height ) {
     last_width_ = width;
     last_height_ = height;
-    overlay_panel_->setDimensions( (Ogre::Real)texture_->getWidth() / width,
-                                   (Ogre::Real)texture_->getHeight() / height );
   }
 }
 
-void TextureOverlayRenderer::finishRender() { ogre_overlay_->show(); }
+void TextureOverlayRenderer::finishRender() { overlay_node_->setVisible( true ); }
 
-void TextureOverlayRenderer::hide() { ogre_overlay_->hide(); }
+void TextureOverlayRenderer::hide() { overlay_node_->setVisible( false ); }
 
 void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned int texture_height )
 {
   if ( texture_multiple_of_two_required_ ) {
-    texture_width = bit_ceil( texture_width );
-    texture_height = bit_ceil( texture_height );
+    texture_width = static_cast<unsigned int>( bit_ceil( texture_width ) );
+    texture_height = static_cast<unsigned int>( bit_ceil( texture_height ) );
   }
   if ( texture_ && texture_->getWidth() == texture_width && texture_->getHeight() == texture_height )
     return;
@@ -155,13 +137,13 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
     texture_unit_state_ = nullptr;
   }
   try {
+    LOG_DEBUG( "Creating overlay texture of size (%u, %u)", texture_width, texture_height );
     texture_ = Ogre::TextureManager::getSingleton().createManual(
         "hector_rviz_overlay_OverlayTexture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D, texture_width, texture_height, 0, Ogre::PF_A8R8G8B8,
-        Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY // This is faster than TU_DEFAULT
-    );
+        Ogre::TextureUsage::TU_STATIC | Ogre::TextureUsage::TU_RENDERTARGET );
   } catch ( std::exception &ex ) {
-    LOG_WARN( "Caught exception while creating overlay texture: %s", ex.what() );
+    LOG_ERROR( "Caught exception while creating overlay texture: %s", ex.what() );
   }
   if ( !texture_ ) {
     if ( texture_multiple_of_two_required_ ) {
@@ -175,12 +157,33 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
     }
     return;
   }
-  auto *gl_texture = dynamic_cast<Ogre::GLTexture *>( texture_.get() );
-  if ( gl_texture != nullptr ) {
+  if ( auto *gl_texture = dynamic_cast<const Ogre::GLTexture *>( texture_.get() );
+       gl_texture != nullptr ) {
     texture_id_ = gl_texture->getGLID();
   }
 
   texture_unit_state_ =
       material_->getTechnique( 0 )->getPass( 0 )->createTextureUnitState( texture_->getName() );
+}
+
+void TextureOverlayRenderer::setupOverlay()
+{
+  if ( material_ != nullptr )
+    return;
+  material_ = Ogre::MaterialManager::getSingleton().create(
+      "hector_rviz_overlay/OverlayMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+  auto material_pass = material_->getTechnique( 0 )->getPass( 0 );
+  material_pass->setSceneBlending( Ogre::SBT_TRANSPARENT_ALPHA );
+  material_pass->setDepthCheckEnabled( false );
+  material_pass->setDepthWriteEnabled( false );
+  material_pass->setLightingEnabled( false );
+
+  auto *rectangle = new Ogre::Rectangle2D( true );
+  rectangle->setCorners( -1, 1, 1, -1 ); // Full screen rectangle
+  rectangle->setMaterial( material_ );
+  rectangle->setRenderQueueGroup( Ogre::RENDER_QUEUE_OVERLAY );
+  overlay_node_.reset( context_->getSceneManager()->getRootSceneNode()->createChildSceneNode(
+      "hector_rviz_overlay/OverlayNode" ) );
+  overlay_node_->attachObject( rectangle );
 }
 } // namespace hector_rviz_overlay

@@ -21,13 +21,8 @@
 #include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
 #include <OgreMaterial.h>
+#include <OgreSceneNode.h>
 #include <OgreTexture.h>
-
-namespace Ogre
-{
-class Overlay;
-class OverlayContainer;
-} // namespace Ogre
 
 namespace rviz_common
 {
@@ -87,19 +82,18 @@ protected:
    */
   virtual void updateTexture( unsigned int texture_width, unsigned int texture_height );
 
-  Ogre::Overlay *ogre_overlay_;
-  Ogre::OverlayContainer *overlay_panel_;
   Ogre::MaterialPtr material_;
   Ogre::TexturePtr texture_;
-  Ogre::TextureUnitState *texture_unit_state_;
+  Ogre::TextureUnitState *texture_unit_state_ = nullptr;
+  std::unique_ptr<Ogre::SceneNode> overlay_node_ = nullptr;
   unsigned int texture_id_ = 0;
 
-  rviz_common::RenderPanel *render_panel_;
-
 private:
+  void setupOverlay();
+
   class RenderTargetListener;
 
-  RenderTargetListener *render_target_listener_;
+  std::unique_ptr<RenderTargetListener> render_target_listener_;
 
   int last_width_ = 0;
   int last_height_ = 0;

@@ -29,6 +29,11 @@ namespace rviz_common
 class DisplayContext;
 }
 
+namespace Ogre
+{
+class Rectangle2D;
+}
+
 namespace hector_rviz_overlay
 {
 
@@ -86,6 +91,7 @@ protected:
   Ogre::TexturePtr texture_;
   Ogre::TextureUnitState *texture_unit_state_ = nullptr;
   std::unique_ptr<Ogre::SceneNode> overlay_node_ = nullptr;
+  Ogre::Rectangle2D *rectangle_ = nullptr;
   unsigned int texture_id_ = 0;
 
 private:

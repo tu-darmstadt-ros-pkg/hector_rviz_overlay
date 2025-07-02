@@ -103,7 +103,7 @@ void TextureOverlayRenderer::onRenderPanelDestroyed()
 void TextureOverlayRenderer::redrawLastFrame()
 {
   // Make sure it's visible, that's all
-  overlay_node_->setVisible( true );
+  rectangle_->setVisible( true );
 }
 
 void TextureOverlayRenderer::prepareRender( int width, int height )
@@ -118,9 +118,9 @@ void TextureOverlayRenderer::prepareRender( int width, int height )
   }
 }
 
-void TextureOverlayRenderer::finishRender() { overlay_node_->setVisible( true ); }
+void TextureOverlayRenderer::finishRender() { rectangle_->setVisible( true ); }
 
-void TextureOverlayRenderer::hide() { overlay_node_->setVisible( false ); }
+void TextureOverlayRenderer::hide() { rectangle_->setVisible( false ); }
 
 void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned int texture_height )
 {
@@ -178,12 +178,13 @@ void TextureOverlayRenderer::setupOverlay()
   material_pass->setDepthWriteEnabled( false );
   material_pass->setLightingEnabled( false );
 
-  auto *rectangle = new Ogre::Rectangle2D( true );
-  rectangle->setCorners( -1, 1, 1, -1 ); // Full screen rectangle
-  rectangle->setMaterial( material_ );
-  rectangle->setRenderQueueGroup( Ogre::RENDER_QUEUE_OVERLAY );
-  overlay_node_.reset( context_->getSceneManager()->getRootSceneNode()->createChildSceneNode(
-      "hector_rviz_overlay/OverlayNode" ) );
-  overlay_node_->attachObject( rectangle );
+  rectangle_ = new Ogre::Rectangle2D( true );
+  rectangle_->setUseIdentityProjection( true );
+  rectangle_->setUseIdentityView( true );
+  rectangle_->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
+  rectangle_->setCorners( -1, 1, 1, -1 ); // Full screen rectangle
+  rectangle_->setMaterial( material_ );
+  rectangle_->setRenderQueueGroup( Ogre::RENDER_QUEUE_OVERLAY );
+  context_->getSceneManager()->getRootSceneNode()->attachObject( rectangle_ );
 }
 } // namespace hector_rviz_overlay

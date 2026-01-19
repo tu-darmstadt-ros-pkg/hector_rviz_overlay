@@ -78,6 +78,9 @@ public:
 
   QString nodeName() const;
 
+  //! Copies the given text to the user's clipboard.
+  Q_INVOKABLE void copyTextToClipboard( const QString &text );
+
   /*!
    * Creates a position tracker with a notifying read-only position vector3d property, that will
    * return the screen coordinates of the given 3D point in the Ogre 3D View as x and y, and the

@@ -20,6 +20,7 @@
 
 #include "ui_overlay.hpp"
 
+#include <QStringList>
 #include <QVariantMap>
 
 class QQmlComponent;
@@ -154,6 +155,13 @@ protected slots:
 protected:
   bool createRootItem();
 
+  //! Creates and configures the QQmlEngine with all required context, providers, and paths.
+  void createEngine();
+
+  //! Destroys the current engine and creates a new one, resetting all singletons and type
+  //! registrations. This is necessary because Qt5 has no API to reset singletons.
+  void recreateEngine();
+
   void updateGeometry();
 
   /// @inherit
@@ -179,6 +187,8 @@ protected:
   bool sending_event_ = false;
 
   QString path_;
+  QStringList import_paths_;
+  QStringList plugin_paths_;
   Status status_ = Uninitialized;
   bool live_reload_enabled_ = false;
   std::unique_ptr<FileSystemWatcher> file_system_watcher_;

@@ -113,23 +113,7 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   render_control_ = new QQuickRenderControl();
   quick_window_ = new QQuickWindow( render_control_ );
 
-  engine_ = new QQmlEngine( quick_window_ );
-
-  delete url_interceptor_;
-  url_interceptor_ = new UrlInterceptor( this );
-  engine_->setUrlInterceptor( url_interceptor_ );
-  if ( !engine_->incubationController() )
-    engine_->setIncubationController( quick_window_->incubationController() );
-  qml_rviz_context_ =
-      new QmlRvizContext( OverlayManager::getSingleton().displayContext(), this, false );
-  qml_rviz_context_->setConfig( configuration_ );
-  emit contextCreated();
-  engine_->rootContext()->setContextProperty( "rviz", qml_rviz_context_ );
-  auto *tool_icon_provider =
-      new RvizToolIconProvider( OverlayManager::getSingleton().displayContext()->getToolManager() );
-  engine_->addImageProvider( QLatin1String( "rviz_tool_icons" ), tool_icon_provider );
-
-  component_ = new QQmlComponent( engine_ );
+  createEngine();
 
   quick_window_->contentItem()->setTransformOrigin( QQuickItem::TopLeft );
   quick_window_->contentItem()->setScale( scale() );
@@ -310,8 +294,53 @@ bool QmlOverlay::reload()
     return false;
   }
   LOG_INFO( "Reloading qml file." );
-  engine_->clearComponentCache();
+  recreateEngine();
   return createRootItem();
+}
+
+void QmlOverlay::recreateEngine()
+{
+  // Delete the old root item and component before the engine
+  delete root_item_;
+  root_item_ = nullptr;
+  delete component_;
+  component_ = nullptr;
+
+  // Delete the old engine (this also deletes all QML singletons)
+  delete engine_;
+  engine_ = nullptr;
+
+  createEngine();
+}
+
+void QmlOverlay::createEngine()
+{
+  engine_ = new QQmlEngine( quick_window_ );
+
+  if ( url_interceptor_ == nullptr )
+    url_interceptor_ = new UrlInterceptor( this );
+  engine_->setUrlInterceptor( url_interceptor_ );
+  if ( !engine_->incubationController() )
+    engine_->setIncubationController( quick_window_->incubationController() );
+
+  // Only create the rviz context on initial setup; reuse it across reloads
+  // to preserve user-modified configuration properties.
+  if ( qml_rviz_context_ == nullptr ) {
+    qml_rviz_context_ =
+        new QmlRvizContext( OverlayManager::getSingleton().displayContext(), this, false );
+    qml_rviz_context_->setConfig( configuration_ );
+    emit contextCreated();
+  }
+  engine_->rootContext()->setContextProperty( "rviz", qml_rviz_context_ );
+
+  auto *tool_icon_provider =
+      new RvizToolIconProvider( OverlayManager::getSingleton().displayContext()->getToolManager() );
+  engine_->addImageProvider( QLatin1String( "rviz_tool_icons" ), tool_icon_provider );
+
+  for ( const auto &path : import_paths_ ) engine_->addImportPath( path );
+  for ( const auto &path : plugin_paths_ ) engine_->addPluginPath( path );
+
+  component_ = new QQmlComponent( engine_ );
 }
 
 bool QmlOverlay::createRootItem()
@@ -374,9 +403,21 @@ void QmlOverlay::setStatus( QmlOverlay::Status status )
   emit statusChanged( status_ );
 }
 
-void QmlOverlay::addImportPath( const QString &dir ) { engine_->addImportPath( dir ); }
+void QmlOverlay::addImportPath( const QString &dir )
+{
+  if ( !import_paths_.contains( dir ) )
+    import_paths_.append( dir );
+  if ( engine_ != nullptr )
+    engine_->addImportPath( dir );
+}
 
-void QmlOverlay::addPluginPath( const QString &dir ) { engine_->addPluginPath( dir ); }
+void QmlOverlay::addPluginPath( const QString &dir )
+{
+  if ( !plugin_paths_.contains( dir ) )
+    plugin_paths_.append( dir );
+  if ( engine_ != nullptr )
+    engine_->addPluginPath( dir );
+}
 
 void QmlOverlay::setLiveReloadEnabled( bool value )
 {

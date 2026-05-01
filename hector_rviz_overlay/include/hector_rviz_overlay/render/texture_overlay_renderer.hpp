@@ -21,7 +21,6 @@
 #include "hector_rviz_overlay/render/overlay_renderer.hpp"
 
 #include <OgreMaterial.h>
-#include <OgreSceneNode.h>
 #include <OgreTexture.h>
 
 namespace rviz_common
@@ -31,8 +30,9 @@ class DisplayContext;
 
 namespace Ogre
 {
-class Rectangle2D;
-}
+class Overlay;
+class OverlayContainer;
+} // namespace Ogre
 
 namespace hector_rviz_overlay
 {
@@ -90,9 +90,14 @@ protected:
   Ogre::MaterialPtr material_;
   Ogre::TexturePtr texture_;
   Ogre::TextureUnitState *texture_unit_state_ = nullptr;
-  std::unique_ptr<Ogre::SceneNode> overlay_node_ = nullptr;
-  Ogre::Rectangle2D *rectangle_ = nullptr;
+  Ogre::Overlay *ogre_overlay_ = nullptr;
+  Ogre::OverlayContainer *overlay_panel_ = nullptr;
   unsigned int texture_id_ = 0;
+
+  // Whether the renderer currently has content that should be drawn.
+  // The overlay's actual visibility per render target is gated by the
+  // RenderTargetListener so it only shows in the main render panel.
+  bool overlay_active_ = false;
 
 private:
   void setupOverlay();

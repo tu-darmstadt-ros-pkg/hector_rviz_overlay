@@ -23,9 +23,10 @@
 #include <rviz_rendering/render_window.hpp>
 
 #include <Ogre.h>
-#include <OgreRectangle2D.h>
 #include <OgreRenderTargetListener.h>
-#include <OgreSceneNode.h>
+#include <Overlay/OgreOverlay.h>
+#include <Overlay/OgreOverlayContainer.h>
+#include <Overlay/OgreOverlayManager.h>
 #include <RenderSystems/GL/OgreGLTexture.h>
 
 #include "../logging.hpp"
@@ -42,6 +43,21 @@ public:
   {
     Ogre::RenderTargetListener::preRenderTargetUpdate( evt );
     renderer_->render();
+  }
+
+  // Show the overlay only while the main RViz render window's viewport is
+  // being updated. This listener is registered on the main render window only,
+  // so it does not fire for Camera Display render windows.
+  void preViewportUpdate( const Ogre::RenderTargetViewportEvent & ) override
+  {
+    if ( renderer_->ogre_overlay_ != nullptr && renderer_->overlay_active_ )
+      renderer_->ogre_overlay_->show();
+  }
+
+  void postViewportUpdate( const Ogre::RenderTargetViewportEvent & ) override
+  {
+    if ( renderer_->ogre_overlay_ != nullptr )
+      renderer_->ogre_overlay_->hide();
   }
 
 private:
@@ -86,6 +102,15 @@ TextureOverlayRenderer::~TextureOverlayRenderer()
                                                              render_target_listener_.get() );
   }
 
+  if ( ogre_overlay_ != nullptr ) {
+    ogre_overlay_->hide();
+    Ogre::OverlayManager &overlay_manager = Ogre::OverlayManager::getSingleton();
+    overlay_manager.destroy( ogre_overlay_ );
+    if ( overlay_panel_ != nullptr )
+      overlay_manager.destroyOverlayElement( overlay_panel_ );
+    ogre_overlay_ = nullptr;
+    overlay_panel_ = nullptr;
+  }
   if ( material_ != nullptr ) {
     material_->unload();
     Ogre::MaterialManager::getSingleton().remove( material_->getName() );
@@ -102,8 +127,9 @@ void TextureOverlayRenderer::onRenderPanelDestroyed()
 
 void TextureOverlayRenderer::redrawLastFrame()
 {
-  // Make sure it's visible, that's all
-  rectangle_->setVisible( true );
+  // Mark the overlay as active. Actual visibility per render target is
+  // toggled by the RenderTargetListener on the main render window.
+  overlay_active_ = true;
 }
 
 void TextureOverlayRenderer::prepareRender( int width, int height )
@@ -115,12 +141,16 @@ void TextureOverlayRenderer::prepareRender( int width, int height )
   if ( last_width_ != width || last_height_ != height ) {
     last_width_ = width;
     last_height_ = height;
+    if ( overlay_panel_ != nullptr && texture_ != nullptr ) {
+      overlay_panel_->setDimensions( (Ogre::Real)texture_->getWidth() / width,
+                                     (Ogre::Real)texture_->getHeight() / height );
+    }
   }
 }
 
-void TextureOverlayRenderer::finishRender() { rectangle_->setVisible( true ); }
+void TextureOverlayRenderer::finishRender() { overlay_active_ = true; }
 
-void TextureOverlayRenderer::hide() { rectangle_->setVisible( false ); }
+void TextureOverlayRenderer::hide() { overlay_active_ = false; }
 
 void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned int texture_height )
 {
@@ -168,8 +198,10 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
 
 void TextureOverlayRenderer::setupOverlay()
 {
-  if ( material_ != nullptr )
+  if ( ogre_overlay_ != nullptr )
     return;
+  Ogre::OverlayManager &overlay_manager = Ogre::OverlayManager::getSingleton();
+  ogre_overlay_ = overlay_manager.create( "hector_rviz_overlay/Overlay" );
   material_ = Ogre::MaterialManager::getSingleton().create(
       "hector_rviz_overlay/OverlayMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
   auto material_pass = material_->getTechnique( 0 )->getPass( 0 );
@@ -178,13 +210,15 @@ void TextureOverlayRenderer::setupOverlay()
   material_pass->setDepthWriteEnabled( false );
   material_pass->setLightingEnabled( false );
 
-  rectangle_ = new Ogre::Rectangle2D( true );
-  rectangle_->setUseIdentityProjection( true );
-  rectangle_->setUseIdentityView( true );
-  rectangle_->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
-  rectangle_->setCorners( -1, 1, 1, -1 ); // Full screen rectangle
-  rectangle_->setMaterial( material_ );
-  rectangle_->setRenderQueueGroup( Ogre::RENDER_QUEUE_OVERLAY );
-  context_->getSceneManager()->getRootSceneNode()->attachObject( rectangle_ );
+  overlay_panel_ = dynamic_cast<Ogre::OverlayContainer *>(
+      overlay_manager.createOverlayElement( "Panel", "hector_rviz_overlay/MainPanel" ) );
+  overlay_panel_->setPosition( 0.0, 0.0 );
+  overlay_panel_->setDimensions( 1.0, 1.0 );
+  overlay_panel_->setMaterial( material_ );
+
+  ogre_overlay_->add2D( overlay_panel_ );
+  // Default to hidden; the RenderTargetListener will show it during the main
+  // render window's viewport update only.
+  ogre_overlay_->hide();
 }
 } // namespace hector_rviz_overlay

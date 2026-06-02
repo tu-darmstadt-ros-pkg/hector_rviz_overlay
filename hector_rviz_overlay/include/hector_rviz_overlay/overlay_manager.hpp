@@ -151,8 +151,6 @@ private:
 
   ~OverlayManager() final;
 
-  void checkEmpty();
-
   void insertOverlay( UiOverlayPtr overlay );
 
   bool eventFilter( QObject *receiver, QEvent *event ) final;
@@ -167,6 +165,10 @@ private:
   rviz_common::RenderPanel *render_panel_;
   std::vector<UiOverlayPtr> ui_overlays_;
   std::vector<PopupOverlayPtr> popup_overlays_;
+  // Created lazily when the first overlay is added and intentionally kept alive afterwards, even
+  // when no overlays remain. It is only torn down on application quit (onAboutToQuit). Destroying
+  // it when the overlay count drops to zero crashes when config is changed as it fails to create
+  // the texture again.
   OverlayRenderer *renderer_;
 
   /*!

@@ -67,6 +67,8 @@ private:
 namespace
 {
 
+constexpr const char *kOverlayTextureName = "hector_rviz_overlay_OverlayTexture";
+
 size_t bit_ceil( size_t value )
 {
 #if __cplusplus >= 202002L
@@ -169,11 +171,19 @@ void TextureOverlayRenderer::updateTexture( unsigned int texture_width, unsigned
   try {
     LOG_DEBUG( "Creating overlay texture of size (%u, %u)", texture_width, texture_height );
     texture_ = Ogre::TextureManager::getSingleton().createManual(
-        "hector_rviz_overlay_OverlayTexture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+        kOverlayTextureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
         Ogre::TEX_TYPE_2D, texture_width, texture_height, 0, Ogre::PF_A8R8G8B8,
         Ogre::TextureUsage::TU_STATIC | Ogre::TextureUsage::TU_RENDERTARGET );
   } catch ( std::exception &ex ) {
     LOG_ERROR( "Caught exception while creating overlay texture: %s", ex.what() );
+    // createManual registers the resource by name before initialising its GPU resources (e.g. the
+    // render-target FBO). If that init throws, the name stays registered but no usable texture is
+    // returned, so later create attempts would fail with "texture already exists". Drop the
+    // half-created resource so it can be recreated.
+    texture_.reset();
+    auto &texture_manager = Ogre::TextureManager::getSingleton();
+    if ( texture_manager.resourceExists( kOverlayTextureName ) )
+      texture_manager.remove( kOverlayTextureName );
   }
   if ( !texture_ ) {
     if ( texture_multiple_of_two_required_ ) {

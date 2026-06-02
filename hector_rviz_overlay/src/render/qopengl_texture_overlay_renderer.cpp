@@ -81,7 +81,10 @@ void QOpenGLTextureOverlayRenderer::releaseResources()
 void QOpenGLTextureOverlayRenderer::updateTexture( unsigned texture_width, unsigned texture_height )
 {
   TextureOverlayRenderer::updateTexture( texture_width, texture_height );
-  texture_unit_state_->setTextureScale( 1, -1 );
+  // The base leaves texture_unit_state_ null when texture creation fails (see its power-of-two
+  // fallback). Guard so a failed frame degrades gracefully instead of crashing.
+  if ( texture_unit_state_ != nullptr )
+    texture_unit_state_->setTextureScale( 1, -1 );
 }
 
 QPaintDevice *QOpenGLTextureOverlayRenderer::paintDevice() noexcept

@@ -114,23 +114,6 @@ bool OverlayManager::removeOverlay( const std::string &name )
   return removeOverlay( getByName( name ) );
 }
 
-void OverlayManager::checkEmpty()
-{
-  // If there are no overlays left, the renderer is destroyed.
-  // This is done for two reasons: The first and most obvious, we don't need a renderer if we have
-  // no overlays and second, when deleting it in OverlayManager's destructor it crashes because of a
-  // multithreading issue and deleting when the RenderPanel is destroyed doesn't work either because
-  // the overlays are removed after that which leads to a different crash.
-  if ( ui_overlays_.empty() && popup_overlays_.empty() ) {
-    qApp->removeEventFilter( this );
-    if ( renderer_ != nullptr ) {
-      renderer_->releaseResources();
-      delete renderer_;
-      renderer_ = nullptr;
-    }
-  }
-}
-
 bool OverlayManager::removeOverlay( OverlayPtr overlay )
 {
   if ( overlay == nullptr )
@@ -162,8 +145,6 @@ bool OverlayManager::removeOverlay( OverlayPtr overlay )
     disconnect( static_cast<UiOverlay *>( overlay.get() ), &UiOverlay::zIndexChanged, this,
                 &OverlayManager::onZIndexChanged );
     ui_overlays_.erase( it );
-
-    checkEmpty();
     return true;
   }
 
@@ -176,8 +157,6 @@ bool OverlayManager::removeOverlay( OverlayPtr overlay )
       renderer_->removeOverlay( overlay );
     }
     popup_overlays_.erase( it );
-
-    checkEmpty();
     return true;
   }
   return false;

@@ -82,6 +82,8 @@ class QmlToolManager : public QObject
 public:
   explicit QmlToolManager( rviz_common::ToolManager *tool_manager );
 
+  ~QmlToolManager() override;
+
   QVariantList tools() const;
 
   Q_INVOKABLE QObject *addTool();

@@ -18,12 +18,20 @@
 #include "hector_rviz_overlay/helper/qml_tool_manager.hpp"
 
 #include <QApplication>
+#include <QQmlEngine>
 #include <rviz_common/tool_manager.hpp>
 
 namespace hector_rviz_overlay
 {
 
-QmlTool::QmlTool( rviz_common::Tool *tool ) : tool_( tool ) { }
+QmlTool::QmlTool( rviz_common::Tool *tool ) : tool_( tool )
+{
+  // QmlTool is owned and deleted by QmlToolManager (tools_). Without this, QML assigns
+  // JavaScriptOwnership to the parentless object returned via the tools property / getTool /
+  // currentTool and its garbage collector (or QQmlEngine teardown) frees it out from under us,
+  // leaving dangling pointers that crash on the next config reload.
+  QQmlEngine::setObjectOwnership( this, QQmlEngine::CppOwnership );
+}
 
 bool QmlTool::isSelected() const { return is_selected_; }
 
@@ -66,6 +74,13 @@ QmlToolManager::QmlToolManager( rviz_common::ToolManager *tool_manager )
       tool->setIsSelected( true );
     tools_.append( tool );
   }
+}
+
+QmlToolManager::~QmlToolManager()
+{
+  // QmlTools are CppOwnership and parentless, so neither QML's GC nor Qt's parent-child
+  // teardown frees them. QmlToolManager owns them via tools_ and must delete them itself.
+  qDeleteAll( tools_ );
 }
 
 void QmlToolManager::disconnectSignals()
@@ -156,7 +171,8 @@ void QmlToolManager::removeTool( int i )
   if ( tools_.size() <= i )
     return;
   assert( tools_.at( i )->tool() == tool_manager_->getTool( i ) );
-  tools_.removeAt( i );
+  // Let onToolRemoved remove it from tools_ and delete the QmlTool, so the QML toolRemoved
+  // signal fires and cleanup matches the rviz-driven removal path.
   tool_manager_->removeTool( i );
 }
 

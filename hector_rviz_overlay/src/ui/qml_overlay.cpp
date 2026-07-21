@@ -140,11 +140,23 @@ void QmlOverlay::prepareRender( Renderer *renderer )
 
 void QmlOverlay::releaseRenderResources()
 {
+  // Tear down in the order recommended for QQuickRenderControl: scene items and
+  // render control first, then the window, then the engine (which the items and
+  // window may access while being destroyed).
+  // quick_window_ has no QObject parent and must be deleted explicitly; deleting
+  // it also cascades to its children, so detach engine_ first to avoid a double
+  // free and to let the engine outlive the window's scene graph teardown.
+  delete root_item_;
+  root_item_ = nullptr;
   delete render_control_;
-  qml_rviz_context_ = nullptr;
   render_control_ = nullptr;
+  delete component_;
   component_ = nullptr;
+  if ( engine_ != nullptr )
+    engine_->setParent( nullptr );
+  delete quick_window_;
   quick_window_ = nullptr;
+  delete engine_;
   engine_ = nullptr;
 }
 
@@ -371,12 +383,14 @@ bool QmlOverlay::createRootItem()
   if ( component_->isError() ) {
     LOG_WARN( "Error while trying to create QML component: %s",
               component_->errorString().toStdString().c_str() );
+    delete root_object;
     setStatus( CreationFailed );
     return false;
   }
 
   auto *root_item = qobject_cast<QQuickItem *>( root_object );
   if ( !root_item ) {
+    delete root_object;
     setStatus( Error );
     return false;
   }

@@ -48,6 +48,15 @@ OgrePositionTracker::OgrePositionTracker( const Ogre::Vector3 &point,
     : point_( point ), context_( context ), overlay_( overlay )
 {
   listener_.reset( new OgrePositionTracker::Listener( this ) );
+  // The tracker is owned by QML but back-references the overlay; if the overlay is destroyed first,
+  // detach from the camera and stop dereferencing it to avoid a use-after-free.
+  connect( overlay_, &QObject::destroyed, this, [this]() {
+    if ( camera_ != nullptr ) {
+      camera_->removeListener( listener_.get() );
+      camera_ = nullptr;
+    }
+    overlay_ = nullptr;
+  } );
   updateCamera();
 }
 
@@ -60,6 +69,8 @@ OgrePositionTracker::~OgrePositionTracker()
 
 void OgrePositionTracker::checkPosition()
 {
+  if ( overlay_ == nullptr || camera_ == nullptr )
+    return;
   Ogre::Vector4 screen_point = camera_->getProjectionMatrix() * camera_->getViewMatrix() *
                                Ogre::Vector4( point_.x, point_.y, point_.z, 1 );
   float x = screen_point.x * 0.5 / screen_point.w + 0.5;
@@ -81,7 +92,10 @@ void OgrePositionTracker::updateCamera()
 {
   if ( camera_ != nullptr )
     camera_->removeListener( listener_.get() );
-  camera_ = context_->getViewManager()->getCurrent()->getCamera();
+  camera_ = nullptr;
+  if ( auto *view_controller = context_->getViewManager()->getCurrent();
+       view_controller != nullptr )
+    camera_ = view_controller->getCamera();
   if ( camera_ != nullptr )
     camera_->addListener( listener_.get() );
 }

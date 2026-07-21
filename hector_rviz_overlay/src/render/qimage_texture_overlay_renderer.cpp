@@ -34,6 +34,11 @@ void QImageTextureOverlayRenderer::releaseResources() { /* Nothing to do */ }
 void QImageTextureOverlayRenderer::prepareRender( int width, int height )
 {
   TextureOverlayRenderer::prepareRender( width, height );
+  // updateTexture leaves texture_ null if creation failed (see its power-of-two fallback).
+  if ( texture_ == nullptr ) {
+    paint_device_image_ = QImage();
+    return;
+  }
   buffer_ = texture_->getBuffer();
   buffer_->lock( Ogre::HardwareBuffer::HBL_DISCARD );
   const Ogre::PixelBox &pixel_box = buffer_->getCurrentLock();
@@ -52,8 +57,11 @@ void QImageTextureOverlayRenderer::prepareRender( int width, int height )
 
 void QImageTextureOverlayRenderer::finishRender()
 {
-  buffer_->unlock();
-  buffer_.reset();
+  // buffer_ stays null when prepareRender bailed out on a failed texture creation.
+  if ( buffer_ != nullptr ) {
+    buffer_->unlock();
+    buffer_.reset();
+  }
   TextureOverlayRenderer::finishRender();
 }
 

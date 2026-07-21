@@ -32,7 +32,10 @@ OgreTracker::OgreTracker( const Ogre::Vector3 &point, const rviz_common::Display
 
 QPoint OgreTracker::getPoint( int width, int height )
 {
-  Ogre::Camera *camera_ = context_->getViewManager()->getCurrent()->getCamera();
+  rviz_common::ViewController *view_controller = context_->getViewManager()->getCurrent();
+  Ogre::Camera *camera_ = view_controller != nullptr ? view_controller->getCamera() : nullptr;
+  if ( camera_ == nullptr )
+    return { width / 2, height / 2 };
   Ogre::Vector4 screen_point = camera_->getProjectionMatrix() * camera_->getViewMatrix() *
                                Ogre::Vector4( point_.x, point_.y, point_.z, 1 );
   double x = screen_point.x * 0.5 / screen_point.w + 0.5;

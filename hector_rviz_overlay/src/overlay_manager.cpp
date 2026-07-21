@@ -208,6 +208,8 @@ void OverlayManager::onZIndexChanged()
 
 void OverlayManager::moveToFront( UiOverlayPtr overlay )
 {
+  if ( ui_overlays_.empty() )
+    return;
   UiOverlayPtr top = ui_overlays_[ui_overlays_.size() - 1];
   if ( top == overlay )
     return;
@@ -237,6 +239,8 @@ void OverlayManager::moveToBack( const std::string &name )
 
 void OverlayManager::moveToBack( UiOverlayPtr overlay )
 {
+  if ( ui_overlays_.empty() )
+    return;
   UiOverlayPtr bottom = ui_overlays_[0];
   if ( bottom == overlay )
     return;
@@ -338,7 +342,10 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
   QMouseEvent child_mouse_event( event->type(), render_panel_pos, event->screenPos(),
                                  event->button(), event->buttons(), event->modifiers() );
   if ( mouse_down_overlay_ != nullptr ) {
-    bool result = mouse_down_overlay_->handleEvent( receiver, &child_mouse_event );
+    // Keep a strong ref: handleEvent can trigger overlay removal, which would drop the member and
+    // destroy the overlay while its own method is still running.
+    OverlayPtr overlay = mouse_down_overlay_;
+    bool result = overlay->handleEvent( receiver, &child_mouse_event );
     if ( !is_mouse_down ) {
       mouse_down_overlay_ = nullptr;
     }
@@ -347,22 +354,30 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
   }
 
   std::unique_lock<std::recursive_mutex> scoped_lock( mutex_ );
+  // Snapshot the containers: handleEvent can reentrantly remove or reorder overlays, which would
+  // invalidate a live index mid-loop and let the reorder below erase the wrong element or push a
+  // removed overlay back in. Iterating a copy keeps indices stable and keeps every overlay alive
+  // across its own handleEvent; mutations to the live vectors are located by value instead.
   // First go through popups because they are on top
-  for ( int i = (int)popup_overlays_.size() - 1; i >= 0; --i ) {
-    if ( !popup_overlays_[i]->isVisible() )
+  const std::vector<PopupOverlayPtr> popups = popup_overlays_;
+  for ( int i = (int)popups.size() - 1; i >= 0; --i ) {
+    const PopupOverlayPtr &popup_overlay = popups[i];
+    if ( !popup_overlay->isVisible() )
       continue;
 
-    if ( !popup_overlays_[i]->handleEvent( receiver, &child_mouse_event ) )
+    if ( !popup_overlay->handleEvent( receiver, &child_mouse_event ) )
       continue;
 
-    PopupOverlayPtr popup_overlay = popup_overlays_[i];
     if ( mouse_overlay_ != popup_overlay && mouse_overlay_ != nullptr ) {
       mouse_overlay_->handleEventsCanceled();
     }
 
-    if ( i == static_cast<int>( popup_overlays_.size() ) - 1 ) {
-      // The popup that is at the top did not handle the event but another one did, hence, we move the other to the top.
-      popup_overlays_.erase( popup_overlays_.begin() + i );
+    // Locate the overlay in the live container; reentrant handling may have moved or removed it.
+    auto it = std::find( popup_overlays_.begin(), popup_overlays_.end(), popup_overlay );
+    if ( it != popup_overlays_.end() && it + 1 != popup_overlays_.end() ) {
+      // The popup that handled the event was not the topmost; bring it to the front so it renders
+      // on top and receives subsequent events first.
+      popup_overlays_.erase( it );
       popup_overlays_.push_back( popup_overlay );
       OverlayPtr overlay = std::static_pointer_cast<Overlay>( popup_overlay );
       renderer_->removeOverlay( overlay );
@@ -379,20 +394,22 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
   }
 
   // Go through overlays from last to first, because the last one is drawn on top of the others
-  for ( int i = (int)ui_overlays_.size() - 1; i >= 0; --i ) {
-    if ( !ui_overlays_[i]->isVisible() )
+  const std::vector<UiOverlayPtr> ui_overlays = ui_overlays_;
+  for ( int i = (int)ui_overlays.size() - 1; i >= 0; --i ) {
+    const UiOverlayPtr &ui_overlay = ui_overlays[i];
+    if ( !ui_overlay->isVisible() )
       continue;
 
-    if ( !ui_overlays_[i]->handleEvent( receiver, &child_mouse_event ) )
+    if ( !ui_overlay->handleEvent( receiver, &child_mouse_event ) )
       continue;
-    if ( mouse_overlay_ != ui_overlays_[i] && mouse_overlay_ != nullptr ) {
+    if ( mouse_overlay_ != ui_overlay && mouse_overlay_ != nullptr ) {
       mouse_overlay_->handleEventsCanceled();
     }
 
-    mouse_overlay_ = ui_overlays_[i];
+    mouse_overlay_ = ui_overlay;
     if ( is_mouse_down ) {
-      mouse_down_overlay_ = ui_overlays_[i];
-      focused_overlay_ = ui_overlays_[i];
+      mouse_down_overlay_ = ui_overlay;
+      focused_overlay_ = ui_overlay;
     }
     event->setAccepted( true );
     return true;
@@ -419,21 +436,27 @@ bool OverlayManager::handleWheelEvent( QObject *receiver, QWheelEvent *event )
                            event->phase(), event->source() );
 
   std::unique_lock<std::recursive_mutex> scoped_lock( mutex_ );
-  for ( int i = (int)popup_overlays_.size() - 1; i >= 0; --i ) {
-    if ( !popup_overlays_[i]->isVisible() )
+  // Snapshot: handleEvent can reentrantly remove or reorder overlays, invalidating a live index.
+  // The copies also keep each overlay alive across its own handleEvent.
+  const std::vector<PopupOverlayPtr> popups = popup_overlays_;
+  for ( int i = (int)popups.size() - 1; i >= 0; --i ) {
+    const PopupOverlayPtr &popup_overlay = popups[i];
+    if ( !popup_overlay->isVisible() )
       continue;
 
-    if ( !popup_overlays_[i]->handleEvent( receiver, &child_event ) )
+    if ( !popup_overlay->handleEvent( receiver, &child_event ) )
       continue;
 
     event->setAccepted( true );
     return true;
   }
-  for ( int i = (int)ui_overlays_.size() - 1; i >= 0; --i ) {
-    if ( !ui_overlays_[i]->isVisible() )
+  const std::vector<UiOverlayPtr> ui_overlays = ui_overlays_;
+  for ( int i = (int)ui_overlays.size() - 1; i >= 0; --i ) {
+    const UiOverlayPtr &ui_overlay = ui_overlays[i];
+    if ( !ui_overlay->isVisible() )
       continue;
 
-    if ( !ui_overlays_[i]->handleEvent( receiver, &child_event ) )
+    if ( !ui_overlay->handleEvent( receiver, &child_event ) )
       continue;
 
     event->setAccepted( true );
@@ -446,6 +469,8 @@ bool OverlayManager::handleKeyEvent( QObject *receiver, QKeyEvent *event )
 {
   if ( focused_overlay_ == nullptr )
     return false;
-  return focused_overlay_->handleEvent( receiver, event );
+  // Strong ref: handleEvent may reentrantly remove the overlay and drop the member ref.
+  OverlayPtr overlay = focused_overlay_;
+  return overlay->handleEvent( receiver, event );
 }
 } // namespace hector_rviz_overlay

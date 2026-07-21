@@ -38,6 +38,10 @@ public:
 
   ~FileSystemWatcher();
 
+  // Owns an inotify file descriptor and watch descriptors; copying would double-close them.
+  FileSystemWatcher( const FileSystemWatcher & ) = delete;
+  FileSystemWatcher &operator=( const FileSystemWatcher & ) = delete;
+
   bool isValid() const;
 
   bool addWatch( const std::string &path );

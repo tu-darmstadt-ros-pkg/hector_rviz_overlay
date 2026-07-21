@@ -85,7 +85,6 @@ QOpenGLWrapper::~QOpenGLWrapper()
     delete texture_fbo_;
     doneCurrent();
     delete opengl_context_;
-    delete native_opengl_context_;
     opengl_context_ = nullptr;
   }
   delete native_context_information_;

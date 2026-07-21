@@ -99,12 +99,9 @@ bool FileSystemWatcher::addWatch( const std::string &path )
 
 void FileSystemWatcher::removeWatch( const std::string &path )
 {
-  watched_paths_.erase( std::find( watched_paths_.begin(), watched_paths_.end(), path ) );
-  // Only unregister if no other watches are left
-  if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end() )
-    return;
+  // Resolve symlinks first, mirroring addWatch which records the resolved target rather than the
+  // link. Decrementing on the link key would miss the target's reference and leak its watch.
   if ( std::filesystem::is_symlink( path ) ) {
-    // Follow symlinks
     std::error_code error;
     std::string target = std::filesystem::read_symlink( path, error );
     if ( error ) {
@@ -115,6 +112,14 @@ void FileSystemWatcher::removeWatch( const std::string &path )
     removeWatch( target );
     return;
   }
+
+  auto path_it = std::find( watched_paths_.begin(), watched_paths_.end(), path );
+  if ( path_it == watched_paths_.end() )
+    return;
+  watched_paths_.erase( path_it );
+  // Only unregister if no other references to this path are left
+  if ( std::find( watched_paths_.begin(), watched_paths_.end(), path ) != watched_paths_.end() )
+    return;
 
   // Check if folder
   if ( auto it = watched_directories_.find( path ); it != watched_directories_.end() ) {
@@ -162,6 +167,11 @@ bool FileSystemWatcher::checkForChanges() const
     while ( offset < static_cast<size_t>( count ) ) {
       event = reinterpret_cast<const inotify_event *>( buffer + offset );
       offset += sizeof( struct inotify_event ) + event->len;
+
+      // Nameless events (IN_IGNORED, IN_Q_OVERFLOW, IN_UNMOUNT) are delivered regardless of the
+      // requested mask and carry no name; reading event->name would over-read past the payload.
+      if ( event->len == 0 )
+        continue;
 
       // Ignore qmlc file changes because we create them. Some of them are temps and end in .qmlc.[RANDOMSTRING]
       if ( std::string name = event->name;

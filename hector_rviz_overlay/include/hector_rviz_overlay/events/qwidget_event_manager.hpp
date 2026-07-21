@@ -19,13 +19,14 @@
 #define HECTOR_RVIZ_OVERLAY_QWIDGET_EVENT_MANAGER_H
 
 #include <QPoint>
+#include <QPointer>
+#include <QWidget>
 
 class QEvent;
 class QKeyEvent;
 class QMouseEvent;
 class QObject;
 class QWheelEvent;
-class QWidget;
 
 namespace hector_rviz_overlay
 {
@@ -61,10 +62,11 @@ protected:
   QWidget *widget_ = nullptr;
   float scale_ = 1.0f;
 
-  QWidget *mouse_over_widget_ = nullptr;
+  // QPointer so a child widget destroyed at runtime auto-nulls here instead of dangling.
+  QPointer<QWidget> mouse_over_widget_;
   QPoint hover_pos_;
-  QWidget *mouse_down_widget_ = nullptr;
-  QWidget *focus_widget_ = nullptr;
+  QPointer<QWidget> mouse_down_widget_;
+  QPointer<QWidget> focus_widget_;
 };
 } // namespace hector_rviz_overlay
 

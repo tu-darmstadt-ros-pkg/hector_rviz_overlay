@@ -37,8 +37,12 @@ const QWidget *PopupContainerWidget::popup() const { return popup_; }
 
 void PopupContainerWidget::setPopup( QWidget *value )
 {
+  if ( popup_ == value )
+    return;
   if ( popup_ != nullptr && popup_->parentWidget() == this ) {
-    popup_->setParent( nullptr );
+    // This container owns the previous popup via its Qt parent; delete it instead of just
+    // detaching, otherwise the orphaned top-level widget leaks.
+    popup_->deleteLater();
   }
   popup_ = value;
   popup_->setParent( this );

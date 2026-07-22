@@ -31,6 +31,7 @@ set(SOURCES
   include/hector_rviz_overlay/displays/qwidget_overlay_display.hpp
   include/hector_rviz_overlay/events/qwidget_event_manager.hpp
   include/hector_rviz_overlay/helper/file_system_watcher.hpp
+  include/hector_rviz_overlay/helper/qml_display_manager.hpp
   include/hector_rviz_overlay/helper/qml_rviz_context.hpp
   include/hector_rviz_overlay/helper/qml_rviz_property.hpp
   include/hector_rviz_overlay/helper/qml_tool_manager.hpp
@@ -63,6 +64,7 @@ set(SOURCES
   src/displays/qwidget_overlay_display.cpp
   src/events/qwidget_event_manager.cpp
   src/helper/file_system_watcher.cpp
+  src/helper/qml_display_manager.cpp
   src/helper/qml_rviz_context.cpp
   src/helper/qml_rviz_property.cpp
   src/helper/qml_tool_manager.cpp

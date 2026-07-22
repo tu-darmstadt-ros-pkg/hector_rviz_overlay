@@ -19,12 +19,30 @@
 #define HECTOR_RVIZ_OVERLAY_QML_RVIZ_PROPERTY_H
 
 #include <QObject>
+#include <QPointer>
 #include <rviz_common/properties/property.hpp>
 
 #include "hector_rviz_overlay/displays/overlay_display.hpp"
 
 namespace hector_rviz_overlay
 {
+
+/*!
+ * Finds the direct child property of the given property whose name matches path.
+ * Unlike Property::subProp this does not log and return a FailureProperty on a miss.
+ * @return The matching child property or nullptr if none matches.
+ */
+rviz_common::properties::Property *findChildProperty( rviz_common::properties::Property *property,
+                                                      const QString &path );
+
+/*!
+ * Sets a property's value, coercing the incoming variant to the property's current value type first.
+ * rviz's Property::setValue stores the variant verbatim, and its editor delegate picks the widget
+ * from the stored type, so assigning e.g. the string "true" to a BoolProperty replaces the bool and
+ * turns the checkbox into a text field. Coercion keeps the type-specific editor intact.
+ * @return false if the value cannot be converted to the property's type; true otherwise.
+ */
+bool setPropertyValueCoerced( rviz_common::properties::Property *property, const QVariant &value );
 
 class QmlRvizProperty : public QObject
 {
@@ -49,7 +67,7 @@ private slots:
   void onPropertyChanged();
 
 private:
-  rviz_common::properties::Property *property_;
+  QPointer<rviz_common::properties::Property> property_;
 };
 } // namespace hector_rviz_overlay
 

@@ -44,6 +44,7 @@ QmlRvizContext::QmlRvizContext( rviz_common::DisplayContext *context, const Over
   configuration_property_ = new Property( "Configuration", QVariant(),
                                           "Container for configurable settings of the overlay." );
   tool_manager_ = std::make_unique<QmlToolManager>( context_->getToolManager() );
+  display_manager_ = std::make_unique<QmlDisplayManager>( context_ );
   // If rviz is used as widget inside an application, the window manager interface may not be available
   rviz_common::WindowManagerInterface *wmi = context_->getWindowManager();
   QWindow *window = wmi == nullptr ? nullptr : wmi->getParentWindow()->windowHandle();
@@ -133,16 +134,6 @@ void QmlRvizContext::setConfigurationPropertyParent( Property *parent )
 
 namespace
 {
-Property *findChildProperty( Property *property, const QString &path )
-{
-  for ( int i = 0; i < property->numChildren(); ++i ) {
-    if ( property->childAt( i )->getName() != path )
-      continue;
-    return property->childAt( i );
-  }
-  return nullptr;
-}
-
 void loadConfig( const rviz_common::Config &config, Property *property )
 {
   if ( !config.isValid() )
@@ -195,6 +186,8 @@ void QmlRvizContext::load( const rviz_common::Config &config )
 
 QObject *QmlRvizContext::toolManager() const { return tool_manager_.get(); }
 
+QObject *QmlRvizContext::displayManager() const { return display_manager_.get(); }
+
 QObject *QmlRvizContext::registerPropertyContainer( const QString &name, const QString &description )
 {
   QmlRvizProperty tmp( configuration_property_ );
@@ -204,6 +197,8 @@ QObject *QmlRvizContext::registerPropertyContainer( const QString &name, const Q
 QObject *QmlRvizContext::registerPropertyContainer( QmlRvizProperty *parent, const QString &name,
                                                     const QString &description )
 {
+  if ( parent == nullptr )
+    return registerPropertyContainer( name, description );
   auto *prop = findChildProperty( parent->property(), name );
   if ( prop == nullptr ) {
     prop = new Property( name, QVariant(), description, parent->property() );

@@ -20,6 +20,37 @@
 namespace hector_rviz_overlay
 {
 
+rviz_common::properties::Property *findChildProperty( rviz_common::properties::Property *property,
+                                                      const QString &path )
+{
+  if ( property == nullptr )
+    return nullptr;
+  for ( int i = 0; i < property->numChildren(); ++i ) {
+    if ( property->childAt( i )->getName() != path )
+      continue;
+    return property->childAt( i );
+  }
+  return nullptr;
+}
+
+bool setPropertyValueCoerced( rviz_common::properties::Property *property, const QVariant &value )
+{
+  if (property == nullptr)
+    return false;
+  const QVariant current = property->getValue();
+  // Only coerce when the property has a typed value to match. Valueless properties (e.g. group
+  // headers) carry an invalid variant, so pass the value through unchanged as rviz would.
+  if ( current.isValid() && value.userType() != current.userType() ) {
+    QVariant coerced = value;
+    if ( !coerced.convert( current.userType() ) )
+      return false;
+    property->setValue( coerced );
+    return true;
+  }
+  property->setValue( value );
+  return true;
+}
+
 QmlRvizProperty::QmlRvizProperty( rviz_common::properties::Property *property )
     : property_( property )
 {
@@ -27,11 +58,26 @@ QmlRvizProperty::QmlRvizProperty( rviz_common::properties::Property *property )
            &QmlRvizProperty::onPropertyChanged );
 }
 
-QVariant QmlRvizProperty::value() const { return property_->getValue(); }
+QVariant QmlRvizProperty::value() const
+{
+  if ( property_.isNull() )
+    return {};
+  return property_->getValue();
+}
 
-void QmlRvizProperty::setValue( const QVariant &value ) { property_->setValue( value ); }
+void QmlRvizProperty::setValue( const QVariant &value )
+{
+  if ( property_.isNull() )
+    return;
+  setPropertyValueCoerced( property_, value );
+}
 
 rviz_common::properties::Property *QmlRvizProperty::property() { return property_; }
 
-void QmlRvizProperty::onPropertyChanged() { emit valueChanged( property_->getValue() ); }
+void QmlRvizProperty::onPropertyChanged()
+{
+  if ( property_.isNull() )
+    return;
+  emit valueChanged( property_->getValue() );
+}
 } // namespace hector_rviz_overlay

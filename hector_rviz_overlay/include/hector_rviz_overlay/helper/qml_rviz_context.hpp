@@ -22,6 +22,7 @@
 #include <QVariantMap>
 
 #include "hector_rviz_overlay/displays/overlay_display.hpp"
+#include "hector_rviz_overlay/helper/qml_display_manager.hpp"
 #include "hector_rviz_overlay/helper/qml_rviz_property.hpp"
 #include "hector_rviz_overlay/helper/qml_tool_manager.hpp"
 
@@ -43,6 +44,7 @@ class QmlRvizContext : public QObject
   Q_PROPERTY( bool isFullscreen READ isFullscreen WRITE setIsFullscreen NOTIFY isFullscreenChanged )
   Q_PROPERTY( QString fixedFrame READ fixedFrame WRITE setFixedFrame NOTIFY fixedFrameChanged )
   Q_PROPERTY( QObject *toolManager READ toolManager CONSTANT )
+  Q_PROPERTY( QObject *displayManager READ displayManager CONSTANT )
   Q_PROPERTY( QString namespace READ ns CONSTANT)
   Q_PROPERTY( QString nodeName READ nodeName CONSTANT)
   // @formatter:on
@@ -73,6 +75,8 @@ public:
   void setConfigurationPropertyParent( rviz_common::properties::Property *parent );
 
   QObject *toolManager() const;
+
+  QObject *displayManager() const;
 
   QString ns() const;
 
@@ -204,6 +208,7 @@ private:
   Qt::WindowState window_state_;
   rviz_common::DisplayContext *context_;
   std::unique_ptr<QmlToolManager> tool_manager_;
+  std::unique_ptr<QmlDisplayManager> display_manager_;
   const Overlay *overlay_;
   rviz_common::properties::Property *configuration_property_;
   bool visible_;

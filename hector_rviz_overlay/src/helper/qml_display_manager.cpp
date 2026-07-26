@@ -34,6 +34,29 @@ using rviz_common::properties::Property;
 namespace hector_rviz_overlay
 {
 
+namespace
+{
+/*!
+ * Collects the direct child displays of the given display. Groups keep them in a separate list;
+ * non-group displays (e.g. MultiRobotModel) can parent them among their plain properties via
+ * addChild.
+ */
+QList<QPointer<Display>> childDisplaysOf( const Display *display )
+{
+  QList<QPointer<Display>> result;
+  if ( const auto *group = dynamic_cast<const DisplayGroup *>( display ) ) {
+    result.reserve( group->numDisplays() );
+    for ( int i = 0; i < group->numDisplays(); ++i ) result.append( group->getDisplayAt( i ) );
+    return result;
+  }
+  for ( int i = 0; i < display->numChildren(); ++i ) {
+    if ( auto *child = dynamic_cast<Display *>( display->childAt( i ) ) )
+      result.append( child );
+  }
+  return result;
+}
+} // namespace
+
 // ======================== QmlDisplay ========================
 
 QmlDisplay::QmlDisplay( Display *display, QmlDisplayManager *manager )
@@ -46,10 +69,27 @@ QmlDisplay::QmlDisplay( Display *display, QmlDisplayManager *manager )
   // The wrapped display is a BoolProperty; its bool value is the enabled/visibility state and
   // changed() fires when it is toggled.
   connect( display, &Property::changed, this, &QmlDisplay::enabledChanged );
+  // Display::setName stores the name with QObject::setObjectName and emits no changed(), so
+  // objectNameChanged is what tracks renames, wherever they originate.
+  connect( display, &Display::objectNameChanged, this, &QmlDisplay::nameChanged );
+  child_displays_ = childDisplaysOf( display );
   if ( auto *group = dynamic_cast<DisplayGroup *>( display ) ) {
-    connect( group, &DisplayGroup::displayAdded, this, &QmlDisplay::displaysChanged );
-    connect( group, &DisplayGroup::displayRemoved, this, &QmlDisplay::displaysChanged );
+    connect( group, &DisplayGroup::displayAdded, this, &QmlDisplay::onChildListChanged );
+    connect( group, &DisplayGroup::displayRemoved, this, &QmlDisplay::onChildListChanged );
+  } else {
+    connect( display, &Property::childListChanged, this, &QmlDisplay::onChildListChanged );
   }
+}
+
+void QmlDisplay::onChildListChanged()
+{
+  if ( display_.isNull() )
+    return;
+  const QList<QPointer<Display>> children = childDisplaysOf( display_ );
+  if ( children == child_displays_ )
+    return;
+  child_displays_ = children;
+  emit displaysChanged();
 }
 
 void QmlDisplay::invalidate() { emit invalidated(); }
@@ -72,9 +112,7 @@ void QmlDisplay::setName( const QString &name )
 {
   if ( display_.isNull() )
     return;
-  // rviz's Display::setName uses setObjectName and emits no changed(), so we drive nameChanged here.
   display_->setName( name );
-  emit nameChanged();
 }
 
 QString QmlDisplay::getClassId() const
@@ -127,12 +165,12 @@ bool QmlDisplay::valid() const { return !display_.isNull(); }
 QVariantList QmlDisplay::displays() const
 {
   QVariantList result;
-  auto *group = dynamic_cast<DisplayGroup *>( display_.data() );
-  if ( group == nullptr )
-    return result;
-  result.reserve( group->numDisplays() );
-  for ( int i = 0; i < group->numDisplays(); ++i )
-    result.append( QVariant::fromValue<QObject *>( manager_->wrapperFor( group->getDisplayAt( i ) ) ) );
+  result.reserve( child_displays_.size() );
+  for ( const QPointer<Display> &child : child_displays_ ) {
+    if ( child.isNull() )
+      continue;
+    result.append( QVariant::fromValue<QObject *>( manager_->wrapperFor( child ) ) );
+  }
   return result;
 }
 
@@ -186,12 +224,8 @@ bool QmlDisplay::setTopic( const QString &topic, const QString &datatype )
 
 QObject *QmlDisplay::getDisplay( const QString &name )
 {
-  auto *group = dynamic_cast<DisplayGroup *>( display_.data() );
-  if ( group == nullptr )
-    return nullptr;
-  for ( int i = 0; i < group->numDisplays(); ++i ) {
-    Display *child = group->getDisplayAt( i );
-    if ( child->getName() == name )
+  for ( const QPointer<Display> &child : child_displays_ ) {
+    if ( !child.isNull() && child->getName() == name )
       return manager_->wrapperFor( child );
   }
   return nullptr;

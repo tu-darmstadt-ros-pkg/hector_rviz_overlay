@@ -19,6 +19,7 @@
 #define HECTOR_RVIZ_OVERLAY_QML_DISPLAY_MANAGER_H
 
 #include <QHash>
+#include <QList>
 #include <QObject>
 #include <QPointer>
 #include <QVariantList>
@@ -50,15 +51,19 @@ class QmlDisplay : public QObject
 {
   Q_OBJECT
   // @formatter:off
-  //! nameChanged only fires for renames made through this wrapper; a rename via the rviz properties
-  //! panel goes through Display::setName (setObjectName, no changed()) and is not reflected here.
   Q_PROPERTY( QString name READ getName WRITE setName NOTIFY nameChanged )
   Q_PROPERTY( QString classId READ getClassId CONSTANT )
   Q_PROPERTY( QString description READ getDescription CONSTANT )
   Q_PROPERTY( bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged )
   Q_PROPERTY( bool shouldBeSaved READ shouldBeSaved WRITE setShouldBeSaved NOTIFY shouldBeSavedChanged )
+  //! True only for a display group. Non-group displays may still have child displays (see
+  //! displays), but only groups accept displays added or removed through QmlDisplayManager.
   Q_PROPERTY( bool isGroup READ isGroup CONSTANT )
   Q_PROPERTY( bool valid READ valid NOTIFY invalidated )
+  //! The direct child displays. For a group these are its displays. A non-group display may parent
+  //! child displays of its own (e.g. MultiRobotModel); those are listed so they can be found and
+  //! edited, but they belong to their parent display and cannot be added or removed from QML.
+  //! Use displays.length rather than isGroup to decide whether a display can be expanded.
   Q_PROPERTY( QVariantList displays READ displays NOTIFY displaysChanged )
   // @formatter:on
 public:
@@ -102,8 +107,9 @@ public:
   Q_INVOKABLE bool setTopic( const QString &topic, const QString &datatype );
 
   /*!
-   * Finds a direct child display by name (groups only), first match wins.
-   * @return The child display wrapper or nullptr if not found or this is not a group.
+   * Finds a direct child display by name, first match wins. Works for groups and for non-group
+   * displays that parent child displays via addChild (e.g. MultiRobotModel).
+   * @return The child display wrapper or nullptr if no child display of that name exists.
    */
   Q_INVOKABLE QObject *getDisplay( const QString &name );
 
@@ -134,8 +140,17 @@ private:
   //! Walks a '/'-separated name path from this display. Returns the leaf property or nullptr.
   rviz_common::properties::Property *resolveProperty( const QString &path ) const;
 
+  //! Refreshes child_displays_ and emits displaysChanged only if the child displays actually
+  //! changed. Property::childListChanged also fires for plain property children, which displays add
+  //! and remove at runtime.
+  void onChildListChanged();
+
   QPointer<rviz_common::Display> display_;
   QmlDisplayManager *manager_;
+  //! The child displays as of the last change notification and the sole source for displays() and
+  //! getDisplay(). Entries are QPointer so a display freed since then is skipped rather than
+  //! dereferenced.
+  QList<QPointer<rviz_common::Display>> child_displays_;
 };
 
 /*!
@@ -159,7 +174,8 @@ public:
   Q_INVOKABLE QObject *addDisplay( const QString &class_id, const QString &name, bool enabled = true );
 
   //! Adds a display of the given class_id inside parent, a QmlDisplay wrapping a group.
-  //! Returns nullptr if parent is not a valid group wrapper.
+  //! Returns nullptr if parent is not a valid group wrapper. Child displays of a non-group display
+  //! (see QmlDisplay::displays) belong to that display, so it cannot be used as a parent here.
   Q_INVOKABLE QObject *addDisplay( QObject *parent, const QString &class_id, const QString &name,
                                    bool enabled = true );
 
@@ -169,7 +185,9 @@ public:
   //! Convenience: adds a rviz_common/Group inside parent. Returns nullptr if parent is not a group.
   Q_INVOKABLE QObject *addGroup( QObject *parent, const QString &name );
 
-  //! Removes and destroys the display wrapped by the given QmlDisplay.
+  //! Removes and destroys the display wrapped by the given QmlDisplay. Only displays whose parent
+  //! is a group can be removed; a child display of a non-group display belongs to that display and
+  //! returns false.
   Q_INVOKABLE bool removeDisplay( QObject *display );
 
   //! Finds a top-level display by name, first match wins. Returns nullptr if not found.

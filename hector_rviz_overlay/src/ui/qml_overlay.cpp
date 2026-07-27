@@ -86,13 +86,19 @@ void QmlOverlay::update( float dt )
 
   // Check the file for changes every 500ms.
   time_until_file_check_ -= dt;
-  if ( time_until_file_check_ <= 0 ) {
-    if ( file_system_watcher_->checkForChanges() ) {
-      reload_required_ = true;
-      requestRender();
-    }
-    time_until_file_check_ = 0.5f;
-  }
+  if ( time_until_file_check_ > 0 )
+    return;
+  time_until_file_check_ = 0.5f;
+  if ( reload_required_ || !file_system_watcher_->checkForChanges() )
+    return;
+
+  // A reload destroys the engine and the entire item tree, which runs arbitrary QML
+  // (Component.onDestruction / onCompleted) that may call back into rviz and therefore into Ogre.
+  // update() and renderImpl() are called from Ogre's render target update while the overlay's
+  // offscreen OpenGL context is current, so any Ogre GL call issued from QML would go to the wrong
+  // context and corrupt both. Defer the reload to the event loop where neither is true.
+  reload_required_ = true;
+  QMetaObject::invokeMethod( this, [this] { reload(); }, Qt::QueuedConnection );
 }
 
 void QmlOverlay::prepareRender( Renderer *renderer )
@@ -164,10 +170,6 @@ void QmlOverlay::renderImpl( Renderer *renderer )
 {
   if ( render_control_ == nullptr )
     return;
-
-  if ( reload_required_ ) {
-    reload();
-  }
 
   if ( quick_window_->renderTarget() != renderer->framebufferObject() ||
        renderer->framebufferObjectUpdated() ) {

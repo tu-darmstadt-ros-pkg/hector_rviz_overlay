@@ -22,7 +22,6 @@
 #include <rviz_common/view_manager.hpp>
 
 #include <OgreCamera.h>
-#include <OgreViewport.h>
 
 namespace hector_rviz_overlay
 {
@@ -67,18 +66,49 @@ OgrePositionTracker::~OgrePositionTracker()
   }
 }
 
+QVector3D OgrePositionTracker::point() const
+{
+  return QVector3D( point_.x, point_.y, point_.z );
+}
+
+void OgrePositionTracker::setPoint( const QVector3D &point )
+{
+  Ogre::Vector3 value( point.x(), point.y(), point.z() );
+  if ( value == point_ )
+    return;
+  point_ = value;
+  emit pointChanged( point );
+  checkPosition();
+}
+
 void OgrePositionTracker::checkPosition()
 {
-  if ( overlay_ == nullptr || camera_ == nullptr )
+  // The geometry is empty until the overlay was rendered for the first time and is not updated
+  // while it is hidden, so it can not be used to scale the position yet.
+  if ( overlay_ == nullptr || camera_ == nullptr || overlay_->geometry().isEmpty() ) {
+    updateVisible( false );
     return;
+  }
   Ogre::Vector4 screen_point = camera_->getProjectionMatrix() * camera_->getViewMatrix() *
                                Ogre::Vector4( point_.x, point_.y, point_.z, 1 );
+  // Clip space: the point is inside the view volume if |x|, |y|, |z| <= w. For a perspective
+  // projection w is the view-space depth which is <= 0 at and behind the camera, for an
+  // orthographic projection w is always 1 and only the depth range catches near and far plane.
+  if ( screen_point.w <= 0 ) {
+    // Dividing by a non-positive w would yield a mirrored or infinite position, keep the last one.
+    updateVisible( false );
+    return;
+  }
+  updateVisible( std::abs( screen_point.x ) <= screen_point.w &&
+                 std::abs( screen_point.y ) <= screen_point.w &&
+                 std::abs( screen_point.z ) <= screen_point.w );
   float x = screen_point.x * 0.5 / screen_point.w + 0.5;
   float y = -screen_point.y * 0.5 / screen_point.w + 0.5;
-  float z = screen_point.z < 0 ? std::numeric_limits<float>::quiet_NaN() : screen_point.z;
-  const Ogre::Viewport *viewport = camera_->getViewport();
-  x *= viewport->getActualWidth() / overlay_->scale();
-  y *= viewport->getActualHeight() / overlay_->scale();
+  float z = camera_->getProjectionType() == Ogre::PT_ORTHOGRAPHIC
+                ? std::numeric_limits<float>::quiet_NaN()
+                : screen_point.w;
+  x *= overlay_->geometry().width() / overlay_->scale();
+  y *= overlay_->geometry().height() / overlay_->scale();
   if ( std::abs( x - position().x() ) < 1E-2 && std::abs( y - position().y() ) < 1E-2 &&
        ( ( std::isnan( z ) && std::isnan( position().z() ) ) ||
          ( !std::isnan( z ) && !std::isnan( position().z() ) &&

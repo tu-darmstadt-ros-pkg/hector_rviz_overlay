@@ -129,8 +129,7 @@ bool OverlayManager::removeOverlay( OverlayPtr overlay )
   }
 
   if ( overlay == focused_overlay_ ) {
-    overlay->handleEventsCanceled();
-    focused_overlay_ = nullptr;
+    updateFocusedOverlay( nullptr );
   }
 
   for ( auto it = ui_overlays_.begin(); it != ui_overlays_.end(); ++it ) {
@@ -160,6 +159,41 @@ bool OverlayManager::removeOverlay( OverlayPtr overlay )
     return true;
   }
   return false;
+}
+
+void OverlayManager::requestFocus( const Overlay *overlay )
+{
+  for ( const UiOverlayPtr &ui_overlay : ui_overlays_ ) {
+    if ( ui_overlay.get() == overlay ) {
+      updateFocusedOverlay( ui_overlay );
+      return;
+    }
+  }
+  for ( const PopupOverlayPtr &popup_overlay : popup_overlays_ ) {
+    if ( popup_overlay.get() == overlay ) {
+      updateFocusedOverlay( popup_overlay );
+      return;
+    }
+  }
+}
+
+void OverlayManager::releaseFocus( const Overlay *overlay )
+{
+  if ( focused_overlay_.get() != overlay )
+    return;
+  updateFocusedOverlay( nullptr );
+}
+
+void OverlayManager::updateFocusedOverlay( const OverlayPtr &overlay )
+{
+  if ( focused_overlay_ == overlay )
+    return;
+  // Strong ref and assign before notifying: handleEventsCanceled may reentrantly remove the
+  // previously focused overlay, which would drop the member ref while its method is still running.
+  OverlayPtr previous = focused_overlay_;
+  focused_overlay_ = overlay;
+  if (overlay != nullptr && previous != nullptr )
+    previous->handleEventsCanceled();
 }
 
 OverlayPtr OverlayManager::getByName( const std::string &name )
@@ -317,7 +351,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
   QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPos() );
   if ( !render_panel_->contentsRect().contains( render_panel_pos ) && mouse_down_overlay_ == nullptr ) {
     if ( is_mouse_down )
-      focused_overlay_ = nullptr;
+      updateFocusedOverlay( nullptr );
     if ( mouse_overlay_ != nullptr ) {
       mouse_overlay_->handleEventsCanceled();
       mouse_overlay_ = nullptr;
@@ -387,7 +421,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
     mouse_overlay_ = popup_overlay;
     if ( is_mouse_down ) {
       mouse_down_overlay_ = popup_overlay;
-      focused_overlay_ = popup_overlay;
+      updateFocusedOverlay( popup_overlay );
     }
     event->setAccepted( true );
     return true;
@@ -409,7 +443,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
     mouse_overlay_ = ui_overlay;
     if ( is_mouse_down ) {
       mouse_down_overlay_ = ui_overlay;
-      focused_overlay_ = ui_overlay;
+      updateFocusedOverlay( ui_overlay );
     }
     event->setAccepted( true );
     return true;
@@ -418,7 +452,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
   // If mouse is down and no overlay handled it, we reset the focused overlay so that it doesn't
   // keep on eating all scroll and key events.
   if ( is_mouse_down ) {
-    focused_overlay_ = nullptr;
+    updateFocusedOverlay( nullptr );
   }
   return false;
 }
@@ -467,7 +501,8 @@ bool OverlayManager::handleWheelEvent( QObject *receiver, QWheelEvent *event )
 
 bool OverlayManager::handleKeyEvent( QObject *receiver, QKeyEvent *event )
 {
-  if ( focused_overlay_ == nullptr )
+  // A hidden overlay must not eat key events, e.g., if it was hidden while it had the focus.
+  if ( focused_overlay_ == nullptr || !focused_overlay_->isVisible() )
     return false;
   // Strong ref: handleEvent may reentrantly remove the overlay and drop the member ref.
   OverlayPtr overlay = focused_overlay_;

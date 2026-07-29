@@ -42,18 +42,29 @@ namespace positioning
 /*!
  * @brief Tracks a 3D point in the Ogre scene.
  *
- * Returns x and y position in viewport coordinates (pixel).
- * Returns the distance as z-coordinate unless it is not available, e.g., for a orthographic
- * projection, in which case z is set to NaN.
+ * Returns x and y position in overlay coordinates (pixel, already divided by the overlay's scale).
+ * Returns the depth of the point along the camera's viewing direction as z-coordinate unless it is
+ * not available, e.g., for an orthographic projection, in which case z is set to NaN.
  */
 class OgrePositionTracker : public PositionTracker
 {
   Q_OBJECT
+  //! The tracked point in the Ogre world.
+  Q_PROPERTY( QVector3D point READ point WRITE setPoint NOTIFY pointChanged )
 public:
   OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context,
                        const Overlay *overlay );
 
   ~OgrePositionTracker() override;
+
+  QVector3D point() const;
+
+  //! Moves the tracked point to the given position in the Ogre world.
+  void setPoint( const QVector3D &point );
+
+signals:
+
+  void pointChanged( const QVector3D &point );
 
 private:
   void checkPosition();

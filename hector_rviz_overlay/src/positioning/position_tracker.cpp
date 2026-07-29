@@ -24,10 +24,20 @@ namespace positioning
 
 const QVector3D &PositionTracker::position() const { return position_; }
 
+bool PositionTracker::isVisible() const { return visible_; }
+
 void PositionTracker::updatePosition( const QVector3D &position )
 {
   position_ = position;
   emit positionChanged( position_ );
+}
+
+void PositionTracker::updateVisible( bool visible )
+{
+  if ( visible == visible_ )
+    return;
+  visible_ = visible;
+  emit visibleChanged( visible_ );
 }
 } // namespace positioning
 } // namespace hector_rviz_overlay

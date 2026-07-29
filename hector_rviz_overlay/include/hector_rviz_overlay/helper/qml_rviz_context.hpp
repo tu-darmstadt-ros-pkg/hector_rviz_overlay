@@ -85,10 +85,19 @@ public:
   //! Copies the given text to the user's clipboard.
   Q_INVOKABLE void copyTextToClipboard( const QString &text );
 
+  //! Gives this overlay key focus, so key events reach it instead of rviz until releaseKeyFocus is
+  //! called or a mouse event reassigns focus. Use when opening a popup that was not opened by a
+  //! click on the overlay.
+  Q_INVOKABLE void requestKeyFocus();
+
+  //! Gives up the key focus of this overlay, so key events reach rviz again. Call when closing a
+  //! popup that requested the key focus.
+  Q_INVOKABLE void releaseKeyFocus();
+
   /*!
    * Creates a position tracker with a notifying read-only position vector3d property, that will
    * return the screen coordinates of the given 3D point in the Ogre 3D View as x and y, and the
-   * distance of that point to the camera as the z-coordinate.
+   * depth of that point along the view axis as the z-coordinate.
    * @param x The x-value of the tracked point in the Ogre world.
    * @param y The y-value of the tracked point in the Ogre world.
    * @param z The z-value of the tracked point in the Ogre world.

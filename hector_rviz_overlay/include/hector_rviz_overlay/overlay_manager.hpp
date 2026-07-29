@@ -135,6 +135,21 @@ public:
    */
   void moveToBack( const std::string &name );
 
+  /*!
+   * Gives the given overlay key focus, so key events are routed to it until it releases the focus
+   * or a mouse event reassigns it. Does nothing if the overlay is not registered.
+   * Key events are only routed to the focused overlay while it is visible.
+   * @param overlay The overlay that should receive key events.
+   */
+  void requestFocus( const Overlay *overlay );
+
+  /*!
+   * Stops routing key events to the given overlay, so they reach rviz again. Does nothing if the
+   * overlay does not currently have the focus.
+   * @param overlay The overlay that should stop receiving key events.
+   */
+  void releaseFocus( const Overlay *overlay );
+
 private slots:
 
   void onZIndexChanged();
@@ -160,6 +175,14 @@ private:
   bool handleWheelEvent( QObject *receiver, QWheelEvent *event );
 
   bool handleKeyEvent( QObject *receiver, QKeyEvent *event );
+
+  /*!
+   * Makes the given overlay the focused overlay. If another overlay was focused before, it is told
+   * that its ongoing events are canceled, so it does not keep, e.g., a text cursor alive while the
+   * key events go elsewhere.
+   * @param overlay The overlay that should receive key events or nullptr for none.
+   */
+  void updateFocusedOverlay( const OverlayPtr &overlay );
 
   rviz_common::DisplayContext *context_;
   rviz_common::RenderPanel *render_panel_;

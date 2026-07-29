@@ -16,6 +16,7 @@
  */
 
 #include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
+#include "hector_rviz_overlay/overlay_manager.hpp"
 #include "hector_rviz_overlay/positioning/ogre_position_tracker.hpp"
 
 #include <QClipboard>
@@ -75,6 +76,16 @@ void QmlRvizContext::setConfig( const QVariantMap &config )
 void QmlRvizContext::copyTextToClipboard( const QString &text )
 {
   QGuiApplication::clipboard()->setText( text );
+}
+
+void QmlRvizContext::requestKeyFocus()
+{
+  OverlayManager::getSingleton().requestFocus( overlay_ );
+}
+
+void QmlRvizContext::releaseKeyFocus()
+{
+  OverlayManager::getSingleton().releaseFocus( overlay_ );
 }
 
 QObject *QmlRvizContext::createPositionTracker( double x, double y, double z )

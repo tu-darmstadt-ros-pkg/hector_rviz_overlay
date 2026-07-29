@@ -49,19 +49,29 @@ class PositionTracker : public QObject
   //! The position of the tracked point on the screen. May have a z-component indicating the depth.
   //! If no depth is available, z will be NaN.
   Q_PROPERTY( QVector3D position READ position NOTIFY positionChanged )
+  //! Whether the tracked point is inside the visible area of the view, i.e., in front of the
+  //! camera and within the bounds of the view. False until the first projection.
+  Q_PROPERTY( bool visible READ isVisible NOTIFY visibleChanged )
   // @formatter:on
 public:
   const QVector3D &position() const;
+
+  bool isVisible() const;
 
 signals:
 
   void positionChanged( const QVector3D &position );
 
+  void visibleChanged( bool visible );
+
 protected:
   void updatePosition( const QVector3D &position );
 
+  void updateVisible( bool visible );
+
 private:
   QVector3D position_;
+  bool visible_ = false;
 };
 } // namespace positioning
 } // namespace hector_rviz_overlay

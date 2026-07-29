@@ -49,6 +49,11 @@ class QmlRvizContext : public QObject
   Q_PROPERTY( QString nodeName READ nodeName CONSTANT)
   // @formatter:on
 public:
+  /*!
+   * @param overlay The overlay the QML is rendered in. May be nullptr if the QML is not rendered in
+   *   an overlay, e.g., in a panel, in which case the key focus methods are no-ops and position
+   *   trackers use the coordinates of rviz's 3D render panel.
+   */
   explicit QmlRvizContext( rviz_common::DisplayContext *context, const Overlay *overlay,
                            bool visible = false );
 

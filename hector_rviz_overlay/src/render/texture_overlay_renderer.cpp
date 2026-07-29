@@ -17,6 +17,8 @@
 
 #include "hector_rviz_overlay/render/texture_overlay_renderer.hpp"
 
+#include "ogre_gl_context.hpp"
+
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/render_panel.hpp>
 #include <rviz_common/view_manager.hpp>
@@ -42,6 +44,12 @@ public:
   void preRenderTargetUpdate( const Ogre::RenderTargetEvent &evt ) override
   {
     Ogre::RenderTargetListener::preRenderTargetUpdate( evt );
+    // Ogre assumes its context stays current between frames and only rebinds it when the target's
+    // context changed or when the frame buffer is cleared, both of which happen after this
+    // callback. Anything that makes another context current on this thread and leaves it current,
+    // e.g. this renderer's own offscreen context or Qt Quick when it renders on the gui thread,
+    // would make rendering the overlays and uploading them into the Ogre texture use that context.
+    makeRenderTargetContextCurrent( evt.source );
     renderer_->render();
   }
 

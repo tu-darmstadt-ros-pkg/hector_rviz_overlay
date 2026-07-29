@@ -39,6 +39,8 @@ namespace hector_rviz_overlay
 
 class FileSystemWatcher;
 
+class QmlLoadedFileTracker;
+
 class QmlRvizContext;
 
 /*!
@@ -169,9 +171,7 @@ protected:
 
   void setStatus( QmlOverlay::Status status );
 
-  class UrlInterceptor;
-  UrlInterceptor *url_interceptor_ = nullptr;
-  std::vector<std::string> loaded_files_;
+  std::unique_ptr<QmlLoadedFileTracker> file_tracker_;
 
   QWindow *rviz_window_;
   QQuickRenderControl *render_control_ = nullptr;

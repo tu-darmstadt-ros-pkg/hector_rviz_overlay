@@ -30,8 +30,29 @@ To overlay QML, inherit from the  hector_rviz_overlay::QmlOverlayDisplay and ove
 path `package://package_name/path/in/pkg.qml` (see hector_rviz_overlay::QmlOverlay::load).
 Also don't forget the Q_OBJECT macro here.
 
+### QML panel
+To show QML in a dockable panel instead of on top of the 3D scene, inherit from
+hector_rviz_overlay::QmlPanelDisplay and override the `getPathToQml()` method. The path may be
+absolute or package relative (`package://package_name/path/in/pkg.qml`). Don't forget the Q_OBJECT
+macro.
+
+The display hosts the QML in a `QQuickView` embedded with `QWidget::createWindowContainer`, which is
+registered as a dock panel using `rviz_common::Display::setAssociatedWidget` - the same mechanism
+rviz's Camera display uses for its render panel. The panel is therefore a native window: it is always
+stacked on top of overlapping widgets that are not native windows themselves and it does not blend
+with what is behind it.
+Enabling and disabling the display shows and hides the dock.
+The `hector_rviz_overlay_controls/QmlPanel` display provides this with a `Path` property, so no
+subclass is needed to show a QML file.
+
+The QML API is the same as for overlays with two differences: `rviz.requestKeyFocus()` and
+`rviz.releaseKeyFocus()` do nothing because the panel receives key events through normal Qt focus
+handling, and position trackers created with `rviz.createPositionTracker(x, y, z)` return
+coordinates in logical pixels of the 3D render panel instead of overlay coordinates.
+
 #### rviz context property
-Qml files loaded by the `QmlOverlay` will have a rviz context property available.
+Qml files loaded by the `QmlOverlay` or `QmlPanelDisplay` will have a rviz context property
+available.
 See docs (TODO).
 
 ## What does it support?
@@ -53,3 +74,12 @@ If you encounter any problems, feel free to hit me (up).
   > To prevent a widget from consuming scroll events add a dynamic property
   > "IgnoreWheelEvents" and set it to the bool value true.``
 * Key events crash QtWidget overlays if rendering with OpenGL. (QML overlays should work)
+* Tabbing a QML panel's dock behind another dock, or closing it, unchecks the display.
+  > rviz connects the dock's visibility to the display's enabled state. The QML is not unloaded but
+  > live reload stops polling while the display is disabled.
+* Changing the `Path` of a QML panel or overlay keeps the properties the previous QML file
+  registered.
+  > Registered properties are matched by name and are kept across a reload so a reload of the same
+  > file does not lose user edits. Properties the new file does not register stay in the tree and a
+  > property of the same name keeps the old value and type. Delete and re-add the display to get a
+  > clean property tree.

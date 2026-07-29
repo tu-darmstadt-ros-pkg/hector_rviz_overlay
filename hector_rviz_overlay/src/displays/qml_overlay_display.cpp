@@ -19,6 +19,8 @@
 
 #include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
 
+#include "../helper/config_conversion.hpp"
+
 namespace hector_rviz_overlay
 {
 
@@ -89,83 +91,11 @@ UiOverlayPtr QmlOverlayDisplay::createOverlay()
   return qml_overlay_;
 }
 
-namespace
-{
-QVariant configToQml( const rviz_common::Config &config )
-{
-  switch ( config.getType() ) {
-  case rviz_common::Config::Map: {
-    QVariantMap result;
-    rviz_common::Config::MapIterator it = config.mapIterator();
-    while ( it.isValid() ) {
-      result.insert( it.currentKey(), configToQml( it.currentChild() ) );
-      it.advance();
-    }
-    return result;
-  }
-  case rviz_common::Config::List: {
-    QVariantList result;
-    for ( int i = 0; i < config.listLength(); ++i ) {
-      result.append( configToQml( config.listChildAt( i ) ) );
-    }
-    return result;
-  }
-  case rviz_common::Config::Value:
-    return config.getValue();
-  case rviz_common::Config::Empty:
-  case rviz_common::Config::Invalid:
-    return {};
-  }
-  return {};
-}
-
-void writeToConfig( rviz_common::Config config, const QVariantList &list );
-
-void writeToConfig( rviz_common::Config config, const QVariant &variant )
-{
-  config.setValue( variant );
-}
-
-void writeToConfig( rviz_common::Config config, const QVariantMap &map )
-{
-  for ( auto &key : map.keys() ) {
-    std::string std_key = key.toStdString();
-    const QVariant &val = map[key];
-    switch ( val.type() ) {
-    case QVariant::Map:
-      writeToConfig( config.mapMakeChild( key ), val.toMap() );
-      break;
-    case QVariant::List:
-      writeToConfig( config.mapMakeChild( key ), val.toList() );
-      break;
-    default:
-      writeToConfig( config.mapMakeChild( key ), val );
-    }
-  }
-}
-
-void writeToConfig( rviz_common::Config config, const QVariantList &list )
-{
-  for ( auto &item : list ) {
-    switch ( item.type() ) {
-    case QVariant::Map:
-      writeToConfig( config.listAppendNew(), item.toMap() );
-      break;
-    case QVariant::List:
-      writeToConfig( config.listAppendNew(), item.toList() );
-      break;
-    default:
-      writeToConfig( config.listAppendNew(), item );
-    }
-  }
-}
-} // namespace
-
 void QmlOverlayDisplay::load( const rviz_common::Config &config )
 {
   Display::load( config );
   overlay_config_ = config.mapGetChild( "Configuration" );
-  QVariant variant = configToQml( config.mapGetChild( "Overlay Configuration" ) );
+  QVariant variant = configToVariant( config.mapGetChild( "Overlay Configuration" ) );
   QVariantMap map;
   if ( variant.isValid() && variant.type() == QVariant::Map )
     map = variant.toMap();

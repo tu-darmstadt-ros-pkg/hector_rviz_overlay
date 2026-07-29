@@ -42,7 +42,9 @@ namespace positioning
 /*!
  * @brief Tracks a 3D point in the Ogre scene.
  *
- * Returns x and y position in overlay coordinates (pixel, already divided by the overlay's scale).
+ * Returns x and y position in overlay coordinates (pixel, already divided by the overlay's scale)
+ * if constructed with an overlay and in logical (device-independent) pixels of rviz's 3D render
+ * panel if constructed without one (overlay == nullptr).
  * Returns the depth of the point along the camera's viewing direction as z-coordinate unless it is
  * not available, e.g., for an orthographic projection, in which case z is set to NaN.
  */
@@ -52,6 +54,7 @@ class OgrePositionTracker : public PositionTracker
   //! The tracked point in the Ogre world.
   Q_PROPERTY( QVector3D point READ point WRITE setPoint NOTIFY pointChanged )
 public:
+  //! @param overlay The overlay the position is tracked for. May be nullptr, see class description.
   OgrePositionTracker( const Ogre::Vector3 &point, const rviz_common::DisplayContext *context,
                        const Overlay *overlay );
 

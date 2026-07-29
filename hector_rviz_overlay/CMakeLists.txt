@@ -28,6 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(SOURCES
   include/hector_rviz_overlay/displays/overlay_display.hpp
   include/hector_rviz_overlay/displays/qml_overlay_display.hpp
+  include/hector_rviz_overlay/displays/qml_panel_display.hpp
   include/hector_rviz_overlay/displays/qwidget_overlay_display.hpp
   include/hector_rviz_overlay/events/qwidget_event_manager.hpp
   include/hector_rviz_overlay/helper/file_system_watcher.hpp
@@ -61,9 +62,14 @@ set(SOURCES
   include/hector_rviz_overlay/path_helper.hpp
   src/displays/overlay_display.cpp
   src/displays/qml_overlay_display.cpp
+  src/displays/qml_panel_display.cpp
   src/displays/qwidget_overlay_display.cpp
   src/events/qwidget_event_manager.cpp
+  src/helper/config_conversion.hpp
+  src/helper/config_conversion.cpp
   src/helper/file_system_watcher.cpp
+  src/helper/qml_engine_factory.hpp
+  src/helper/qml_engine_factory.cpp
   src/helper/qml_display_manager.cpp
   src/helper/qml_rviz_context.cpp
   src/helper/qml_rviz_property.cpp
@@ -80,6 +86,8 @@ set(SOURCES
   src/positioning/ogre_position_tracker.cpp
   src/positioning/position_tracker.cpp
   src/render/gl_helpers.h
+  src/render/ogre_gl_context.hpp
+  src/render/ogre_gl_context.cpp
   src/render/qimage_texture_overlay_renderer.cpp
   src/render/overlay_renderer.cpp
   src/render/qopengl_wrapper.hpp
@@ -130,6 +138,18 @@ install(
 )
 
 install(DIRECTORY include/ DESTINATION include)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  # Compiles the helper into the test instead of linking the library which would require the Ogre
+  # render system plugins the library's render path references.
+  ament_add_gtest(test_config_conversion
+    test/test_config_conversion.cpp
+    src/helper/config_conversion.cpp
+  )
+  target_link_libraries(test_config_conversion Qt5::Core rviz_common::rviz_common)
+  target_include_directories(test_config_conversion PRIVATE ${PROJECT_SOURCE_DIR}/src)
+endif()
 
 ament_export_dependencies(Qt5 rviz_common rviz_ogre_vendor)
 ament_package(CONFIG_EXTRAS "hector_rviz_overlay-extras.cmake")

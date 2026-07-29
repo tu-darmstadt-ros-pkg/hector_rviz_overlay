@@ -80,11 +80,16 @@ void QmlRvizContext::copyTextToClipboard( const QString &text )
 
 void QmlRvizContext::requestKeyFocus()
 {
+  // Without an overlay the QML is in a widget which receives key events through Qt's focus handling.
+  if ( overlay_ == nullptr )
+    return;
   OverlayManager::getSingleton().requestFocus( overlay_ );
 }
 
 void QmlRvizContext::releaseKeyFocus()
 {
+  if ( overlay_ == nullptr )
+    return;
   OverlayManager::getSingleton().releaseFocus( overlay_ );
 }
 

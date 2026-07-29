@@ -16,9 +16,11 @@ set(CMAKE_AUTOMOC ON)
 
 set(SOURCES
   include/hector_rviz_overlay_controls/qml_overlay_display.h
+  include/hector_rviz_overlay_controls/qml_panel_display.h
   include/hector_rviz_overlay_controls/tools_overlay_display.h
   include/hector_rviz_overlay_controls/tools_widget.h
   src/qml_overlay_display.cpp
+  src/qml_panel_display.cpp
   src/tools_overlay_display.cpp
   src/tools_widget.cpp
 )
@@ -44,7 +46,7 @@ install(
 )
 
 install(
-  DIRECTORY styles
+  DIRECTORY media styles
   DESTINATION share/hector_rviz_overlay_controls
 )
 ament_export_targets(hector_rviz_overlay_controls)

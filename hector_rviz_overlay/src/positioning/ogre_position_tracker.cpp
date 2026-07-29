@@ -19,6 +19,7 @@
 #include "hector_rviz_overlay/overlay.hpp"
 
 #include <rviz_common/display_context.hpp>
+#include <rviz_common/render_panel.hpp>
 #include <rviz_common/view_manager.hpp>
 
 #include <OgreCamera.h>
@@ -49,13 +50,15 @@ OgrePositionTracker::OgrePositionTracker( const Ogre::Vector3 &point,
   listener_.reset( new OgrePositionTracker::Listener( this ) );
   // The tracker is owned by QML but back-references the overlay; if the overlay is destroyed first,
   // detach from the camera and stop dereferencing it to avoid a use-after-free.
-  connect( overlay_, &QObject::destroyed, this, [this]() {
-    if ( camera_ != nullptr ) {
-      camera_->removeListener( listener_.get() );
-      camera_ = nullptr;
-    }
-    overlay_ = nullptr;
-  } );
+  if ( overlay_ != nullptr ) {
+    connect( overlay_, &QObject::destroyed, this, [this]() {
+      if ( camera_ != nullptr ) {
+        camera_->removeListener( listener_.get() );
+        camera_ = nullptr;
+      }
+      overlay_ = nullptr;
+    } );
+  }
   updateCamera();
 }
 
@@ -85,7 +88,7 @@ void OgrePositionTracker::checkPosition()
 {
   // The geometry is empty until the overlay was rendered for the first time and is not updated
   // while it is hidden, so it can not be used to scale the position yet.
-  if ( overlay_ == nullptr || camera_ == nullptr || overlay_->geometry().isEmpty() ) {
+  if ( camera_ == nullptr || ( overlay_ != nullptr && overlay_->geometry().isEmpty() ) ) {
     updateVisible( false );
     return;
   }
@@ -107,8 +110,15 @@ void OgrePositionTracker::checkPosition()
   float z = camera_->getProjectionType() == Ogre::PT_ORTHOGRAPHIC
                 ? std::numeric_limits<float>::quiet_NaN()
                 : screen_point.w;
-  x *= overlay_->geometry().width() / overlay_->scale();
-  y *= overlay_->geometry().height() / overlay_->scale();
+  if ( overlay_ != nullptr ) {
+    x *= overlay_->geometry().width() / overlay_->scale();
+    y *= overlay_->geometry().height() / overlay_->scale();
+  } else {
+    // Without an overlay the coordinates are in logical pixels of rviz's 3D render panel.
+    const QWidget *panel = context_->getViewManager()->getRenderPanel();
+    x *= panel->width();
+    y *= panel->height();
+  }
   if ( std::abs( x - position().x() ) < 1E-2 && std::abs( y - position().y() ) < 1E-2 &&
        ( ( std::isnan( z ) && std::isnan( position().z() ) ) ||
          ( !std::isnan( z ) && !std::isnan( position().z() ) &&

@@ -19,19 +19,18 @@
 
 #include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 #include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
-#include "hector_rviz_overlay/helper/rviz_tool_icon_provider.hpp"
 #include "hector_rviz_overlay/overlay_manager.hpp"
 #include "hector_rviz_overlay/path_helper.hpp"
 #include "hector_rviz_overlay/render/renderer.hpp"
+
+#include "../helper/qml_engine_factory.hpp"
 
 #include <QApplication>
 #include <QOffscreenSurface>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
 #include <QPainter>
-#include <QQmlAbstractUrlInterceptor>
 #include <QQmlComponent>
-#include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickRenderControl>
@@ -45,29 +44,8 @@
 namespace hector_rviz_overlay
 {
 
-class QmlOverlay::UrlInterceptor : public QQmlAbstractUrlInterceptor
-{
-public:
-  explicit UrlInterceptor( QmlOverlay *overlay ) : overlay_( overlay ) { }
-
-  QUrl intercept( const QUrl &path, DataType type ) override
-  {
-    if ( type != QmlFile && type != JavaScriptFile )
-      return path;
-    if ( !path.isLocalFile() )
-      return path;
-    std::string local_path = path.toLocalFile().toStdString();
-    if ( overlay_->file_system_watcher_ != nullptr )
-      overlay_->file_system_watcher_->addWatch( local_path );
-    overlay_->loaded_files_.push_back( local_path );
-    return path;
-  }
-
-private:
-  QmlOverlay *overlay_;
-};
-
-QmlOverlay::QmlOverlay( const std::string &name ) : UiOverlay( name )
+QmlOverlay::QmlOverlay( const std::string &name )
+    : UiOverlay( name ), file_tracker_( std::make_unique<QmlLoadedFileTracker>() )
 {
   qRegisterMetaType<QmlOverlay::Status>();
   connect( this, &Overlay::visibilityChanged, this, &QmlOverlay::onVisibilityChanged );
@@ -75,7 +53,7 @@ QmlOverlay::QmlOverlay( const std::string &name ) : UiOverlay( name )
 
 QmlOverlay::~QmlOverlay()
 {
-  delete url_interceptor_;
+  file_tracker_->setWatcher( nullptr );
   delete qml_rviz_context_;
 }
 
@@ -329,14 +307,6 @@ void QmlOverlay::recreateEngine()
 
 void QmlOverlay::createEngine()
 {
-  engine_ = new QQmlEngine( quick_window_ );
-
-  if ( url_interceptor_ == nullptr )
-    url_interceptor_ = new UrlInterceptor( this );
-  engine_->setUrlInterceptor( url_interceptor_ );
-  if ( !engine_->incubationController() )
-    engine_->setIncubationController( quick_window_->incubationController() );
-
   // Only create the rviz context on initial setup; reuse it across reloads
   // to preserve user-modified configuration properties.
   if ( qml_rviz_context_ == nullptr ) {
@@ -345,14 +315,18 @@ void QmlOverlay::createEngine()
     qml_rviz_context_->setConfig( configuration_ );
     emit contextCreated();
   }
-  engine_->rootContext()->setContextProperty( "rviz", qml_rviz_context_ );
 
-  auto *tool_icon_provider =
-      new RvizToolIconProvider( OverlayManager::getSingleton().displayContext()->getToolManager() );
-  engine_->addImageProvider( QLatin1String( "rviz_tool_icons" ), tool_icon_provider );
+  RvizQmlEngineConfig config;
+  config.parent = quick_window_;
+  config.display_context = OverlayManager::getSingleton().displayContext();
+  config.rviz_context = qml_rviz_context_;
+  config.url_interceptor = file_tracker_.get();
+  config.import_paths = import_paths_;
+  config.plugin_paths = plugin_paths_;
+  engine_ = createRvizQmlEngine( config );
 
-  for ( const auto &path : import_paths_ ) engine_->addImportPath( path );
-  for ( const auto &path : plugin_paths_ ) engine_->addPluginPath( path );
+  if ( !engine_->incubationController() )
+    engine_->setIncubationController( quick_window_->incubationController() );
 
   component_ = new QQmlComponent( engine_ );
 }
@@ -368,7 +342,7 @@ bool QmlOverlay::createRootItem()
   if ( live_reload_enabled_ && !path_.isEmpty() ) {
     file_system_watcher_->removeAllWatches();
   }
-  loaded_files_.clear();
+  file_tracker_->clear();
 
   // Component has to be deleted and recreated otherwise it won't reload if the last load failed
   delete component_;
@@ -443,9 +417,10 @@ void QmlOverlay::setLiveReloadEnabled( bool value )
   if ( live_reload_enabled_ ) {
     // TODO: Check valid and check if watch was successful + display status
     file_system_watcher_.reset( new FileSystemWatcher );
-    for ( const std::string &path : loaded_files_ ) file_system_watcher_->addWatch( path );
+    file_tracker_->setWatcher( file_system_watcher_.get() );
     reload();
   } else {
+    file_tracker_->setWatcher( nullptr );
     file_system_watcher_.reset();
   }
 }

@@ -13,4 +13,11 @@
             Load and display a QML file overlaid on top of the 3D scene.
         </description>
     </class>
+    <class name="hector_rviz_overlay_controls/QmlPanel"
+           type="hector_rviz_overlay_controls::QmlPanelDisplay"
+           base_class_type="rviz_common::Display">
+        <description>
+            Load and display a QML file in a dockable panel.
+        </description>
+    </class>
 </library>

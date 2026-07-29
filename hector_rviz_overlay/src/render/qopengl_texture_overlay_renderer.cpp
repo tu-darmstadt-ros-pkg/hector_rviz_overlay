@@ -4,6 +4,7 @@
 
 #include "hector_rviz_overlay/render/qopengl_texture_overlay_renderer.hpp"
 
+#include "gl_helpers.h"
 #include "qopengl_wrapper.hpp"
 
 #include <rviz_common/display_context.hpp>
@@ -59,10 +60,15 @@ void QOpenGLTextureOverlayRenderer::finishRender()
   qopengl_wrapper_->finishRender();
   glBindTexture( GL_TEXTURE_2D, qopengl_wrapper_->texture() );
   glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_data_.data() );
+  _clearErrors();
   qopengl_wrapper_->doneCurrent();
   glBindTexture( GL_TEXTURE_2D, texture_id_ );
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, qopengl_wrapper_->size().width(),
                 qopengl_wrapper_->size().height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pixel_data_.data() );
+  // These calls go straight to GL instead of through Ogre, so Ogre never clears the errors they may
+  // raise. A pending error is picked up by the next unrelated glUseProgram check and reported there
+  // together with that program's info log, which is highly misleading.
+  _clearErrors();
   TextureOverlayRenderer::finishRender();
 }
 

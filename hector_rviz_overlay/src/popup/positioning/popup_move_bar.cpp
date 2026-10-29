@@ -37,7 +37,7 @@ void PopupMoveBar::mousePressEvent( QMouseEvent *event )
   if ( container == nullptr )
     return;
 
-  start_mouse_position_ = event->globalPos();
+  start_mouse_position_ = event->globalPosition().toPoint();
   start_position_ = container->popupPosition();
   event->accept();
 }
@@ -56,7 +56,8 @@ void PopupMoveBar::mouseMoveEvent( QMouseEvent *event )
   if ( container == nullptr )
     return;
 
-  container->setPopupPosition( start_position_ + event->globalPos() - start_mouse_position_ );
+  container->setPopupPosition( start_position_ + event->globalPosition().toPoint() -
+                               start_mouse_position_ );
   event->accept();
 }
 } // namespace hector_rviz_overlay

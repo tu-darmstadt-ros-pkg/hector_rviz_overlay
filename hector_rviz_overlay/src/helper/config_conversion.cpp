@@ -58,11 +58,11 @@ void writeListToConfig( rviz_common::Config config, const QVariantList &list );
 
 void writeVariantToConfig( rviz_common::Config config, const QVariant &variant )
 {
-  switch ( variant.type() ) {
-  case QVariant::Map:
+  switch ( variant.typeId() ) {
+  case QMetaType::QVariantMap:
     writeMapToConfig( config, variant.toMap() );
     break;
-  case QVariant::List:
+  case QMetaType::QVariantList:
     writeListToConfig( config, variant.toList() );
     break;
   default:

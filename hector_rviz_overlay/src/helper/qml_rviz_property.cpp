@@ -42,7 +42,7 @@ bool setPropertyValueCoerced( rviz_common::properties::Property *property, const
   // headers) carry an invalid variant, so pass the value through unchanged as rviz would.
   if ( current.isValid() && value.userType() != current.userType() ) {
     QVariant coerced = value;
-    if ( !coerced.convert( current.userType() ) )
+    if ( !coerced.convert( current.metaType() ) )
       return false;
     property->setValue( coerced );
     return true;

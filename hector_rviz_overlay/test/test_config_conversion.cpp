@@ -51,7 +51,7 @@ TEST( ConfigConversion, roundTrip )
   writeToConfig( config, original );
 
   const QVariant read_back = configToVariant( config );
-  ASSERT_EQ( read_back.type(), QVariant::Map );
+  ASSERT_EQ( read_back.typeId(), QMetaType::QVariantMap );
 
   rviz_common::Config second;
   writeToConfig( second, read_back.toMap() );
@@ -60,15 +60,15 @@ TEST( ConfigConversion, roundTrip )
   // Values pass through the config as strings, hence, compare the string representations.
   const QVariantMap result = read_back.toMap();
   EXPECT_EQ( result["name"].toString(), original["name"].toString() );
-  ASSERT_EQ( result["nested"].type(), QVariant::Map );
+  ASSERT_EQ( result["nested"].typeId(), QMetaType::QVariantMap );
   EXPECT_EQ( result["nested"].toMap()["flag"].toBool(), true );
   EXPECT_EQ( result["nested"].toMap()["count"].toInt(), 42 );
-  ASSERT_EQ( result["list"].type(), QVariant::List );
+  ASSERT_EQ( result["list"].typeId(), QMetaType::QVariantList );
   const QVariantList result_list = result["list"].toList();
   ASSERT_EQ( result_list.size(), 3 );
   EXPECT_DOUBLE_EQ( result_list[0].toDouble(), 1.5 );
   EXPECT_EQ( result_list[1].toString(), QString( "text" ) );
-  ASSERT_EQ( result_list[2].type(), QVariant::Map );
+  ASSERT_EQ( result_list[2].typeId(), QMetaType::QVariantMap );
   EXPECT_EQ( result_list[2].toMap()["count"].toInt(), 42 );
 }
 

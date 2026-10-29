@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(hector_rviz_overlay_controls VERSION 1.0.0)
 set (CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR  ON)
@@ -11,7 +11,7 @@ endif ()
 find_package(ament_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(hector_rviz_overlay REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Quick Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Widgets)
 set(CMAKE_AUTOMOC ON)
 
 set(SOURCES
@@ -30,7 +30,7 @@ target_include_directories(hector_rviz_overlay_controls PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(hector_rviz_overlay_controls hector_rviz_overlay::hector_rviz_overlay Qt5::Core Qt5::Quick Qt5::Widgets)
+target_link_libraries(hector_rviz_overlay_controls hector_rviz_overlay::hector_rviz_overlay Qt6::Core Qt6::Quick Qt6::Widgets)
 
 install(
   TARGETS hector_rviz_overlay_controls

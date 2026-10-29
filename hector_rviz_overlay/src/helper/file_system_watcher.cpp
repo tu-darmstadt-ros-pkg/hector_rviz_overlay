@@ -17,6 +17,7 @@
 
 #include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <sys/inotify.h>
 #include <sys/stat.h>

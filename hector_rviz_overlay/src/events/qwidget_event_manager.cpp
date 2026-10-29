@@ -20,6 +20,7 @@
 #include "hector_rviz_overlay/overlay_widget.hpp"
 
 #include <QApplication>
+#include <QCursor>
 #include <QMouseEvent>
 #include <QWidget>
 
@@ -32,7 +33,8 @@ QWidgetEventManager::~QWidgetEventManager() = default;
 
 void QWidgetEventManager::handleEventsCanceled()
 {
-  QMouseEvent event( QEvent::MouseMove, hover_pos_, Qt::NoButton, Qt::NoButton, Qt::NoModifier );
+  QMouseEvent event( QEvent::MouseMove, hover_pos_, QCursor::pos(), Qt::NoButton, Qt::NoButton,
+                     Qt::NoModifier );
   sendHoverEvents( nullptr, hover_pos_, &event );
   mouse_down_widget_ = nullptr;
 }
@@ -72,8 +74,8 @@ bool QWidgetEventManager::handleMouseEvent( QMouseEvent *event )
   if ( mouse_down_widget_ ) {
     QPoint local_pos = mouse_down_widget_->mapFrom( widget_, widget_pos );
 
-    QMouseEvent child_mouse_event( event->type(), local_pos, event->screenPos(), event->button(),
-                                   event->buttons(), event->modifiers() );
+    QMouseEvent child_mouse_event( event->type(), local_pos, event->globalPosition(),
+                                   event->button(), event->buttons(), event->modifiers() );
     QApplication::sendEvent( mouse_down_widget_, &child_mouse_event );
 
     if ( !is_mouse_down ) {
@@ -92,7 +94,7 @@ bool QWidgetEventManager::handleMouseEvent( QMouseEvent *event )
 
   // Now forward the event to the child with the position of the mouse relative to the child widget
   QMouseEvent child_mouse_event( event->type(), child->mapFrom( widget_, widget_pos ),
-                                 event->screenPos(), event->button(), event->buttons(),
+                                 event->globalPosition(), event->button(), event->buttons(),
                                  event->modifiers() );
 
   bool handled = QApplication::sendEvent( child, &child_mouse_event );
@@ -203,6 +205,7 @@ void QWidgetEventManager::sendHoverEvents( QWidget *child, QPoint pos, QMouseEve
       // If the widget has the hover attribute, send it a HoverLeave event as well
       if ( w->testAttribute( Qt::WA_Hover ) ) {
         QHoverEvent hover_leave_event( QEvent::HoverLeave, QPoint( -1, -1 ),
+                                       event->globalPosition(),
                                        w->mapFrom( w->topLevelWidget(), hover_pos_ ),
                                        event->modifiers() );
         QApplication::sendEvent( w, &hover_leave_event );
@@ -213,11 +216,12 @@ void QWidgetEventManager::sendHoverEvents( QWidget *child, QPoint pos, QMouseEve
     for ( int k = 0; k < enter_list.size(); ++k ) {
       QWidget *w = enter_list.at( k );
       QPoint local_pos = w->mapFrom( widget_, pos );
-      QEnterEvent enter_event( local_pos, event->windowPos(), event->screenPos() );
+      QEnterEvent enter_event( local_pos, event->scenePosition(), event->globalPosition() );
       QApplication::sendEvent( w, &enter_event );
       // If the widget has the hover attribute, send it a HoverEnter event as well
       if ( w->testAttribute( Qt::WA_Hover ) ) {
-        QHoverEvent hover_enter_event( QEvent::HoverEnter, local_pos, QPoint( -1, -1 ),
+        QHoverEvent hover_enter_event( QEvent::HoverEnter, local_pos, event->globalPosition(),
+                                       QPoint( -1, -1 ),
                                        event->modifiers() );
         QApplication::sendEvent( w, &hover_enter_event );
       }

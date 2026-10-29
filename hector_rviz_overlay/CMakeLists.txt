@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(hector_rviz_overlay VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -16,7 +16,7 @@ add_definitions(-DRENDER_OVERLAYS_USING_OPENGL)
 find_package(ament_cmake REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Quick Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui OpenGL Quick Qml)
 
 ## We also use Ogre
 #include($ENV{ROS_ROOT}/core/rosbuild/FindPkgConfig.cmake)
@@ -113,14 +113,15 @@ target_include_directories(hector_rviz_overlay PUBLIC
 
 # Link required libraries
 target_link_libraries(hector_rviz_overlay PUBLIC
-  Qt5::Core
-  Qt5::Widgets
-  Qt5::Gui
-  Qt5::Quick
-  Qt5::Qml
+  Qt6::Core
+  Qt6::Widgets
+  Qt6::Gui
+  Qt6::OpenGL
+  Qt6::Quick
+  Qt6::Qml
   rviz_common::rviz_common
+  rviz_ogre_vendor::OgreMain
 )
-ament_target_dependencies(hector_rviz_overlay PUBLIC rviz_ogre_vendor)
 
 # Export old-style CMake variables
 ament_export_include_directories(include)
@@ -147,9 +148,9 @@ if(BUILD_TESTING)
     test/test_config_conversion.cpp
     src/helper/config_conversion.cpp
   )
-  target_link_libraries(test_config_conversion Qt5::Core rviz_common::rviz_common)
+  target_link_libraries(test_config_conversion Qt6::Core rviz_common::rviz_common)
   target_include_directories(test_config_conversion PRIVATE ${PROJECT_SOURCE_DIR}/src)
 endif()
 
-ament_export_dependencies(Qt5 rviz_common rviz_ogre_vendor)
+ament_export_dependencies(Qt6 rviz_common rviz_ogre_vendor)
 ament_package(CONFIG_EXTRAS "hector_rviz_overlay-extras.cmake")

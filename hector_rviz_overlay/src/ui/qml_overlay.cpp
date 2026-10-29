@@ -29,11 +29,16 @@
 #include <QOffscreenSurface>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
+#include <QOpenGLTexture>
+#include <QOpenGLTextureBlitter>
 #include <QPainter>
 #include <QQmlComponent>
 #include <QQmlEngine>
+#include <QQuickGraphicsDevice>
 #include <QQuickItem>
+#include <QQuickOpenGLUtils>
 #include <QQuickRenderControl>
+#include <QQuickRenderTarget>
 #include <QQuickWindow>
 #include <QWidget>
 
@@ -94,22 +99,29 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   }
   rviz_window_ = renderer->window();
 
+  // Global setting that has to be set before the first QQuickWindow is created
+  QQuickWindow::setGraphicsApi( QSGRendererInterface::OpenGL );
   render_control_ = new QQuickRenderControl();
   quick_window_ = new QQuickWindow( render_control_ );
+  quick_window_->setGraphicsDevice( QQuickGraphicsDevice::fromOpenGLContext( context ) );
 
   createEngine();
 
   quick_window_->contentItem()->setTransformOrigin( QQuickItem::TopLeft );
   quick_window_->contentItem()->setScale( scale() );
   quick_window_->setColor( Qt::transparent );
-  quick_window_->setClearBeforeRendering( false );
-  quick_window_->setPersistentOpenGLContext( true );
+  quick_window_->setPersistentGraphics( true );
 
   if ( !path_.isEmpty() ) {
     load( path_ );
   }
 
-  render_control_->initialize( context );
+  if ( !render_control_->initialize() ) {
+    LOG_WARN( "Failed to initialize the QQuickRenderControl." );
+    releaseRenderResources();
+    setStatus( Error );
+    return;
+  }
 
   connect( render_control_, &QQuickRenderControl::sceneChanged, this, &QmlOverlay::onSceneChanged );
   connect( render_control_, &QQuickRenderControl::renderRequested, this,
@@ -130,6 +142,8 @@ void QmlOverlay::releaseRenderResources()
   // quick_window_ has no QObject parent and must be deleted explicitly; deleting
   // it also cascades to its children, so detach engine_ first to avoid a double
   // free and to let the engine outlive the window's scene graph teardown.
+  blitter_.reset();
+  render_texture_.reset();
   delete root_item_;
   root_item_ = nullptr;
   delete render_control_;
@@ -149,18 +163,46 @@ void QmlOverlay::renderImpl( Renderer *renderer )
   if ( render_control_ == nullptr )
     return;
 
-  if ( quick_window_->renderTarget() != renderer->framebufferObject() ||
-       renderer->framebufferObjectUpdated() ) {
-    quick_window_->setRenderTarget( renderer->framebufferObject() );
+  QOpenGLFramebufferObject *fbo = renderer->framebufferObject();
+  const QSize size = fbo->size();
+  if ( render_texture_ == nullptr || render_texture_->width() != size.width() ||
+       render_texture_->height() != size.height() ) {
+    render_texture_ = std::make_unique<QOpenGLTexture>( QOpenGLTexture::Target2D );
+    render_texture_->setFormat( QOpenGLTexture::RGBA8_UNorm );
+    render_texture_->setSize( size.width(), size.height() );
+    render_texture_->allocateStorage();
+    // No MSAA: Qt Quick antialiases items itself, MSAA buffers would cost ~32 bytes/pixel/overlay
+    quick_window_->setRenderTarget(
+        QQuickRenderTarget::fromOpenGLTexture( render_texture_->textureId(), size ) );
   }
   if ( scene_changed_ ) {
     // According to https://youtu.be/FamAKvkfzxM?t=2247, polish and sync should be called when QQuickRenderControl emits sceneUpdated
     render_control_->polishItems();
+  }
+  render_control_->beginFrame();
+  if ( scene_changed_ ) {
     render_control_->sync();
     scene_changed_ = false;
   }
   render_control_->render();
-  renderer->context()->functions()->glFlush();
+  render_control_->endFrame();
+
+  // Qt Quick leaves its own state and framebuffer bound
+  QQuickOpenGLUtils::resetOpenGLState();
+  fbo->bind();
+  QOpenGLFunctions *gl = renderer->context()->functions();
+  gl->glViewport( 0, 0, size.width(), size.height() );
+  gl->glEnable( GL_BLEND );
+  gl->glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA ); // Qt Quick output is premultiplied
+  if ( blitter_ == nullptr ) {
+    blitter_ = std::make_unique<QOpenGLTextureBlitter>();
+    blitter_->create();
+  }
+  blitter_->bind();
+  blitter_->blit( render_texture_->textureId(), QMatrix4x4(),
+                  QOpenGLTextureBlitter::OriginBottomLeft );
+  blitter_->release();
+  gl->glDisable( GL_BLEND );
 }
 
 namespace
@@ -213,6 +255,13 @@ bool QmlOverlay::handleEvent( QObject *, QEvent *event )
 
   if ( event->type() != QEvent::KeyPress && event->type() != QEvent::KeyRelease ) {
     QCoreApplication::sendEvent( quick_window_, event );
+    // Qt 6 reports a grabbed press as ignored if other items below the grabber also see it
+    if ( event->type() == QEvent::MouseButtonPress ) {
+      auto *press = static_cast<QMouseEvent *>( event );
+      const QEventPoint &point = press->point( 0 );
+      if ( press->exclusiveGrabber( point ) || !press->passiveGrabbers( point ).isEmpty() )
+        event->accept();
+    }
     if ( event->isAccepted() )
       quick_window_->contentItem()->setFocus( true );
   } else {

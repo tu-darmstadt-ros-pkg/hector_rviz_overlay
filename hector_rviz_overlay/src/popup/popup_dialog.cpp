@@ -56,14 +56,14 @@ PopupDialog::PopupDialog( QWidget *parent, Qt::WindowFlags flags )
   button_cancel_ = new QPushButton( "Cancel" );
   connect( button_cancel_, &QPushButton::clicked, this, &PopupDialog::cancelClicked );
   button_layout->addWidget( button_cancel_ );
-  button_layout->setMargin( 4 );
+  button_layout->setContentsMargins( 4, 4, 4, 4 );
 
   layout_->addLayout( button_layout, 2, 0, Qt::AlignRight );
 
   layout_->setRowMinimumHeight( 0, 24 );
   layout_->setRowStretch( 1, 1 );
   layout_->setSpacing( 0 );
-  layout_->setMargin( 0 );
+  layout_->setContentsMargins( 0, 0, 0, 0 );
   setLayout( layout_ );
   setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
 

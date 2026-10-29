@@ -23,6 +23,8 @@
 #include <QStringList>
 #include <QVariantMap>
 
+class QOpenGLTexture;
+class QOpenGLTextureBlitter;
 class QQmlComponent;
 class QQmlEngine;
 class QQuickItem;
@@ -175,6 +177,10 @@ protected:
 
   QWindow *rviz_window_;
   QQuickRenderControl *render_control_ = nullptr;
+  // Qt Quick always clears its render target, so it renders into its own texture which is then
+  // blended onto the shared framebuffer to keep the content of overlays rendered before.
+  std::unique_ptr<QOpenGLTexture> render_texture_;
+  std::unique_ptr<QOpenGLTextureBlitter> blitter_;
   QQuickWindow *quick_window_ = nullptr;
   QQmlEngine *engine_ = nullptr;
   QQmlComponent *component_ = nullptr;

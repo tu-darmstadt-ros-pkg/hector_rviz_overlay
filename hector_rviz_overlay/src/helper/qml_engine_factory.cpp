@@ -57,7 +57,7 @@ QQmlEngine *createRvizQmlEngine( const RvizQmlEngineConfig &config )
   auto *engine = new QQmlEngine( config.parent );
 
   if ( config.url_interceptor != nullptr )
-    engine->setUrlInterceptor( config.url_interceptor );
+    engine->addUrlInterceptor( config.url_interceptor );
 
   engine->rootContext()->setContextProperty( "rviz", config.rviz_context );
 

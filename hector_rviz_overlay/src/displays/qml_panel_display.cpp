@@ -272,7 +272,7 @@ void QmlPanelDisplay::load( const rviz_common::Config &config )
   Display::load( config );
   QVariant variant = configToVariant( config.mapGetChild( "Qml Configuration" ) );
   QVariantMap map;
-  if ( variant.isValid() && variant.type() == QVariant::Map )
+  if ( variant.isValid() && variant.typeId() == QMetaType::QVariantMap )
     map = variant.toMap();
   rviz_context_->setConfig( map );
   rviz_context_->load( config.mapGetChild( "Configuration" ) );

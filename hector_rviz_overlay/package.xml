@@ -12,14 +12,15 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   
-  <build_depend>qtbase5-dev</build_depend>
-  <build_depend>qtdeclarative5-dev</build_depend>
+  <build_depend>qt6-base-dev</build_depend>
+  <build_depend>qt6-declarative-dev</build_depend>
   <build_depend>libglew-dev</build_depend>
-  <depend>libqt5-core</depend>
-  <depend>libqt5-gui</depend>
-  <depend>libqt5-qml</depend>
-  <depend>libqt5-quick</depend>
-  <depend>libqt5-widgets</depend>
+  <depend>libqt6-core</depend>
+  <depend>libqt6-gui</depend>
+  <depend>libqt6-opengl</depend>
+  <depend>libqt6-qml</depend>
+  <depend>libqt6-quick</depend>
+  <depend>libqt6-widgets</depend>
   <depend>pluginlib</depend>
   <depend>rviz_common</depend>
   <depend>rviz_ogre_vendor</depend>

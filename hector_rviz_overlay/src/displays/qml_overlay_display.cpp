@@ -97,7 +97,7 @@ void QmlOverlayDisplay::load( const rviz_common::Config &config )
   overlay_config_ = config.mapGetChild( "Configuration" );
   QVariant variant = configToVariant( config.mapGetChild( "Overlay Configuration" ) );
   QVariantMap map;
-  if ( variant.isValid() && variant.type() == QVariant::Map )
+  if ( variant.isValid() && variant.typeId() == QMetaType::QVariantMap )
     map = variant.toMap();
   if ( qml_overlay_ == nullptr )
     return;

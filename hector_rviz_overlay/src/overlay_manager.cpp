@@ -348,7 +348,7 @@ bool OverlayManager::eventFilter( QObject *receiver, QEvent *event )
 bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
 {
   bool is_mouse_down = ( event->buttons() & Qt::LeftButton ) == Qt::LeftButton;
-  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPos() );
+  QPoint render_panel_pos = render_panel_->mapFromGlobal( event->globalPosition().toPoint() );
   if ( !render_panel_->contentsRect().contains( render_panel_pos ) && mouse_down_overlay_ == nullptr ) {
     if ( is_mouse_down )
       updateFocusedOverlay( nullptr );
@@ -373,7 +373,7 @@ bool OverlayManager::handleMouseEvent( QObject *receiver, QMouseEvent *event )
     return false;
   }
 
-  QMouseEvent child_mouse_event( event->type(), render_panel_pos, event->screenPos(),
+  QMouseEvent child_mouse_event( event->type(), render_panel_pos, event->globalPosition(),
                                  event->button(), event->buttons(), event->modifiers() );
   if ( mouse_down_overlay_ != nullptr ) {
     // Keep a strong ref: handleEvent can trigger overlay removal, which would drop the member and

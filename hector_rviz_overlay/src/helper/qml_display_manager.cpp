@@ -27,12 +27,12 @@
 
 #include "../logging.hpp"
 
+namespace hector_rviz_overlay
+{
+// Inside the namespace so they don't hide Xlib's global Display typedef.
 using rviz_common::Display;
 using rviz_common::DisplayGroup;
 using rviz_common::properties::Property;
-
-namespace hector_rviz_overlay
-{
 
 namespace
 {

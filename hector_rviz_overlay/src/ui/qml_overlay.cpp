@@ -104,6 +104,7 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   render_control_ = new QQuickRenderControl();
   quick_window_ = new QQuickWindow( render_control_ );
   quick_window_->setGraphicsDevice( QQuickGraphicsDevice::fromOpenGLContext( context ) );
+  quick_window_->setFormat( context->format() );
 
   createEngine();
 

@@ -12,7 +12,7 @@ Item {
   Subscription {
     id: subscriber
     topic: "/titleMessage"
-    onNewMessage: helloText.text += message.data + "\n"
+    onNewMessage: function(message) { helloText.text += message.data + "\n" }
   }
 
   Text {

@@ -18,6 +18,9 @@
 #ifndef HECTOR_RVIZ_OVERLAY_QML_RVIZ_WRAPPER_H
 #define HECTOR_RVIZ_OVERLAY_QML_RVIZ_WRAPPER_H
 
+
+
+#include <QJSValue>
 #include <QObject>
 #include <QVariantMap>
 
@@ -39,7 +42,7 @@ class QmlRvizContext : public QObject
 {
   Q_OBJECT
   // @formatter:off
-  Q_PROPERTY( QVariantMap config READ config WRITE setConfig NOTIFY configChanged )
+  Q_PROPERTY( QJSValue config READ configJs WRITE setConfigJs NOTIFY configChanged )
   Q_PROPERTY( bool visible READ visible NOTIFY visibleChanged )
   Q_PROPERTY( bool isFullscreen READ isFullscreen WRITE setIsFullscreen NOTIFY isFullscreenChanged )
   Q_PROPERTY( QString fixedFrame READ fixedFrame WRITE setFixedFrame NOTIFY fixedFrameChanged )
@@ -62,6 +65,11 @@ public:
   const QVariantMap &config() const;
 
   void setConfig( const QVariantMap &config );
+
+  //! A fresh copy of the config as plain JS objects and arrays. Edits only apply once assigned back.
+  QJSValue configJs() const;
+
+  void setConfigJs( const QJSValue &config );
 
   bool visible() const;
 

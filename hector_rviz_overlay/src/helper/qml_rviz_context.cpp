@@ -21,6 +21,8 @@
 
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QJSEngine>
+#include <QJsonObject>
 #include <QWindow>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
@@ -72,6 +74,15 @@ void QmlRvizContext::setConfig( const QVariantMap &config )
   config_ = config;
   emit configChanged();
 }
+
+QJSValue QmlRvizContext::configJs() const
+{
+  // Qt >= 6.7 would expose lists as sequences (Array.isArray false) and Qt >= 6.9 maps as
+  // references that write every change straight back into config_.
+  return qjsEngine( this )->toScriptValue( QJsonObject::fromVariantMap( config_ ) );
+}
+
+void QmlRvizContext::setConfigJs( const QJSValue &config ) { setConfig( config.toVariant().toMap() ); }
 
 void QmlRvizContext::copyTextToClipboard( const QString &text )
 {

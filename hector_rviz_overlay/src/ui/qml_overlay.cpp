@@ -104,7 +104,6 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   render_control_ = new QQuickRenderControl();
   quick_window_ = new QQuickWindow( render_control_ );
   quick_window_->setGraphicsDevice( QQuickGraphicsDevice::fromOpenGLContext( context ) );
-  quick_window_->setFormat( context->format() );
 
   createEngine();
 
@@ -112,6 +111,7 @@ void QmlOverlay::prepareRender( Renderer *renderer )
   quick_window_->contentItem()->setScale( scale() );
   quick_window_->setColor( Qt::transparent );
   quick_window_->setPersistentGraphics( true );
+  quick_window_->setFormat( context->format() );
 
   if ( !path_.isEmpty() ) {
     load( path_ );

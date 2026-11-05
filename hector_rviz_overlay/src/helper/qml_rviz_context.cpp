@@ -109,6 +109,8 @@ QObject *QmlRvizContext::createPositionTracker( double x, double y, double z )
   return new positioning::OgrePositionTracker( Ogre::Vector3( x, y, z ), context_, overlay_ );
 }
 
+rviz_common::DisplayContext *QmlRvizContext::displayContext() const { return context_; }
+
 bool QmlRvizContext::visible() const { return visible_; }
 
 void QmlRvizContext::setVisible( bool value )

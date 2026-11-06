@@ -60,7 +60,8 @@ class CameraOverlay : public QQuickItem
   //! The image size the intrinsics refer to.
   Q_PROPERTY( QSize imageSize READ imageSize WRITE setImageSize NOTIFY imageSizeChanged )
   //! The capture time of the shown image in seconds (ROS time) used to look up the camera pose.
-  //! 0 or a failed lookup uses the latest pose.
+  //! 0 or a failed lookup uses the latest pose. With a stamp, the scene is only rendered again when
+  //! the stamp or another property changes.
   Q_PROPERTY( qreal stamp READ stamp WRITE setStamp NOTIFY stampChanged )
   //! The paths of the rendered displays, i.e., their names joined by '/' starting below the root
   //! group, e.g., Group/Markers. Displays with the same name in one group are numbered from the

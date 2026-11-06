@@ -109,6 +109,8 @@ void CameraOverlay::componentComplete()
     LOG_ERROR( "CameraOverlay requires the rviz context property!" );
     return;
   }
+  rviz_ = rviz;
+  connect( rviz_, &QmlRvizContext::visibleChanged, this, &CameraOverlay::requestRender );
   context_ = rviz->displayContext();
   auto *scene_manager = context_->getSceneManager();
   const std::string name =
@@ -141,15 +143,15 @@ void CameraOverlay::itemChange( ItemChange change, const ItemChangeData &value )
 
 void CameraOverlay::requestRender()
 {
-  if ( context_ != nullptr )
+  if ( context_ != nullptr && ( !displays_.isEmpty() || rendered_ ) )
     context_->queueRender();
 }
 
 void CameraOverlay::prepareFrame()
 {
-  const bool active = isVisible() && window() != nullptr && !displays_.isEmpty() &&
-                      !frame_id_.isEmpty() && intrinsics_.x() > 0 && intrinsics_.y() > 0 &&
-                      !image_size_.isEmpty();
+  const bool active = isVisible() && rviz_->visible() && window() != nullptr &&
+                      !displays_.isEmpty() && !frame_id_.isEmpty() && intrinsics_.x() > 0 &&
+                      intrinsics_.y() > 0 && !image_size_.isEmpty();
   if ( !active ) {
     if ( texture_ )
       texture_->getBuffer()->getRenderTarget()->setActive( false );
@@ -180,11 +182,19 @@ void CameraOverlay::preRender()
   camera_node_->setOrientation( orientation *
                                 Ogre::Quaternion( Ogre::Degree( 180 ), Ogre::Vector3::UNIT_X ) );
   updateProjection();
-  viewport_->setVisibilityMask( valid ? 0xFFFFFFFF : 0 );
+  auto *render_window = renderWindow( context_ );
+  auto *main_viewport =
+      render_window == nullptr
+          ? nullptr
+          : rviz_rendering::RenderWindowOgreAdapter::getOgreViewport( render_window );
+  viewport_->setVisibilityMask( !valid          ? 0
+                                : main_viewport ? main_viewport->getVisibilityMask()
+                                                : 0xFFFFFFFF );
 
   // rviz lights the scene along the main view, light it along this camera instead.
-  main_light_ =
-      rviz_rendering::RenderWindowOgreAdapter::getDirectionalLight( renderWindow( context_ ) );
+  main_light_ = render_window == nullptr
+                    ? nullptr
+                    : rviz_rendering::RenderWindowOgreAdapter::getDirectionalLight( render_window );
   if ( main_light_ != nullptr ) {
     main_light_visible_ = main_light_->getVisible();
     main_light_->setVisible( false );
@@ -217,9 +227,13 @@ void CameraOverlay::postRender()
 void CameraOverlay::collectHiddenNodes( rviz_common::DisplayGroup *group, const QString &prefix )
 {
   auto *root = context_->getSceneManager()->getRootSceneNode();
+  QHash<QString, int> names;
   for ( int i = 0; i < group->numDisplays(); ++i ) {
     auto *display = group->getDisplayAt( i );
-    const QString path = prefix + display->getName();
+    // Displays with the same name in one group are numbered from the second on.
+    const int count = ++names[display->getName()];
+    const QString path =
+        prefix + display->getName() + ( count > 1 ? "#" + QString::number( count ) : QString() );
     if ( auto *child_group = qobject_cast<rviz_common::DisplayGroup *>( display ) ) {
       collectHiddenNodes( child_group, path + "/" );
       continue;
@@ -237,8 +251,9 @@ void CameraOverlay::updateProjection()
   Ogre::Matrix4 projection = Ogre::Matrix4::ZERO;
   projection[0][0] = 2 * intrinsics_.x() / width;
   projection[1][1] = 2 * intrinsics_.y() / height;
-  projection[0][2] = 1 - 2 * intrinsics_.z() / width;
-  projection[1][2] = 2 * intrinsics_.w() / height - 1;
+  // The intrinsics have pixel centers at integer coordinates, the projection pixel edges.
+  projection[0][2] = 1 - 2 * ( intrinsics_.z() + 0.5f ) / width;
+  projection[1][2] = 2 * ( intrinsics_.w() + 0.5f ) / height - 1;
   projection[2][2] = -( kFarClip + kNearClip ) / ( kFarClip - kNearClip );
   projection[2][3] = -2 * kFarClip * kNearClip / ( kFarClip - kNearClip );
   projection[3][2] = -1;
@@ -251,7 +266,7 @@ void CameraOverlay::updateTexture()
       mapRectToScene( boundingRect() ).size() * window()->effectiveDevicePixelRatio();
   const QSize size( std::max( 1, qRound( scene_size.width() ) ),
                     std::max( 1, qRound( scene_size.height() ) ) );
-  if ( texture_ && size == image_.size() )
+  if ( ( texture_ && size == image_.size() ) || size == failed_texture_size_ )
     return;
   destroyTexture();
   try {
@@ -261,9 +276,15 @@ void CameraOverlay::updateTexture()
         Ogre::TU_RENDERTARGET );
   } catch ( std::exception &ex ) {
     LOG_ERROR( "Failed to create camera overlay texture: %s", ex.what() );
+    // A failed render target init leaves the texture registered, see TextureOverlayRenderer.
     texture_.reset();
+    auto &texture_manager = Ogre::TextureManager::getSingleton();
+    if ( texture_manager.resourceExists( camera_->getName() + "/Texture" ) )
+      texture_manager.remove( camera_->getName() + "/Texture" );
+    failed_texture_size_ = size;
     return;
   }
+  failed_texture_size_ = QSize();
   auto *target = texture_->getBuffer()->getRenderTarget();
   target->addListener( listener_.get() );
   viewport_ = target->addViewport( camera_ );

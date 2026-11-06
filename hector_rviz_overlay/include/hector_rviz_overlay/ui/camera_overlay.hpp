@@ -41,6 +41,7 @@ class DisplayGroup;
 
 namespace hector_rviz_overlay
 {
+class QmlRvizContext;
 
 /*!
  * @brief Renders the rviz scene from the perspective of a pinhole camera with a transparent
@@ -62,7 +63,8 @@ class CameraOverlay : public QQuickItem
   //! 0 or a failed lookup uses the latest pose.
   Q_PROPERTY( qreal stamp READ stamp WRITE setStamp NOTIFY stampChanged )
   //! The paths of the rendered displays, i.e., their names joined by '/' starting below the root
-  //! group, e.g., Group/Markers.
+  //! group, e.g., Group/Markers. Displays with the same name in one group are numbered from the
+  //! second on, e.g., Group/Markers#2.
   Q_PROPERTY( QStringList displays READ displays WRITE setDisplays NOTIFY displaysChanged )
 public:
   explicit CameraOverlay( QQuickItem *parent = nullptr );
@@ -129,6 +131,7 @@ private:
 
   void collectHiddenNodes( rviz_common::DisplayGroup *group, const QString &prefix );
 
+  QmlRvizContext *rviz_ = nullptr;
   rviz_common::DisplayContext *context_ = nullptr;
   std::unique_ptr<Listener> listener_;
   Ogre::SceneNode *camera_node_ = nullptr;
@@ -146,6 +149,7 @@ private:
   qreal stamp_ = 0;
   QStringList displays_;
   QImage image_;
+  QSize failed_texture_size_;
   bool rendered_ = false;
 };
 } // namespace hector_rviz_overlay

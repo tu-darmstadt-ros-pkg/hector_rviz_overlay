@@ -151,6 +151,7 @@ private:
   QImage image_;
   QSize failed_texture_size_;
   bool rendered_ = false;
+  bool dirty_ = true;
 };
 } // namespace hector_rviz_overlay
 

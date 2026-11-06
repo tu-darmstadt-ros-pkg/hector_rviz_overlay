@@ -143,6 +143,7 @@ void CameraOverlay::itemChange( ItemChange change, const ItemChangeData &value )
 
 void CameraOverlay::requestRender()
 {
+  dirty_ = true;
   if ( context_ != nullptr && ( !displays_.isEmpty() || rendered_ ) )
     context_->queueRender();
 }
@@ -163,8 +164,9 @@ void CameraOverlay::prepareFrame()
   }
   makeMainContextCurrent( context_ );
   updateTexture();
+  // With a stamp, the scene is only rendered again for a new image or changed properties.
   if ( texture_ )
-    texture_->getBuffer()->getRenderTarget()->setActive( true );
+    texture_->getBuffer()->getRenderTarget()->setActive( dirty_ || stamp_ <= 0 );
 }
 
 void CameraOverlay::preRender()
@@ -221,6 +223,7 @@ void CameraOverlay::postRender()
       Ogre::Box( 0, 0, image_.width(), image_.height() ),
       Ogre::PixelBox( image_.width(), image_.height(), 1, Ogre::PF_BYTE_RGBA, image_.bits() ) );
   rendered_ = true;
+  dirty_ = false;
   update();
 }
 
@@ -285,6 +288,7 @@ void CameraOverlay::updateTexture()
     return;
   }
   failed_texture_size_ = QSize();
+  dirty_ = true;
   auto *target = texture_->getBuffer()->getRenderTarget();
   target->addListener( listener_.get() );
   viewport_ = target->addViewport( camera_ );

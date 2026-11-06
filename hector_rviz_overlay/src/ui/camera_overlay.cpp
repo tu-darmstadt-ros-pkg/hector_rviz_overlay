@@ -166,8 +166,12 @@ void CameraOverlay::preRender()
 {
   Ogre::Vector3 position;
   Ogre::Quaternion orientation;
+  auto *frame_manager = context_->getFrameManager();
+  const std::string frame = frame_id_.toStdString();
+  const rclcpp::Time stamp( static_cast<int64_t>( stamp_ * 1e9 ), RCL_ROS_TIME );
   const bool valid =
-      context_->getFrameManager()->getTransform( frame_id_.toStdString(), position, orientation );
+      ( stamp_ > 0 && frame_manager->getTransform( frame, stamp, position, orientation ) ) ||
+      frame_manager->getTransform( frame, position, orientation );
   // Ogre cameras look along -z with y up, optical frames along z with y down.
   camera_node_->setPosition( position );
   camera_node_->setOrientation( orientation *
@@ -317,6 +321,17 @@ void CameraOverlay::setIntrinsics( const QVector4D &value )
     return;
   intrinsics_ = value;
   emit intrinsicsChanged();
+  requestRender();
+}
+
+qreal CameraOverlay::stamp() const { return stamp_; }
+
+void CameraOverlay::setStamp( qreal value )
+{
+  if ( stamp_ == value )
+    return;
+  stamp_ = value;
+  emit stampChanged();
   requestRender();
 }
 

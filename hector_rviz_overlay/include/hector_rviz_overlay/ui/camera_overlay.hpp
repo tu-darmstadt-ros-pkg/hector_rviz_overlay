@@ -58,6 +58,9 @@ class CameraOverlay : public QQuickItem
   Q_PROPERTY( QVector4D intrinsics READ intrinsics WRITE setIntrinsics NOTIFY intrinsicsChanged )
   //! The image size the intrinsics refer to.
   Q_PROPERTY( QSize imageSize READ imageSize WRITE setImageSize NOTIFY imageSizeChanged )
+  //! The capture time of the shown image in seconds (ROS time) used to look up the camera pose.
+  //! 0 or a failed lookup uses the latest pose.
+  Q_PROPERTY( qreal stamp READ stamp WRITE setStamp NOTIFY stampChanged )
   //! The paths of the rendered displays, i.e., their names joined by '/' starting below the root
   //! group, e.g., Group/Markers.
   Q_PROPERTY( QStringList displays READ displays WRITE setDisplays NOTIFY displaysChanged )
@@ -78,6 +81,10 @@ public:
 
   void setImageSize( const QSize &value );
 
+  qreal stamp() const;
+
+  void setStamp( qreal value );
+
   QStringList displays() const;
 
   void setDisplays( const QStringList &value );
@@ -89,6 +96,8 @@ signals:
   void intrinsicsChanged();
 
   void imageSizeChanged();
+
+  void stampChanged();
 
   void displaysChanged();
 
@@ -134,6 +143,7 @@ private:
   QString frame_id_;
   QVector4D intrinsics_;
   QSize image_size_;
+  qreal stamp_ = 0;
   QStringList displays_;
   QImage image_;
   bool rendered_ = false;

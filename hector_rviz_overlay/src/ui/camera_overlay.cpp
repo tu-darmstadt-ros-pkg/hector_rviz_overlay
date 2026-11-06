@@ -58,6 +58,9 @@ private:
 
 namespace
 {
+constexpr float kNearClip = 0.05f;
+constexpr float kFarClip = 200.f;
+
 rviz_rendering::RenderWindow *renderWindow( rviz_common::DisplayContext *context )
 {
   auto *render_panel = context->getViewManager()->getRenderPanel();
@@ -83,10 +86,10 @@ CameraOverlay::CameraOverlay( QQuickItem *parent )
 
 CameraOverlay::~CameraOverlay()
 {
-  if ( context_ == nullptr )
+  auto *root = Ogre::Root::getSingletonPtr();
+  if ( context_ == nullptr || root == nullptr )
     return;
-  if ( auto *root = Ogre::Root::getSingletonPtr() )
-    root->removeFrameListener( listener_.get() );
+  root->removeFrameListener( listener_.get() );
   destroyTexture();
   auto *scene_manager = context_->getSceneManager();
   scene_manager->destroySceneNode( camera_node_ );
@@ -111,8 +114,8 @@ void CameraOverlay::componentComplete()
   const std::string name =
       "hector_rviz_overlay/CameraOverlay/" + std::to_string( reinterpret_cast<uintptr_t>( this ) );
   camera_ = scene_manager->createCamera( name );
-  camera_->setNearClipDistance( 0.05 );
-  camera_->setFarClipDistance( 200 );
+  camera_->setNearClipDistance( kNearClip );
+  camera_->setFarClipDistance( kFarClip );
   camera_node_ = scene_manager->getRootSceneNode()->createChildSceneNode();
   camera_node_->attachObject( camera_ );
   light_ = scene_manager->createLight( name + "/Light" );
@@ -229,8 +232,6 @@ void CameraOverlay::collectHiddenNodes( rviz_common::DisplayGroup *group, const 
 
 void CameraOverlay::updateProjection()
 {
-  constexpr float near = 0.05f;
-  constexpr float far = 200.f;
   const float width = image_size_.width();
   const float height = image_size_.height();
   Ogre::Matrix4 projection = Ogre::Matrix4::ZERO;
@@ -238,8 +239,8 @@ void CameraOverlay::updateProjection()
   projection[1][1] = 2 * intrinsics_.y() / height;
   projection[0][2] = 1 - 2 * intrinsics_.z() / width;
   projection[1][2] = 2 * intrinsics_.w() / height - 1;
-  projection[2][2] = -( far + near ) / ( far - near );
-  projection[2][3] = -2 * far * near / ( far - near );
+  projection[2][2] = -( kFarClip + kNearClip ) / ( kFarClip - kNearClip );
+  projection[2][3] = -2 * kFarClip * kNearClip / ( kFarClip - kNearClip );
   projection[3][2] = -1;
   camera_->setCustomProjectionMatrix( true, projection );
 }

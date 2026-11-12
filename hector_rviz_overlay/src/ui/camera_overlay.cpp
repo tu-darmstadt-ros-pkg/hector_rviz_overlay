@@ -34,6 +34,8 @@
 #include <QQuickWindow>
 #include <QSGSimpleTextureNode>
 
+#include <cmath>
+
 namespace hector_rviz_overlay
 {
 
@@ -265,10 +267,11 @@ void CameraOverlay::updateProjection()
 
 void CameraOverlay::updateTexture()
 {
-  const QSizeF scene_size =
-      mapRectToScene( boundingRect() ).size() * window()->effectiveDevicePixelRatio();
-  const QSize size( std::max( 1, qRound( scene_size.width() ) ),
-                    std::max( 1, qRound( scene_size.height() ) ) );
+  // The item's own size, the scene rect would swap width and height in rotated camera views.
+  const qreal scale = std::sqrt( std::abs( itemTransform( nullptr, nullptr ).determinant() ) ) *
+                      window()->effectiveDevicePixelRatio();
+  const QSize size( std::max( 1, qRound( width() * scale ) ),
+                    std::max( 1, qRound( height() * scale ) ) );
   if ( ( texture_ && size == image_.size() ) || size == failed_texture_size_ )
     return;
   destroyTexture();

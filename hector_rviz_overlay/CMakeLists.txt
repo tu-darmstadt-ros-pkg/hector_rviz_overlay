@@ -53,6 +53,7 @@ set(SOURCES
   include/hector_rviz_overlay/render/overlay_renderer.hpp
   include/hector_rviz_overlay/render/renderer.hpp
   include/hector_rviz_overlay/render/texture_overlay_renderer.hpp
+  include/hector_rviz_overlay/ui/camera_overlay.hpp
   include/hector_rviz_overlay/ui/qml_overlay.hpp
   include/hector_rviz_overlay/ui/qwidget_overlay.hpp
   include/hector_rviz_overlay/ui/ui_overlay.hpp
@@ -93,6 +94,7 @@ set(SOURCES
   src/render/qopengl_wrapper.hpp
   src/render/qopengl_wrapper.cpp
   src/render/texture_overlay_renderer.cpp
+  src/ui/camera_overlay.cpp
   src/ui/qml_overlay.cpp
   src/ui/qwidget_overlay.cpp
   src/ui/ui_overlay.cpp

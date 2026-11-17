@@ -20,6 +20,7 @@
 #include "hector_rviz_overlay/helper/file_system_watcher.hpp"
 #include "hector_rviz_overlay/helper/qml_rviz_context.hpp"
 #include "hector_rviz_overlay/helper/rviz_tool_icon_provider.hpp"
+#include "hector_rviz_overlay/ui/camera_overlay.hpp"
 
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -54,6 +55,9 @@ void QmlLoadedFileTracker::clear() { loaded_files_.clear(); }
 
 QQmlEngine *createRvizQmlEngine( const RvizQmlEngineConfig &config )
 {
+  static const int camera_overlay_type =
+      qmlRegisterType<CameraOverlay>( "Hector.RvizOverlay", 1, 0, "CameraOverlay" );
+  Q_UNUSED( camera_overlay_type );
   auto *engine = new QQmlEngine( config.parent );
 
   if ( config.url_interceptor != nullptr )

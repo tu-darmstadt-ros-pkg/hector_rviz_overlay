@@ -95,6 +95,8 @@ public:
 
   QString nodeName() const;
 
+  rviz_common::DisplayContext *displayContext() const;
+
   //! Copies the given text to the user's clipboard.
   Q_INVOKABLE void copyTextToClipboard( const QString &text );
 
